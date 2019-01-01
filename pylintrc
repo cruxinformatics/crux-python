@@ -1,0 +1,30 @@
+[MASTER]
+ignore=vendor
+suggestion-mode=yes
+
+[MESSAGES CONTROL]
+disable=
+    bad-continuation,
+    cell-var-from-loop, # https://github.com/PyCQA/pylint/issues/1934
+    duplicate-code,
+    fixme,
+    locally-disabled,
+    no-else-return,  # We should try to avoid unnecessary conditionals and re-enable this
+    protected-access,
+    too-few-public-methods,
+    too-many-arguments,
+    too-many-instance-attributes,
+    too-many-lines,
+    too-many-locals,
+    too-many-public-methods,
+    useless-else-on-loop,
+    useless-object-inheritance,
+
+enable=useless-suppression
+
+[REPORTS]
+output-format=colorized
+reports=no
+
+[BASIC]
+good-names=fh,id,type,_

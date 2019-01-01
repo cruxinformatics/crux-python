@@ -1,0 +1,48 @@
+"""
+Setup file for Python packaging.
+"""
+
+import os
+
+from setuptools import setup
+
+here = os.path.abspath(os.path.dirname(__file__))
+requirements = ["requests", "typing;python_version=='2.7'"]
+
+version = {}
+with open(os.path.join(here, "crux", "__version__.py"), "r", "utf-8") as fh:
+    exec(fh.read(), globals=version)  # pylint: disable=exec-used
+
+with open("README.md", "r", "utf-8") as fh:
+    readme = fh.read()
+
+setup(
+    name="crux",
+    packages=["crux", "crux.models"],
+    version=version["__version__"],
+    description="Crux Informatics API client library",
+    long_description=readme,
+    long_description_content_type="text/markdown",
+    author="Crux Informatics, Inc.",
+    author_email="python-opensource@cruxinformatics.com",
+    url="https://github.com/cruxinformatics/crux-python",
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
+    license="MIT",
+    install_requires=requirements,
+    keywords=["crux-python"],
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Topic :: Software Development",
+    ],
+)

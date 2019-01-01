@@ -1,0 +1,84 @@
+"""Module contains the set of crux-python's exceptions."""
+
+from typing import Dict, Union  # noqa: F401 pylint: disable=unused-import
+
+
+class CruxAPIError(Exception):
+    """Exception which should be raised when the API response expects an error."""
+
+    def __init__(self, message):
+        # type: (Dict[str, Union[str, int]]) -> None
+        """
+        Args:
+            message (str): Human readable string describing the exception.
+
+        Attributes:
+            message (str): Human readable string describing the exception.
+            status_code (int): Exception error code.
+        """
+        super(CruxAPIError, self).__init__(message)
+        self.status_code = message["statusCode"]
+        self.message = message
+
+    def __str__(self):
+        return "{message}".format(message=self.message)
+
+
+class CruxClientError(Exception):
+    """Exception which should be raised when the client SDK expects an error."""
+
+    def __init__(self, message):
+        # type: (str) -> None
+        """
+        Args:
+            message (str): Human readable string describing the exception.
+
+        Attributes:
+            message (str): Human readable string describing the exception.
+        """
+        super(CruxClientError, self).__init__(message)
+        self.message = message
+
+    def __str__(self):
+        return "{message}".format(message=self.message)
+
+
+class CruxClientHTTPError(CruxClientError):
+    """Exception should be raised when SDK expects any HTTP related errors."""
+
+    def __str__(self):
+        return "{message}".format(message=self.message)
+
+
+class CruxClientConnectionError(CruxClientError):
+    """Exception should be raised when SDK expects any connection related errors."""
+
+    def __str__(self):
+        return "{message}".format(message=self.message)
+
+
+class CruxClientTimeout(CruxClientError):
+    """Exception should be raised when SDK expects any timeout related errors."""
+
+    def __str__(self):
+        return "{message}".format(message=self.message)
+
+
+class CruxResourceNotFoundError(CruxAPIError):
+    """Exception which should be raised when Crux Resource is not found."""
+
+    def __init__(self, message):
+        # type: (Dict[str, Union[str, int]]) -> None
+        """
+        Args:
+            message (str): Human readable string describing the exception.
+
+        Attributes:
+            message (str): Human readable string describing the exception.
+            status_code (int): Exception error code.
+        """
+        super(CruxResourceNotFoundError, self).__init__(message)
+        self.message = message
+
+    def __str__(self):
+        return "{message}".format(message=self.message)

@@ -46,7 +46,11 @@ lock: ## Generate Pipfile.lock and requirements.txt
 .PHONY: package
 package: ## Package for distribution
 	rm -rf dist && \
-	python setup.py bdist_wheel
+	python3 setup.py sdist bdist_wheel
+
+.PHONY: publish
+publish: package ## Publish package to PyPI
+	twine upload dist/*
 
 .PHONY: docs
 docs: ## Generate sphinx HTML documentation

@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 requests = "*"
-typing = "*"
+typing = {version = "*", markers="python_version < '3.5'"}
 
 [dev-packages]
 black = "*"
@@ -16,7 +16,9 @@ mypy = "*"
 pylint = "*"
 pytest = "*"
 recommonmark = "*"
+setuptools = "*"
 sphinx = "*"
+twine = "*"
 wheel = "*"
 
 [requires]

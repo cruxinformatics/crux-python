@@ -14,7 +14,7 @@ brew install pipenv
 Install `crux` in a virtual environment, and get a shell in that environment:
 
 ```bash
-pipenv install -e git+ssh://git@github.com/cruxinformatics/crux-python.git@master#egg=crux
+pipenv install "crux==0.0.2"
 pipenv shell
 ```
 ## Getting Started

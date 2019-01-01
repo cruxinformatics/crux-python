@@ -13,7 +13,7 @@ Python 2.7 and 3.5+ are supported, Python 3.6+ is recommended.
 Install with [pipenv](https://pipenv.readthedocs.io/en/latest/), pip, or another package manager.
 
 ```bash
-pipenv install -e git+ssh://git@github.com/cruxinformatics/crux-python.git@master#egg=crux
+pipenv install "crux==0.0.2"
 ```
 
 Use the `crux` module.
@@ -38,7 +38,7 @@ Python 3.7 is required for development, which can be installed with `brew instal
 [Pipenv](https://pipenv.readthedocs.io/en/latest/) should be used to manage dependancies during development.
 
 1. [Install Pipenv](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv), on macOS run `brew install pipenv`
-2. `git clone git@github.com:cruxinformatics/crux-python.git`
+2. `git clone https://github.com/cruxinformatics/crux-python.git`
 3. `cd crux-python`
 4. `pipenv install --dev` to install the dependancies
 5. `pipenv shell` to get a shell in the virtual environment

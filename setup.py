@@ -4,21 +4,22 @@ Setup file for Python packaging.
 
 import os
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 here = os.path.abspath(os.path.dirname(__file__))
-requirements = ["requests", "typing;python_version=='2.7'"]
+requirements = ["requests", "typing;python_version<'3.5'"]
+packages = [pkg for pkg in find_packages() if pkg.startswith("crux")]
 
 version = {}
-with open(os.path.join(here, "crux", "__version__.py"), "r", "utf-8") as fh:
-    exec(fh.read(), globals=version)  # pylint: disable=exec-used
+with open(os.path.join(here, "crux", "__version__.py"), "r", encoding="utf-8") as fh:
+    exec(fh.read(), version)
 
-with open("README.md", "r", "utf-8") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     readme = fh.read()
 
 setup(
     name="crux",
-    packages=["crux", "crux.models"],
+    packages=packages,
     version=version["__version__"],
     description="Crux Informatics API client library",
     long_description=readme,

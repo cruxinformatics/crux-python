@@ -184,8 +184,8 @@ texinfo_documents = [
         u"crux-python Documentation",
         author,
         "crux-python",
-        "One line description of project.",
-        "Miscellaneous",
+        "A Python library for interacting with the Crux platform.",
+        "crux-python",
     )
 ]
 

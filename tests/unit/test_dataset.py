@@ -39,7 +39,6 @@ def monkeypatch_create_file(tags=None, description=None, path=None):
     file_resource = File(
         name="test_file.txt", type="file", tags=tags, description=description
     )
-    file_resource.folder = "/folder1/folder2"
     return file_resource
 
 
@@ -64,7 +63,6 @@ def monkeypatch_create_table(tags=None, description=None, path=None, config=None
         description=description,
         config=config,
     )
-    table_resource.folder = "/folder1/folder2"
     return table_resource
 
 
@@ -90,7 +88,6 @@ def monkeypatch_create_folder(tags=None, description=None, path=None, folder=Non
         tags=["tags"],
         description="test_folder_description",
     )
-    folder_resource.folder = "/folder1/folder2"
     return folder_resource
 
 
@@ -105,7 +102,6 @@ def test_create_folder(dataset, monkeypatch):
     )
 
     assert resp.name == "folder3"
-    assert resp.folder == "/folder1/folder2"
     assert resp.description == "test_folder_description"
     assert resp.tags == ["tags"]
 
@@ -121,8 +117,6 @@ def monkeypatch_create_query(
         description="test_query_description",
     )
 
-    query_resource.folder = "/test_folder1/test_folder2"
-
     return query_resource
 
 
@@ -137,7 +131,6 @@ def test_create_query(dataset, monkeypatch):
     )
 
     assert resp.name == "bank_query"
-    assert resp.folder == "/test_folder1/test_folder2"
     assert resp.description == "test_query_description"
     assert resp.tags == ["tags"]
 
@@ -153,8 +146,6 @@ def monkeypatch_upload_query(
         description="test_query_description",
     )
 
-    query_resource.folder = "/test_folder1/test_folder2"
-
     return query_resource
 
 
@@ -168,7 +159,6 @@ def test_upload_query(dataset, monkeypatch):
     )
 
     assert resp.name == "bank_query"
-    assert resp.folder == "/test_folder1/test_folder2"
     assert resp.description == "test_query_description"
     assert resp.tags == ["tags"]
 
@@ -242,7 +232,6 @@ def monkeypatch_stitch(
     file_resource = File(
         name="test_file.txt", type="file", tags=tags, description=description
     )
-    file_resource.folder = "/folder1/folder2"
     return file_resource, "123456"
 
 

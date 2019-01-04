@@ -1,5 +1,6 @@
 """Module contains Resource model."""
 
+import posixpath
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -83,7 +84,6 @@ class Resource(CruxModel):
         self._media_type = None
         self._modified_at = None
         self._tags = None
-        self._folder = None
         self._labels = labels  # type: Tuple[Label, ...]
 
         self.id = id
@@ -238,6 +238,16 @@ class Resource(CruxModel):
     @modified_at.setter
     def modified_at(self, modified_at):
         self._modified_at = modified_at
+
+    @property
+    def path(self):
+        """str: Gets the resource path."""
+        return self._get_path()
+
+    @property
+    def folder(self):
+        """str: Gets the folder name."""
+        return self._get_folder()
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -590,3 +600,36 @@ class Resource(CruxModel):
 
         label_tuple_obj = tuple(label_objects)  # type: Tuple[Label, ...]
         return label_tuple_obj
+
+    def _get_path(self):
+        # type: () -> str
+        """Fetches the path of the resource.
+
+        Returns:
+            str: Path of the resource.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = self.connection.api_call(
+            "GET", ["resources", self.id, "folderpath"], headers=headers
+        )
+
+        return posixpath.join(response.json().get("path"), self.name)
+
+    def _get_folder(self):
+        # type: () -> str
+        """Fetches the folder of the resource.
+
+        Returns:
+            str: Folder name of the resource.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = self.connection.api_call(
+            "GET", ["resources", self.id, "folderpath"], headers=headers
+        )
+
+        folder_name = posixpath.basename(response.json().get("path"))
+
+        if not folder_name:
+            return "/"
+        else:
+            return folder_name

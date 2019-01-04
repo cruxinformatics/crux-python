@@ -16,15 +16,6 @@ from crux.utils import ContentType, DEFAULT_CHUNK_SIZE, valid_chunk_size
 class File(Resource):
     """File Model."""
 
-    @property
-    def folder(self):
-        """str: Gets and Sets the folder."""
-        return self._folder
-
-    @folder.setter
-    def folder(self, folder):
-        self._folder = folder
-
     def to_dict(self):
         # type: () -> Dict[str, Any]
         """Transforms File object to File Dictionary.
@@ -36,7 +27,6 @@ class File(Resource):
             "name": self.name,
             "description": self.description,
             "tags": self.tags,
-            "folder": self.folder,
             "type": self.type,
             "labels": self.labels,
         }

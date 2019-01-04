@@ -9,15 +9,6 @@ from crux.models.resource import Resource
 class Folder(Resource):
     """Folder Model."""
 
-    @property
-    def folder(self):
-        """str: Gets and Sets the folder."""
-        return self._folder
-
-    @folder.setter
-    def folder(self, folder):
-        self._folder = folder
-
     def to_dict(self):
         # type: () -> Dict[str, Any]
         """Transforms Folder object to Folder Dictionary.
@@ -29,7 +20,6 @@ class Folder(Resource):
             "name": self.name,
             "description": self.description,
             "tags": self.tags,
-            "folder": self.folder,
             "type": self.type,
             "labels": self.labels,
         }

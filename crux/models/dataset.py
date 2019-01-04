@@ -299,12 +299,15 @@ class Dataset(CruxModel):
         file_resource = File(
             name=file_name, type="file", tags=tags, description=description
         )
-        file_resource.folder = folder
+
+        params_dict = file_resource.to_dict()
+
+        params_dict.update({"folder": folder})
 
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            params=file_resource.to_dict(),
+            params=params_dict,
             model=File,
             headers=headers,
         )
@@ -338,12 +341,15 @@ class Dataset(CruxModel):
             description=description,
             config=config,
         )
-        table_resource.folder = folder
+
+        params_dict = table_resource.to_dict()
+
+        params_dict.update({"folder": folder})
 
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            params=table_resource.to_dict(),
+            params=params_dict,
             model=Table,
             headers=headers,
         )
@@ -374,12 +380,15 @@ class Dataset(CruxModel):
         folder_resource = Folder(
             name=file_name, type="folder", tags=tags, description=description
         )
-        folder_resource.folder = folder
+
+        params_dict = folder_resource.to_dict()
+
+        params_dict.update({"folder": folder})
 
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            params=folder_resource.to_dict(),
+            params=params_dict,
             model=Folder,
             headers=headers,
         )
@@ -842,12 +851,15 @@ class Dataset(CruxModel):
             description=description,
             config=config,
         )
-        query_resource.folder = folder
+
+        params_dict = query_resource.to_dict()
+
+        params_dict.update({"folder": folder})
 
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            params=query_resource.to_dict(),
+            params=params_dict,
             model=Query,
             headers=headers,
         )

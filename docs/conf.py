@@ -34,18 +34,10 @@ release = u"{version}".format(version=crux.__version__)
 
 # Use recommonmark.transform.AutoStructify to generate index.html w/toctree
 # from markdown
-github_doc_root = "https://github.com/cruxinformatics/crux-python/tree/master/doc/"
 
 
 def setup(app):
-    app.add_config_value(
-        "recommonmark_config",
-        {
-            "url_resolver": lambda url: github_doc_root + url,
-            "enable_auto_doc_ref": False,
-        },
-        True,
-    )
+    app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
     app.add_transform(AutoStructify)
 
 
@@ -66,7 +58,14 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.apidoc",
 ]
+
+# Add module path that contains api docstrings.
+apidoc_module_dir = "../crux"
+
+# Add the path which will store the generated api documentation.
+apidoc_output_dir = "./"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -185,8 +184,8 @@ texinfo_documents = [
         u"crux-python Documentation",
         author,
         "crux-python",
-        "One line description of project.",
-        "Miscellaneous",
+        "A Python library for interacting with the Crux platform.",
+        "crux-python",
     )
 ]
 

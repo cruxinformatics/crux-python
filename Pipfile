@@ -18,6 +18,7 @@ pytest = "*"
 recommonmark = "*"
 setuptools = "*"
 sphinx = "*"
+sphinxcontrib-apidoc = "*"
 twine = "*"
 wheel = "*"
 

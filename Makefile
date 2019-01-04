@@ -55,5 +55,4 @@ publish: package ## Publish package to PyPI
 .PHONY: docs
 docs: ## Generate sphinx HTML documentation
 	cd docs && \
-	sphinx-apidoc -o ./ ../crux && \
 	make html

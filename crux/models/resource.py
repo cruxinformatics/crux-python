@@ -68,144 +68,81 @@ class Resource(CruxModel):
             ValueError: If name or tags are set to None.
             TypeError: If tags are not of list type.
         """
-        self._id = None
-        self._dataset_id = None
-        self._folder_id = None
-        self._description = None
-        self._name = None
-        self._size = None
-        self._type = None
-        self._config = None
-        self._provenance = None
-        self._as_of = None
-        self._created_at = None
-        self._storage_id = None
-        self._media_type = None
-        self._modified_at = None
-        self._tags = None
+        self._id = id
+        self._dataset_id = dataset_id
+        self._folder_id = folder_id
+        self._description = description
+        self._name = name
+        self._size = size
+        self._type = type
+        self._config = config
+        self._provenance = provenance
+        self._as_of = as_of
+        self._created_at = created_at
+        self._storage_id = storage_id
+        self._media_type = media_type
+        self._modified_at = modified_at
+        self._tags = tags
         self._folder = None
         self._labels = labels  # type: Tuple[Label, ...]
 
-        self.id = id
-        self.dataset_id = dataset_id
-        self.folder_id = folder_id
-        self.name = name
-        self.size = size
-        self.type = type
-        self.config = config
-        self.provenance = provenance
-        self.as_of = as_of
-        self.created_at = created_at
-        self.modified_at = modified_at
-        self.storage_id = storage_id
         self.connection = connection
         self.raw_response = raw_response
-        self.media_type = media_type
-        self.description = description
-        self.tags = tags
 
     @property
     def id(self):
         """str: Gets and Sets the Resource ID."""
         return self._id
 
-    @id.setter
-    def id(self, id):  # id name is by design pylint: disable=redefined-builtin
-        self._id = id
-
     @property
     def description(self):
         """str: Gets and Sets the Resource Description."""
         return self._description
-
-    @description.setter
-    def description(self, description):
-        self._description = description
 
     @property
     def media_type(self):
         """str: Gets and Sets the Resource Description."""
         return self._media_type
 
-    @media_type.setter
-    def media_type(self, media_type):
-        self._media_type = media_type
-
     @property
     def dataset_id(self):
         """str: Gets and Sets the Dataset ID."""
         return self._dataset_id
-
-    @dataset_id.setter
-    def dataset_id(self, dataset_id):
-        self._dataset_id = dataset_id
 
     @property
     def folder_id(self):
         """str: Gets and Sets the Folder ID."""
         return self._folder_id
 
-    @folder_id.setter
-    def folder_id(self, folder_id):
-        self._folder_id = folder_id
-
     @property
     def storage_id(self):
         """str: Gets and Sets the Storage ID."""
         return self._storage_id
-
-    @storage_id.setter
-    def storage_id(self, storage_id):
-        self._storage_id = storage_id
 
     @property
     def name(self):
         """str: Gets and Sets the Resource Name."""
         return self._name
 
-    @name.setter
-    def name(self, name):
-        if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")
-        self._name = name
-
     @property
     def config(self):
         """str: Gets and Sets the config."""
         return self._config
-
-    @config.setter
-    def config(self, config):
-        self._config = config
 
     @property
     def provenance(self):
         """str: Gets and Sets the Provenance."""
         return self._provenance
 
-    @provenance.setter
-    def provenance(self, provenance):
-        self._provenance = provenance
-
     @property
     def type(self):
         """str: Gets and Sets the Resource Type."""
         return self._type
 
-    @type.setter
-    def type(self, type):  # type name is by design pylint: disable=redefined-builtin
-        self._type = type
-
     @property
     def tags(self):
         """:obj:`list` of :obj:`str`: Gets and Sets the Resource Tags."""
         return self._tags
-
-    @tags.setter
-    def tags(self, tags):
-        if not isinstance(tags, list):
-            raise TypeError("Invalid Type for `tags`, tags should be of type list")
-        self._tags = tags
 
     @property
     def labels(self):
@@ -217,27 +154,20 @@ class Resource(CruxModel):
         """str: Gets and Sets the as_of."""
         return self._as_of
 
-    @as_of.setter
-    def as_of(self, as_of):
-        self._as_of = as_of
-
     @property
     def created_at(self):
         """str: Gets and Sets the created_at."""
         return self._created_at
-
-    @created_at.setter
-    def created_at(self, created_at):
-        self._created_at = created_at
 
     @property
     def modified_at(self):
         """str: Gets and Sets the modified_at."""
         return self._modified_at
 
-    @modified_at.setter
-    def modified_at(self, modified_at):
-        self._modified_at = modified_at
+    @property
+    def size(self):
+        """str: Gets and Sets the size."""
+        return self._size
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -377,11 +307,11 @@ class Resource(CruxModel):
             response_dict = response.json()
 
             if "name" in response_dict:
-                self.name = response.json().get("name")
+                self._name = response.json().get("name")
             if "response" in response_dict:
-                self.tags = response.json().get("tags")
+                self._tags = response.json().get("tags")
             if "description" in response_dict:
-                self.description = response.json().get("description")
+                self._description = response.json().get("description")
             return True
         else:
             raise ValueError("Name, Description or Tags should be set")

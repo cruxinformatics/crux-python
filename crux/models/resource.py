@@ -277,7 +277,7 @@ class Resource(CruxModel):
         Args:
             name (str): Name of resource. Defaults to None.
             description (str): Description of the resource. Defaults to None.
-            tags (:obj:`list` of :obj:`str`): List of tags. Default to None.
+            tags (:obj:`list` of :obj:`str`): List of tags. Defaults to None.
 
         Returns:
             bool: True, if resource is updated.
@@ -308,7 +308,7 @@ class Resource(CruxModel):
 
             if "name" in response_dict:
                 self._name = response.json().get("name")
-            if "response" in response_dict:
+            if "tags" in response_dict and tags is not None:
                 self._tags = response.json().get("tags")
             if "description" in response_dict:
                 self._description = response.json().get("description")

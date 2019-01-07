@@ -23,6 +23,7 @@ class Query(Resource):
             "type": self.type,
             "config": self.config,
             "labels": self.labels,
+            "folder": self.folder,
         }
 
     def run(

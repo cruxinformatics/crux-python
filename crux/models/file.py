@@ -29,6 +29,7 @@ class File(Resource):
             "tags": self.tags,
             "type": self.type,
             "labels": self.labels,
+            "folder": self.folder,
         }
 
     def iter_content(self, chunk_size=DEFAULT_CHUNK_SIZE, decode_unicode=False):

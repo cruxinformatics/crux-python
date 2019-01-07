@@ -26,6 +26,7 @@ class Resource(CruxModel):
         id=None,  # type: str # id name is by design pylint: disable=redefined-builtin
         dataset_id=None,  # type: str
         folder_id=None,  # type: str
+        folder=None,  # type: str
         name=None,  # type: str
         size=None,  # type: str
         type=None,  # type: str # type name is by design pylint: disable=redefined-builtin
@@ -48,6 +49,7 @@ class Resource(CruxModel):
             id (str): Resourece Id. Defaults to None.
             dataset_id (str): Dataset Identity. Defaults to None.
             folder_id (str): Folder Identity. Defaults to None.
+            folder (str): Folder Name. Defaults to None.
             name (str): Resource name. Defaults to None.
             size (str): Resource size. Defaults to None.
             type (str): Resource type. Defaults to None.
@@ -85,6 +87,7 @@ class Resource(CruxModel):
         self._modified_at = None
         self._tags = None
         self._labels = labels  # type: Tuple[Label, ...]
+        self._folder = folder
 
         self.id = id
         self.dataset_id = dataset_id
@@ -241,13 +244,17 @@ class Resource(CruxModel):
 
     @property
     def path(self):
-        """str: Gets the resource path."""
+        """str: Compute or Get the resource path."""
         return self._get_path()
 
     @property
     def folder(self):
-        """str: Gets the folder name."""
-        return self._get_folder()
+        """str: Compute or Get the folder name."""
+        if self._folder:
+            return self._folder
+
+        self._folder = self._get_folder()
+        return self._folder
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -608,12 +615,8 @@ class Resource(CruxModel):
         Returns:
             str: Path of the resource.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        response = self.connection.api_call(
-            "GET", ["resources", self.id, "folderpath"], headers=headers
-        )
 
-        return posixpath.join(response.json().get("path"), self.name)
+        return posixpath.join(self.folder, self.name)
 
     def _get_folder(self):
         # type: () -> str
@@ -627,9 +630,4 @@ class Resource(CruxModel):
             "GET", ["resources", self.id, "folderpath"], headers=headers
         )
 
-        folder_name = posixpath.basename(response.json().get("path"))
-
-        if not folder_name:
-            return "/"
-        else:
-            return folder_name
+        return response.json().get("path")

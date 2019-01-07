@@ -22,6 +22,7 @@ class Folder(Resource):
             "tags": self.tags,
             "type": self.type,
             "labels": self.labels,
+            "folder": self.folder,
         }
 
     def add_permission(  # It is by design pylint: disable=arguments-differ

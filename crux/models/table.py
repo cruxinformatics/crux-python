@@ -22,4 +22,5 @@ class Table(Resource):
             "type": self.type,
             "config": self.config,
             "labels": self.labels,
+            "folder": self.folder,
         }

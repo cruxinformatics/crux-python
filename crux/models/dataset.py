@@ -297,9 +297,12 @@ class Dataset(CruxModel):
         file_name, folder = split_posixpath_filename_dirpath(path)
 
         file_resource = File(
-            name=file_name, type="file", tags=tags, description=description
+            name=file_name,
+            type="file",
+            tags=tags,
+            description=description,
+            folder=folder,
         )
-        file_resource.folder = folder
 
         return self.connection.api_call(
             "POST",
@@ -337,8 +340,8 @@ class Dataset(CruxModel):
             tags=tags,
             description=description,
             config=config,
+            folder=folder,
         )
-        table_resource.folder = folder
 
         return self.connection.api_call(
             "POST",
@@ -372,9 +375,12 @@ class Dataset(CruxModel):
         file_name, folder = split_posixpath_filename_dirpath(path)
 
         folder_resource = Folder(
-            name=file_name, type="folder", tags=tags, description=description
+            name=file_name,
+            type="folder",
+            tags=tags,
+            description=description,
+            folder=folder,
         )
-        folder_resource.folder = folder
 
         return self.connection.api_call(
             "POST",
@@ -841,8 +847,8 @@ class Dataset(CruxModel):
             tags=tags,
             description=description,
             config=config,
+            folder=folder,
         )
-        query_resource.folder = folder
 
         return self.connection.api_call(
             "POST",

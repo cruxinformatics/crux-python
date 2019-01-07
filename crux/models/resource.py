@@ -1,5 +1,6 @@
 """Module contains Resource model."""
 
+import posixpath
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -25,6 +26,7 @@ class Resource(CruxModel):
         id=None,  # type: str # id name is by design pylint: disable=redefined-builtin
         dataset_id=None,  # type: str
         folder_id=None,  # type: str
+        folder=None,  # type: str
         name=None,  # type: str
         size=None,  # type: str
         type=None,  # type: str # type name is by design pylint: disable=redefined-builtin
@@ -47,6 +49,7 @@ class Resource(CruxModel):
             id (str): Resourece Id. Defaults to None.
             dataset_id (str): Dataset Identity. Defaults to None.
             folder_id (str): Folder Identity. Defaults to None.
+            folder (str): Folder Name. Defaults to None.
             name (str): Resource name. Defaults to None.
             size (str): Resource size. Defaults to None.
             type (str): Resource type. Defaults to None.
@@ -83,8 +86,8 @@ class Resource(CruxModel):
         self._media_type = None
         self._modified_at = None
         self._tags = None
-        self._folder = None
         self._labels = labels  # type: Tuple[Label, ...]
+        self._folder = folder
 
         self.id = id
         self.dataset_id = dataset_id
@@ -238,6 +241,20 @@ class Resource(CruxModel):
     @modified_at.setter
     def modified_at(self, modified_at):
         self._modified_at = modified_at
+
+    @property
+    def path(self):
+        """str: Compute or Get the resource path."""
+        return posixpath.join(self.folder, self.name)
+
+    @property
+    def folder(self):
+        """str: Compute or Get the folder name."""
+        if self._folder:
+            return self._folder
+
+        self._folder = self._get_folder()
+        return self._folder
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -590,3 +607,17 @@ class Resource(CruxModel):
 
         label_tuple_obj = tuple(label_objects)  # type: Tuple[Label, ...]
         return label_tuple_obj
+
+    def _get_folder(self):
+        # type: () -> str
+        """Fetches the folder of the resource.
+
+        Returns:
+            str: Folder name of the resource.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = self.connection.api_call(
+            "GET", ["resources", self.id, "folderpath"], headers=headers
+        )
+
+        return response.json().get("path")

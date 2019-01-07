@@ -76,7 +76,7 @@ class Resource(CruxModel):
         self._folder_id = None
         self._description = None
         self._name = None
-        self._size = None
+        self._size = size
         self._type = None
         self._config = None
         self._provenance = None
@@ -93,7 +93,6 @@ class Resource(CruxModel):
         self.dataset_id = dataset_id
         self.folder_id = folder_id
         self.name = name
-        self.size = size
         self.type = type
         self.config = config
         self.provenance = provenance
@@ -243,6 +242,11 @@ class Resource(CruxModel):
         self._modified_at = modified_at
 
     @property
+    def size(self):
+        """str: Gets the size."""
+        return self._size
+
+    @property
     def path(self):
         """str: Compute or Get the resource path."""
         return posixpath.join(self.folder, self.name)
@@ -327,6 +331,7 @@ class Resource(CruxModel):
         provenance = a_dict["provenance"]
         created_at = a_dict["createdAt"]
         modified_at = a_dict["modifiedAt"]
+        size = a_dict["size"]
 
         return cls(
             dataset_id=dataset_id,
@@ -343,6 +348,7 @@ class Resource(CruxModel):
             provenance=provenance,
             created_at=created_at,
             modified_at=modified_at,
+            size=size,
         )
 
     def delete(self):

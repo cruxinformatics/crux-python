@@ -245,7 +245,7 @@ class Resource(CruxModel):
     @property
     def path(self):
         """str: Compute or Get the resource path."""
-        return self._get_path()
+        return posixpath.join(self.folder, self.name)
 
     @property
     def folder(self):
@@ -607,16 +607,6 @@ class Resource(CruxModel):
 
         label_tuple_obj = tuple(label_objects)  # type: Tuple[Label, ...]
         return label_tuple_obj
-
-    def _get_path(self):
-        # type: () -> str
-        """Fetches the path of the resource.
-
-        Returns:
-            str: Path of the resource.
-        """
-
-        return posixpath.join(self.folder, self.name)
 
     def _get_folder(self):
         # type: () -> str

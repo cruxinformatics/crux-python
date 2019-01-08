@@ -76,47 +76,47 @@ class Dataset(CruxModel):
 
     @property
     def id(self):
-        """str: Gets and Sets the Dataset ID."""
+        """str: Gets the Dataset ID."""
         return self._id
 
     @property
     def owner_identity_id(self):
-        """str: Gets and Sets the Owner Identity ID."""
+        """str: Gets the Owner Identity ID."""
         return self._owner_identity_id
 
     @property
     def contact_identity_id(self):
-        """str: Gets and Sets the Contact Identity ID."""
+        """str: Gets the Contact Identity ID."""
         return self._contact_identity_id
 
     @property
     def name(self):
-        """str: Gets and Sets the Dataset Name."""
+        """str: Gets the Dataset Name."""
         return self._name
 
     @property
     def tags(self):
-        """str: Gets and Sets the tags."""
+        """str: Gets the tags."""
         return self._tags
 
     @property
     def description(self):
-        """str: Gets and Sets the Dataset Description."""
+        """str: Gets the Dataset Description."""
         return self._description
 
     @property
     def website(self):
-        """str: Gets and Sets the Dataset Website."""
+        """str: Gets the Dataset Website."""
         return self._website
 
     @property
     def created_at(self):
-        """str: Gets and Sets the Dataset created_at."""
+        """str: Gets the Dataset created_at."""
         return self._created_at
 
     @property
     def modified_at(self):
-        """str: Gets and Sets the Dataset modified_at."""
+        """str: Gets the Dataset modified_at."""
         return self._modified_at
 
     def to_dict(self):
@@ -248,9 +248,12 @@ class Dataset(CruxModel):
         file_name, folder = split_posixpath_filename_dirpath(path)
 
         file_resource = File(
-            name=file_name, type="file", tags=tags, description=description
+            name=file_name,
+            type="file",
+            tags=tags,
+            description=description,
+            folder=folder,
         )
-        file_resource.folder = folder
 
         return self.connection.api_call(
             "POST",
@@ -288,8 +291,8 @@ class Dataset(CruxModel):
             tags=tags,
             description=description,
             config=config,
+            folder=folder,
         )
-        table_resource.folder = folder
 
         return self.connection.api_call(
             "POST",
@@ -323,9 +326,12 @@ class Dataset(CruxModel):
         file_name, folder = split_posixpath_filename_dirpath(path)
 
         folder_resource = Folder(
-            name=file_name, type="folder", tags=tags, description=description
+            name=file_name,
+            type="folder",
+            tags=tags,
+            description=description,
+            folder=folder,
         )
-        folder_resource.folder = folder
 
         return self.connection.api_call(
             "POST",
@@ -792,8 +798,8 @@ class Dataset(CruxModel):
             tags=tags,
             description=description,
             config=config,
+            folder=folder,
         )
-        query_resource.folder = folder
 
         return self.connection.api_call(
             "POST",

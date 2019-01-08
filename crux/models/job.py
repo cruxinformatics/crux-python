@@ -25,12 +25,12 @@ class LoadJob(AbstractJob):
 
     @property
     def job_id(self):
-        """str: Gets and Sets the Job Id."""
+        """str: Gets the Job Id."""
         return self._job_id
 
     @property
     def job_url(self):
-        """str: Gets and Sets the Job URL."""
+        """str: Gets the Job URL."""
         return self._job_url
 
     @classmethod

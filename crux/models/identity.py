@@ -64,62 +64,62 @@ class Identity(CruxModel):
 
     @property
     def identity_id(self):
-        """str: Gets and Sets the Identity Id."""
+        """str: Gets the Identity Id."""
         return self._identity_id
 
     @property
     def parent_identity_id(self):
-        """str: Gets and Sets the Parent Identity Id"""
+        """str: Gets the Parent Identity Id."""
         return self._parent_identity_id
 
     @property
     def company_name(self):
-        """str: Gets and Sets the Company name"""
+        """str: Gets the Company name."""
         return self._company_name
 
     @property
     def description(self):
-        """str: Gets and Sets the Description."""
+        """str: Gets the Description."""
         return self._description
 
     @property
     def first_name(self):
-        """str: Gets and Sets the First name."""
+        """str: Gets the First name."""
         return self._first_name
 
     @property
     def last_name(self):
-        """str: Gets and Sets the Last name."""
+        """str: Gets the Last name."""
         return self._last_name
 
     @property
     def role(self):
-        """str: Gets and Sets the Role."""
+        """str: Gets the Role."""
         return self._role
 
     @property
     def email(self):
-        """str: Gets and Sets the Email."""
+        """str: Gets the Email."""
         return self._email
 
     @property
     def website(self):
-        """str: Gets and Sets the Website."""
+        """str: Gets the Website."""
         return self._website
 
     @property
     def landing_page(self):
-        """str: Gets and Sets the Landing Page."""
+        """str: Gets the Landing Page."""
         return self._landing_page
 
     @property
     def type(self):
-        """str: Gets and Sets the Type."""
+        """str: Gets the Type."""
         return self._type
 
     @property
     def phone(self):
-        """str: Gets and Sets the phone."""
+        """str: Gets the phone."""
         return self._phone
 
     def to_dict(self):

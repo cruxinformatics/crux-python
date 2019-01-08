@@ -1,5 +1,6 @@
 """Module contains Resource model."""
 
+import posixpath
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -25,6 +26,7 @@ class Resource(CruxModel):
         id=None,  # type: str # id name is by design pylint: disable=redefined-builtin
         dataset_id=None,  # type: str
         folder_id=None,  # type: str
+        folder=None,  # type: str
         name=None,  # type: str
         size=None,  # type: str
         type=None,  # type: str # type name is by design pylint: disable=redefined-builtin
@@ -47,6 +49,7 @@ class Resource(CruxModel):
             id (str): Resourece Id. Defaults to None.
             dataset_id (str): Dataset Identity. Defaults to None.
             folder_id (str): Folder Identity. Defaults to None.
+            folder (str): Folder Name. Defaults to None.
             name (str): Resource name. Defaults to None.
             size (str): Resource size. Defaults to None.
             type (str): Resource type. Defaults to None.
@@ -85,89 +88,104 @@ class Resource(CruxModel):
         self._tags = tags
         self._folder = None
         self._labels = labels  # type: Tuple[Label, ...]
+        self._folder = folder
 
         self.connection = connection
         self.raw_response = raw_response
 
     @property
     def id(self):
-        """str: Gets and Sets the Resource ID."""
+        """str: Gets the Resource ID."""
         return self._id
 
     @property
     def description(self):
-        """str: Gets and Sets the Resource Description."""
+        """str: Gets the Resource Description."""
         return self._description
 
     @property
     def media_type(self):
-        """str: Gets and Sets the Resource Description."""
+        """str: Gets the Resource Description."""
         return self._media_type
 
     @property
     def dataset_id(self):
-        """str: Gets and Sets the Dataset ID."""
+        """str: Gets the Dataset ID."""
         return self._dataset_id
 
     @property
     def folder_id(self):
-        """str: Gets and Sets the Folder ID."""
+        """str: Gets the Folder ID."""
         return self._folder_id
 
     @property
     def storage_id(self):
-        """str: Gets and Sets the Storage ID."""
+        """str: Gets the Storage ID."""
         return self._storage_id
 
     @property
     def name(self):
-        """str: Gets and Sets the Resource Name."""
+        """str: Gets the Resource Name."""
         return self._name
 
     @property
     def config(self):
-        """str: Gets and Sets the config."""
+        """str: Gets the config."""
         return self._config
 
     @property
     def provenance(self):
-        """str: Gets and Sets the Provenance."""
+        """str: Gets the Provenance."""
         return self._provenance
 
     @property
     def type(self):
-        """str: Gets and Sets the Resource Type."""
+        """str: Gets the Resource Type."""
         return self._type
 
     @property
     def tags(self):
-        """:obj:`list` of :obj:`str`: Gets and Sets the Resource Tags."""
+        """:obj:`list` of :obj:`str`: Gets the Resource Tags."""
         return self._tags
 
     @property
     def labels(self):
-        """:obj:`list` of :obj:`dict`: Gets and Sets the Resource labels."""
+        """:obj:`list` of :obj:`dict`: Gets the Resource labels."""
         return tuple(self._labels)
 
     @property
     def as_of(self):
-        """str: Gets and Sets the as_of."""
+        """str: Gets the as_of."""
         return self._as_of
 
     @property
     def created_at(self):
-        """str: Gets and Sets the created_at."""
+        """str: Gets created_at."""
         return self._created_at
 
     @property
     def modified_at(self):
-        """str: Gets and Sets the modified_at."""
+        """str: Gets modified_at."""
         return self._modified_at
 
     @property
     def size(self):
-        """str: Gets and Sets the size."""
+        """str: Gets the size."""
         return self._size
+
+    @property
+    def path(self):
+        """str: Compute or Get the resource path."""
+        return posixpath.join(self.folder, self.name)
+
+    @property
+    def folder(self):
+        """str: Compute or Get the folder name."""
+        if self._folder:
+            return self._folder
+
+        self._folder = self._get_folder()
+        return self._folder
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -240,6 +258,7 @@ class Resource(CruxModel):
         provenance = a_dict["provenance"]
         created_at = a_dict["createdAt"]
         modified_at = a_dict["modifiedAt"]
+        size = a_dict["size"]
 
         return cls(
             dataset_id=dataset_id,
@@ -256,6 +275,7 @@ class Resource(CruxModel):
             provenance=provenance,
             created_at=created_at,
             modified_at=modified_at,
+            size=size,
         )
 
     def delete(self):
@@ -520,3 +540,17 @@ class Resource(CruxModel):
 
         label_tuple_obj = tuple(label_objects)  # type: Tuple[Label, ...]
         return label_tuple_obj
+
+    def _get_folder(self):
+        # type: () -> str
+        """Fetches the folder of the resource.
+
+        Returns:
+            str: Folder name of the resource.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = self.connection.api_call(
+            "GET", ["resources", self.id, "folderpath"], headers=headers
+        )
+
+        return response.json().get("path")

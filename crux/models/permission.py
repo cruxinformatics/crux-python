@@ -22,17 +22,17 @@ class Permission(CruxModel):
 
     @property
     def target_id(self):
-        """str: Gets and Sets the Target ID."""
+        """str: Gets the Target ID."""
         return self._target_id
 
     @property
     def identity_id(self):
-        """str: Gets and Sets the Identity ID."""
+        """str: Gets the Identity ID."""
         return self._identity_id
 
     @property
     def permission_name(self):
-        """str: Gets and Sets the Permission Name."""
+        """str: Gets the Permission Name."""
         return self._permission_name
 
     def to_dict(self):

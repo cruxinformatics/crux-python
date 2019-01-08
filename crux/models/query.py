@@ -9,15 +9,6 @@ from crux.utils import DEFAULT_CHUNK_SIZE, valid_chunk_size
 class Query(Resource):
     """Query Model."""
 
-    @property
-    def folder(self):
-        """str: Gets and Sets the folder."""
-        return self._folder
-
-    @folder.setter
-    def folder(self, folder):
-        self._folder = folder
-
     def to_dict(self):
         # type: () -> Dict[str, Any]
         """Transforms Query object to Query dictionary.
@@ -29,10 +20,10 @@ class Query(Resource):
             "name": self.name,
             "description": self.description,
             "tags": self.tags,
-            "folder": self.folder,
             "type": self.type,
             "config": self.config,
             "labels": self.labels,
+            "folder": self.folder,
         }
 
     def run(

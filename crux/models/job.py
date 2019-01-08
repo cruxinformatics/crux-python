@@ -20,29 +20,18 @@ class LoadJob(AbstractJob):
             job_url (str): Job Url. Defaults to None.
         """
 
-        self._job_id = None
-        self._job_url = None
-
-        self.job_id = job_id
-        self.job_url = job_url
+        self._job_id = job_id
+        self._job_url = job_url
 
     @property
     def job_id(self):
-        """str: Gets and Sets the Job Id."""
+        """str: Gets the Job Id."""
         return self._job_id
-
-    @job_id.setter
-    def job_id(self, job_id):
-        self._job_id = job_id
 
     @property
     def job_url(self):
-        """str: Gets and Sets the Job URL."""
+        """str: Gets the Job URL."""
         return self._job_url
-
-    @job_url.setter
-    def job_url(self, job_url):
-        self._job_url = job_url
 
     @classmethod
     def from_dict(cls, a_dict):

@@ -55,7 +55,7 @@ class CruxClient(object):
         params=None,  # type: Dict[Any,Any]
         data=None,  # type: Dict[Any,Any]
         stream=False,  # type: bool
-        retries=20,  # type: int
+        retries=None,  # type: int
         backoff=0.3,  # type: float
         status_forcelist=(
             500,

@@ -73,8 +73,10 @@ class CruxClient(object):
         ),  # type: Tuple
         retry_on_methods=("GET", "PUT", "DELETE", "POST"),  # type: Tuple
         max_http_redirects=10,  # type: int
-        timeout=60,  # type: int
+        connect_timeout=60.5,  # type: float
         max_conn_errors=10,  # type: int
+        read_timeout=60,  # type: int
+        max_read_errors=10,  # type: int
     ):
         # type:(...) -> Any
         """
@@ -100,9 +102,13 @@ class CruxClient(object):
                 Defaults to ("GET", "PUT", "DELETE", "POST").
             max_http_redirects (int): Max HTTP sredirects to perform on API calls.
                 Defaults to 10.
-            timeout (int): Request timeout configuration in seconds.
-                Defaults to 60.
+            connect_timeout (float): Request connect timeout configuration in seconds.
+                Defaults to 60.5.
             max_conn_errors (int): Max connection-related errors to retry on.
+                Defaults to 10.
+            read_timeout (int): Request read timeout configuration in seconds.
+                Defaults to 60.
+            max_read_errors (int): Max read-related errors to retry on.
                 Defaults to 10.
 
         Returns:
@@ -148,6 +154,7 @@ class CruxClient(object):
             method_whitelist=retry_on_methods,
             redirect=max_http_redirects,
             connect=max_conn_errors,
+            read=max_read_errors,
         )
 
         adapter = HTTPAdapter(max_retries=retry)
@@ -164,7 +171,7 @@ class CruxClient(object):
                         params=params,
                         stream=stream,
                         proxies=self.crux_config.proxies,
-                        timeout=timeout,
+                        timeout=(connect_timeout, read_timeout),
                     )
             except (HTTPError, TooManyRedirects) as err:
                 raise CruxClientHTTPError(str(err))
@@ -184,7 +191,7 @@ class CruxClient(object):
                             headers=headers,
                             data=data,
                             proxies=self.crux_config.proxies,
-                            timeout=timeout,
+                            timeout=(connect_timeout, read_timeout),
                         )
                 else:
                     with requests.session() as session:
@@ -196,7 +203,7 @@ class CruxClient(object):
                             headers=headers,
                             json=params,
                             proxies=self.crux_config.proxies,
-                            timeout=timeout,
+                            timeout=(connect_timeout, read_timeout),
                         )
             except (HTTPError, TooManyRedirects) as err:
                 raise CruxClientHTTPError(str(err))

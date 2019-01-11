@@ -59,14 +59,16 @@ class File(Resource):
         return data.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     def download(
-        self, local_path, chunk_size=DEFAULT_CHUNK_SIZE
-    ):  # content_type is skipped intentionally pylint: disable=arguments-differ
-        # type: ignore # https://github.com/python/mypy/issues/3750
+        self, local_path, chunk_size=DEFAULT_CHUNK_SIZE, use_crux_domain=False
+    ):
+        # type: (str, int, bool) -> bool
         """Downloads the file resource.
 
         Args:
             local_path (str or file): Local OS path at which file resource will be downloaded.
             chunk_size (int): Number of bytes to be read in memory.
+            use_gcs (bool): If True, it will use Google signed url to download.
+                Defaults to True.
 
         Returns:
             bool: True if it is downloaded.
@@ -77,9 +79,12 @@ class File(Resource):
         if not valid_chunk_size(chunk_size):
             raise ValueError("chunk_size should be multiple of 256 KiB")
 
-        return self._download(
-            local_path=local_path, content_type=None, chunk_size=chunk_size
-        )
+        if use_crux_domain:
+            return self._download_crux_domain(
+                local_path=local_path, content_type=None, chunk_size=chunk_size
+            )
+        else:
+            return self._download_gcs(local_path=local_path, chunk_size=chunk_size)
 
     def upload(self, local_path, content_type=None):
         # type: (Union[IO, str], str) -> bool

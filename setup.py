@@ -7,7 +7,7 @@ import os
 from setuptools import find_packages, setup
 
 here = os.path.abspath(os.path.dirname(__file__))
-requirements = ["requests", "typing;python_version<'3.5'"]
+requirements = ["google-resumable-media", "requests", "typing;python_version<'3.5'"]
 packages = [pkg for pkg in find_packages() if pkg.startswith("crux")]
 
 version = {}

@@ -52,5 +52,6 @@ def format_check(session):
 @nox.session(python=["3.7"])
 def type_check(session):
     """Run type checks."""
+    session.install("-r", "requirements.txt")
     session.install("mypy")
     session.run("mypy", "crux")

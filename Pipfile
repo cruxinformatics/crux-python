@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 requests = "*"
+google-resumable-media = "*"
 typing = {version = "*", markers="python_version < '3.5'"}
 
 [dev-packages]

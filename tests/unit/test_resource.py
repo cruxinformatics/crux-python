@@ -72,16 +72,6 @@ def test_delete_resource(monkeypatch, resource):
     assert resp == {}
 
 
-def monkeypatch_download_resource():
-    return True
-
-
-def test_download_resource(monkeypatch, resource):
-    monkeypatch.setattr(resource, "download", monkeypatch_download_resource)
-    resp = resource.download()
-    assert resp is True
-
-
 def monkeypatch_add_label(label_key=None, label_value=None):
     return {}
 
@@ -128,16 +118,6 @@ def test_get_all_labels(resource, monkeypatch):
     assert label_list[0].label_key == "test_label1"
     assert label_list[1].label_value == "test_value2"
     assert label_list[1].label_key == "test_label2"
-
-
-def monkeypatch_download(local_path, content_type):
-    return True
-
-
-def test_download(monkeypatch, resource):
-    monkeypatch.setattr(resource, "download", monkeypatch_download)
-    result = resource.download(local_path="/tmp/test.csv", content_type="text/csv")
-    assert result is True
 
 
 def monkeypatch_update_resource(*args, **kwargs):

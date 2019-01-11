@@ -72,8 +72,8 @@ class Query(Resource):
 
     def download(
         self, local_path, format="csv", params=None
-    ):  # It is by design pylint: disable=redefined-builtin,arguments-differ
-        # type: (...) -> bool
+    ):  # It is by design pylint: disable=redefined-builtin
+        # type: (str, str, Dict[Any, Any]) -> bool
         """Method which streams the Query
 
         Args:

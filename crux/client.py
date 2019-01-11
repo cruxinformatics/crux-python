@@ -55,7 +55,7 @@ class CruxClient(object):
         params=None,  # type: Dict[Any,Any]
         data=None,  # type: Dict[Any,Any]
         stream=False,  # type: bool
-        retries=None,  # type: int
+        max_total_retries=20,  # type: int
         backoff=0.3,  # type: float
         status_forcelist=(
             500,
@@ -73,9 +73,9 @@ class CruxClient(object):
         ),  # type: Tuple
         retry_on_methods=("GET", "PUT", "DELETE", "POST"),  # type: Tuple
         max_http_redirects=10,  # type: int
-        connect_timeout=60.5,  # type: float
+        connect_timeout=9.5,  # type: float
         max_conn_errors=10,  # type: int
-        read_timeout=60,  # type: int
+        read_timeout=60,  # type: float
         max_read_errors=10,  # type: int
     ):
         # type:(...) -> Any
@@ -91,7 +91,7 @@ class CruxClient(object):
             data (dict): Should be used while passing form encoded data. Defaults to None.
             stream (bool): Should be set to True, when response is required to be streamed.
                 Defaults to False.
-            retries (int): Total Retries to be performed. Defaults to 20.
+            max_total_retries (int): Total Retries to be performed. Defaults to 20.
             backoff (float): Backoff factor to be applied. Defaults to 0.3.
                 {backoff factor} * (2 ^ ({number of total retries} - 1))
             status_forcelist (tuple): A set of integer HTTP status codes
@@ -106,7 +106,7 @@ class CruxClient(object):
                 Defaults to 60.5.
             max_conn_errors (int): Max connection-related errors to retry on.
                 Defaults to 10.
-            read_timeout (int): Request read timeout configuration in seconds.
+            read_timeout (float): Request read timeout configuration in seconds.
                 Defaults to 60.
             max_read_errors (int): Max read-related errors to retry on.
                 Defaults to 10.
@@ -148,7 +148,7 @@ class CruxClient(object):
         headers.update({"Authorization": bearer_token, "User-Agent": user_agent})
 
         retry = Retry(
-            total=retries,
+            total=max_total_retries,
             backoff_factor=backoff,
             status_forcelist=status_forcelist,
             method_whitelist=retry_on_methods,

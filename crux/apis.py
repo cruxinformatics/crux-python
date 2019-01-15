@@ -22,6 +22,7 @@ class Crux(object):
         proxies=None,  # type: Optional[MutableMapping[unicode, unicode]]
         user_agent=None,  # type: str
         api_prefix=None,  # type: str
+        only_use_crux_domains=False,  # type: bool
     ):
         # type: (...) -> None
         crux_config = CruxConfig(
@@ -30,6 +31,7 @@ class Crux(object):
             proxies=proxies,
             user_agent=user_agent,
             api_prefix=api_prefix,
+            only_use_crux_domains=only_use_crux_domains,
         )
 
         self.api_client = CruxClient(crux_config=crux_config)

@@ -9,6 +9,12 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     Union,
 )
 
+from google.resumable_media.common import InvalidResponse  # type: ignore
+from google.resumable_media.requests import ChunkedDownload  # type: ignore
+from requests import Session
+
+from crux.compat import unicode
+from crux.exceptions import CruxClientError
 from crux.models.resource import Resource
 from crux.utils import ContentType, DEFAULT_CHUNK_SIZE, valid_chunk_size
 
@@ -31,6 +37,101 @@ class File(Resource):
             "labels": self.labels,
             "folder": self.folder,
         }
+
+    def _get_signed_url(self):
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = self.connection.api_call(
+            "POST", ["resources", self.id, "content-url"], headers=headers
+        )
+        return response.json().get("url")
+
+    def _dl_via_api(self, local_path, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
+        if content_type is not None:
+            headers = {"Accept": content_type}
+        else:
+            headers = None
+
+        if not valid_chunk_size(chunk_size):
+            raise ValueError("chunk_size should be multiple of 256 KiB")
+
+        data = self.connection.api_call(
+            "GET", ["resources", self.id, "content"], headers=headers, stream=True
+        )
+
+        if hasattr(local_path, "write"):
+            for chunk in data.iter_content(chunk_size=chunk_size):
+                local_path.write(chunk)
+            local_path.flush()
+            return True
+        elif isinstance(local_path, (str, unicode)):
+            with open(local_path, mode="wb") as local_file:
+                for chunk in data.iter_content(chunk_size=chunk_size):
+                    local_file.write(chunk)
+            return True
+        else:
+            raise TypeError(
+                "Invalid Data Type for local_path: {}".format(type(local_path))
+            )
+
+    def _dl_signed_url_resumable(  # pylint: disable=too-many-branches
+        self, local_path, chunk_size=DEFAULT_CHUNK_SIZE
+    ):
+
+        if hasattr(local_path, "write"):
+            local_file_object = local_path
+        elif isinstance(local_path, (str, unicode)):
+            local_file_object = open(local_path, "wb")
+        else:
+            raise TypeError(
+                "Invalid Data Type for local_path: {}".format(type(local_path))
+            )
+        signed_url = self._get_signed_url()
+        transport = Session()
+        bytes_at_last_refresh = 0
+        refreshes_without_progress = 0
+        fetched_signed_urls = 0
+        total_bytes_downloaded = 0
+        max_url_refreshes_without_progress = 5
+        max_url_refreshes = 10
+
+        download = ChunkedDownload(signed_url, chunk_size, local_file_object)
+
+        while not download.finished:
+            try:
+                download.consume_next_chunk(transport)
+                total_bytes_downloaded += download.bytes_downloaded
+            except InvalidResponse:
+                if total_bytes_downloaded <= bytes_at_last_refresh:
+                    if refreshes_without_progress <= max_url_refreshes_without_progress:
+                        if fetched_signed_urls <= max_url_refreshes:
+                            new_signed_url = self._get_signed_url()
+                            fetched_signed_urls += 1
+                        else:
+                            raise CruxClientError("Exceeded max new Signed URLs")
+                        refreshes_without_progress += 1
+                        total_bytes_downloaded += download.bytes_downloaded
+                        bytes_at_last_refresh = total_bytes_downloaded
+                    else:
+                        raise CruxClientError(
+                            "Exceeded max new Signed URLs without progress"
+                        )
+                else:
+                    refreshes_without_progress = 0
+                    if fetched_signed_urls <= max_url_refreshes:
+                        new_signed_url = self._get_signed_url()
+                        fetched_signed_urls += 1
+                    else:
+                        raise CruxClientError("Exceeded max new Signed URLs")
+                    total_bytes_downloaded += download.bytes_downloaded
+                    bytes_at_last_refresh = total_bytes_downloaded
+                download = ChunkedDownload(
+                    new_signed_url,
+                    chunk_size,
+                    local_file_object,
+                    start=download.bytes_downloaded,
+                )
+        local_file_object.flush()
+        return True
 
     def iter_content(self, chunk_size=DEFAULT_CHUNK_SIZE, decode_unicode=False):
         # type: (int, bool) -> Iterable[str]
@@ -58,10 +159,8 @@ class File(Resource):
 
         return data.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
-    def download(
-        self, local_path, chunk_size=DEFAULT_CHUNK_SIZE, use_crux_domain=False
-    ):
-        # type: (str, int, bool) -> bool
+    def download(self, local_path, chunk_size=DEFAULT_CHUNK_SIZE):
+        # type: (str, int) -> bool
         """Downloads the file resource.
 
         Args:
@@ -79,12 +178,16 @@ class File(Resource):
         if not valid_chunk_size(chunk_size):
             raise ValueError("chunk_size should be multiple of 256 KiB")
 
-        if use_crux_domain:
-            return self._download_crux_domain(
+        small_enough = self.size < (chunk_size * 2)
+
+        if self.connection.crux_config.only_use_crux_domains or small_enough:
+            return self._dl_via_api(
                 local_path=local_path, content_type=None, chunk_size=chunk_size
             )
         else:
-            return self._download_gcs(local_path=local_path, chunk_size=chunk_size)
+            return self._dl_signed_url_resumable(
+                local_path=local_path, chunk_size=chunk_size
+            )
 
     def upload(self, local_path, content_type=None):
         # type: (Union[IO, str], str) -> bool

@@ -11,6 +11,7 @@ def config_env():
     os.environ["CRUX_API_KEY"] = "12345"
     os.environ["CRUX_API_HOST"] = "https://api-env.example.com"
     os.environ["CRUX_API_PREFIX"] = "/example-v1"
+    os.environ["CRUX_ONLY_USE_CRUX_DOMAINS"] = "True"
     return CruxConfig()
 
 
@@ -41,6 +42,10 @@ def test_sanitize_user_agent_part(config_env):
     assert sanitized_part == "Clean_0.1-_+~"
 
 
+def test_env_use_crux_domain(config_env):
+    assert config_env.only_use_crux_domains is True
+
+
 @pytest.fixture
 def config_def():
     return CruxConfig(
@@ -52,6 +57,7 @@ def config_def():
             "https": "socks5://user:pass@host:port",
         },
         user_agent="crux/browser",
+        only_use_crux_domains=True,
     )
 
 
@@ -76,3 +82,7 @@ def test_def_proxies(config_def):
         "http": "socks5://user:pass@host:port",
         "https": "socks5://user:pass@host:port",
     }
+
+
+def test_def_use_crux_domain(config_def):
+    assert config_def.only_use_crux_domains is True

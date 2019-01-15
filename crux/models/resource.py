@@ -9,17 +9,11 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     Union,
 )
 
-from google.resumable_media.common import InvalidResponse  # type: ignore
-from google.resumable_media.requests import ChunkedDownload  # type: ignore
-from requests import Session
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
-from crux.compat import unicode
-from crux.exceptions import CruxClientError
 from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
-from crux.utils import DEFAULT_CHUNK_SIZE, valid_chunk_size
 
 
 class Resource(CruxModel):
@@ -412,103 +406,6 @@ class Resource(CruxModel):
             return True
         else:
             raise ValueError("Name, Description or Tags should be set")
-
-    def _download_crux_domain(
-        self, local_path, content_type, chunk_size=DEFAULT_CHUNK_SIZE
-    ):
-        if content_type is not None:
-            headers = {"Accept": content_type}
-        else:
-            headers = None
-
-        if not valid_chunk_size(chunk_size):
-            raise ValueError("chunk_size should be multiple of 256 KiB")
-
-        data = self.connection.api_call(
-            "GET", ["resources", self.id, "content"], headers=headers, stream=True
-        )
-
-        if hasattr(local_path, "write"):
-            for chunk in data.iter_content(chunk_size=chunk_size):
-                local_path.write(chunk)
-            local_path.flush()
-            return True
-        elif isinstance(local_path, (str, unicode)):
-            with open(local_path, mode="wb") as local_file:
-                for chunk in data.iter_content(chunk_size=chunk_size):
-                    local_file.write(chunk)
-            return True
-        else:
-            raise TypeError(
-                "Invalid Data Type for local_path: {}".format(type(local_path))
-            )
-
-    def _get_signed_url(self):
-        # Will be implemented when it is part of API.
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        return self.connection.api_call(
-            "GET", ["resources", self.id, "content-url"], headers=headers
-        )
-
-    def _download_gcs(  # pylint: disable=too-many-branches
-        self, local_path, chunk_size=DEFAULT_CHUNK_SIZE
-    ):
-
-        if hasattr(local_path, "write"):
-            local_file_object = local_path
-        elif isinstance(local_path, (str, unicode)):
-            local_file_object = open(local_path, "wb")
-        else:
-            raise TypeError(
-                "Invalid Data Type for local_path: {}".format(type(local_path))
-            )
-        signed_url = self._get_signed_url()
-        transport = Session()
-        bytes_at_last_refresh = 0
-        refreshes_without_progress = 0
-        fetched_signed_urls = 0
-        total_bytes_downloaded = 0
-        max_url_refreshes_without_progress = 5
-        max_url_refreshes = 1000
-
-        download = ChunkedDownload(signed_url, chunk_size, local_file_object)
-
-        while not download.finished:
-            try:
-                download.consume_next_chunk(transport)
-                total_bytes_downloaded += download.bytes_downloaded
-            except InvalidResponse:
-                if total_bytes_downloaded <= bytes_at_last_refresh:
-                    if refreshes_without_progress <= max_url_refreshes_without_progress:
-                        if fetched_signed_urls <= max_url_refreshes:
-                            new_signed_url = self._get_signed_url()
-                            fetched_signed_urls += 1
-                        else:
-                            raise CruxClientError("Exceeded max new Signed URLs")
-                        refreshes_without_progress += 1
-                        total_bytes_downloaded += download.bytes_downloaded
-                        bytes_at_last_refresh = total_bytes_downloaded
-                    else:
-                        raise CruxClientError(
-                            "Exceeded max new Signed URLs without progress"
-                        )
-                else:
-                    refreshes_without_progress = 0
-                    if fetched_signed_urls <= max_url_refreshes:
-                        new_signed_url = self._get_signed_url()
-                        fetched_signed_urls += 1
-                    else:
-                        raise CruxClientError("Exceeded max new Signed URLs")
-                    total_bytes_downloaded += download.bytes_downloaded
-                    bytes_at_last_refresh = total_bytes_downloaded
-                download = ChunkedDownload(
-                    new_signed_url,
-                    chunk_size,
-                    local_file_object,
-                    start=download.bytes_downloaded,
-                )
-        local_file_object.flush()
-        return True
 
     def add_permission(self, identity_id="_subscribed_", permission="Read"):
         # type: (str, str) -> Union[bool, Permission]

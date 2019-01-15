@@ -4,6 +4,7 @@ from crux.utils import (
     ContentType,
     quote,
     split_posixpath_filename_dirpath,
+    str_to_bool,
     url_builder,
     valid_chunk_size,
 )
@@ -44,3 +45,13 @@ def test_split_posixpath_filename_dirpath():
     fullpath = "/tmp/path/to/file.txt"
     filename, dirpath = split_posixpath_filename_dirpath(fullpath)
     assert (filename, dirpath) == ("file.txt", "/tmp/path/to")
+
+
+def test_str_to_bool():
+    assert str_to_bool("True") is True
+    assert str_to_bool("true") is True
+    assert str_to_bool("False") is False
+    assert str_to_bool("false") is False
+
+    with pytest.raises(ValueError):
+        assert str_to_bool("crux")

@@ -116,3 +116,25 @@ def split_posixpath_filename_dirpath(path):
     filename = posixpath.basename(path)  # type: str
     dirpath = posixpath.dirname(path)  # type: str
     return filename, dirpath
+
+
+def str_to_bool(string):
+    """Converts string to boolean value.
+
+    Args:
+        string (str): Input string.
+
+    Returns:
+        bool: True if input string is "True" or "true",
+            False if input string is "False" or "false".
+
+    Raises:
+        ValueError: If input string is not in True, true,
+            False, false.
+    """
+    if string in ["True", "true"]:
+        return True
+    elif string in ["False", "false"]:
+        return False
+    else:
+        raise ValueError("Cannot convert {} to bool".format(string))

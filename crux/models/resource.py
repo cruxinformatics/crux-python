@@ -14,6 +14,7 @@ from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
+from crux.utils import DEFAULT_CHUNK_SIZE
 
 
 class Resource(CruxModel):
@@ -201,9 +202,9 @@ class Resource(CruxModel):
             "name": self.name,
             "size": self.size,
             "type": self.type,
-            # "config": self.config,
-            # "provenance": self.provenance,
-            "asof": self.as_of,
+            "config": self.config,
+            "provenance": self.provenance,
+            "asOf": self.as_of,
             "tags": self.tags,
             "labels": self.labels,
             "storageId": self.storage_id,
@@ -257,6 +258,7 @@ class Resource(CruxModel):
         created_at = a_dict["createdAt"]
         modified_at = a_dict["modifiedAt"]
         size = a_dict["size"]
+        as_of = a_dict["asOf"]
 
         return cls(
             dataset_id=dataset_id,
@@ -274,6 +276,7 @@ class Resource(CruxModel):
             created_at=created_at,
             modified_at=modified_at,
             size=size,
+            as_of=as_of,
         )
 
     def delete(self):
@@ -500,3 +503,19 @@ class Resource(CruxModel):
         )
 
         return response.json().get("path")
+
+    def _download(self, file_pointer, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
+
+        if content_type is not None:
+            headers = {"Accept": content_type}
+        else:
+            headers = None
+
+        data = self.connection.api_call(
+            "GET", ["resources", self.id, "content"], headers=headers, stream=True
+        )
+
+        for chunk in data.iter_content(chunk_size=chunk_size):
+            file_pointer.write(chunk)
+
+        return True

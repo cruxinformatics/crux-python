@@ -83,18 +83,8 @@ class File(Resource):
                 "Invalid Data Type for local_path: {}".format(type(local_path))
             )
 
-    def _dl_signed_url_resumable(  # pylint: disable=too-many-branches
-        self, local_path, chunk_size=DEFAULT_CHUNK_SIZE
-    ):
+    def _dl_signed_url_resumable(self, file_pointer, chunk_size=DEFAULT_CHUNK_SIZE):
 
-        if hasattr(local_path, "write"):
-            local_file_object = local_path
-        elif isinstance(local_path, (str, unicode)):
-            local_file_object = open(local_path, "wb")
-        else:
-            raise TypeError(
-                "Invalid Data Type for local_path: {}".format(type(local_path))
-            )
         signed_url = self._get_signed_url()
         transport = Session()
         bytes_at_last_refresh = 0
@@ -104,7 +94,7 @@ class File(Resource):
         max_url_refreshes_without_progress = 5
         max_url_refreshes = 10
 
-        download = ChunkedDownload(signed_url, chunk_size, local_file_object)
+        download = ChunkedDownload(signed_url, chunk_size, file_pointer)
 
         while not download.finished:
             try:
@@ -137,10 +127,9 @@ class File(Resource):
                 download = ChunkedDownload(
                     new_signed_url,
                     chunk_size,
-                    local_file_object,
+                    file_pointer,
                     start=download.bytes_downloaded,
                 )
-        local_file_object.flush()
         return True
 
     def iter_content(self, chunk_size=DEFAULT_CHUNK_SIZE, decode_unicode=False):
@@ -169,6 +158,23 @@ class File(Resource):
 
         return data.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
+    def _download_file(self, file_pointer, chunk_size=DEFAULT_CHUNK_SIZE):
+        # google-resumable-media has a bug where is expects the 'content-range' even
+        # for 200 OK responses, which happens when the range is larger than the size.
+        # There isn't much point in using resumable media for small files.
+        # Make sure size is greater than 2x chunk_size if Google Resumable media is
+        # to be used.
+        small_enough = self.size < (chunk_size * 2)
+
+        if self.connection.crux_config.only_use_crux_domains or small_enough:
+            return self._download(
+                file_pointer=file_pointer, content_type=None, chunk_size=chunk_size
+            )
+        else:
+            return self._dl_signed_url_resumable(
+                file_pointer=file_pointer, chunk_size=chunk_size
+            )
+
     def download(self, local_path, chunk_size=DEFAULT_CHUNK_SIZE):
         # type: (str, int) -> bool
         """Downloads the file resource.
@@ -181,25 +187,16 @@ class File(Resource):
             bool: True if it is downloaded.
 
         Raises:
-            ValueError: If chunk_size is not multiple of 256 KiB.
+            TypeError: If local_path is not a file like or string type.
         """
-        if not valid_chunk_size(chunk_size):
-            raise ValueError("chunk_size should be multiple of 256 KiB")
-
-        # google-resumable-media has a bug where is expects the 'content-range' even
-        # for 200 OK responses, which happens when the range is larger than the size.
-        # There isn't much point in using resumable media for small files.
-        # Make sure size is greater than 2x chunk_size if Google Resumable media is
-        # to be used.
-        small_enough = self.size < (chunk_size * 2)
-
-        if self.connection.crux_config.only_use_crux_domains or small_enough:
-            return self._dl_via_api(
-                local_path=local_path, content_type=None, chunk_size=chunk_size
-            )
+        if hasattr(local_path, "write"):
+            return self._download_file(local_path, chunk_size=chunk_size)
+        elif isinstance(local_path, (str, unicode)):
+            with open(local_path, "wb") as file_pointer:
+                return self._download_file(file_pointer, chunk_size=chunk_size)
         else:
-            return self._dl_signed_url_resumable(
-                local_path=local_path, chunk_size=chunk_size
+            raise TypeError(
+                "Invalid Data Type for local_path: {}".format(type(local_path))
             )
 
     def upload(self, local_path, content_type=None):

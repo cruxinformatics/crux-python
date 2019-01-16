@@ -510,7 +510,9 @@ class Dataset(CruxModel):
                     folder=resource_path, local_path=resource_local_path
                 )
             elif resource.type == "file":
-                resource.download(local_path=resource_local_path)
+                file_resource = File.from_dict(resource.to_dict())
+                file_resource.connection = self.connection
+                file_resource.download(local_path=resource_local_path)
                 local_file_list.append(resource_local_path)
 
         return local_file_list

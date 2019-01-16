@@ -12,12 +12,16 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 
 from google.resumable_media.common import InvalidResponse  # type: ignore
 from google.resumable_media.requests import ChunkedDownload  # type: ignore
-from requests import Session
 
 from crux.compat import unicode
 from crux.exceptions import CruxClientError
 from crux.models.resource import Resource
-from crux.utils import ContentType, DEFAULT_CHUNK_SIZE, valid_chunk_size
+from crux.utils import (
+    ContentType,
+    DEFAULT_CHUNK_SIZE,
+    get_signed_url_session,
+    valid_chunk_size,
+)
 
 
 class File(Resource):
@@ -86,49 +90,67 @@ class File(Resource):
     def _dl_signed_url_resumable(self, file_pointer, chunk_size=DEFAULT_CHUNK_SIZE):
 
         signed_url = self._get_signed_url()
-        transport = Session()
+
+        transport = get_signed_url_session()
+
+        # Track how many bytes the client has downloaded since the last time they
+        # got a new signed URL, and how many times that got a new URL without
+        # downloading more bytes.
+        # This is to prevent infinite loops without progress.
         bytes_at_last_refresh = 0
         refreshes_without_progress = 0
+        # Track how much has been downloaded from each signed URL
+        total_bytes_from_urls = [0]
         fetched_signed_urls = 0
-        total_bytes_downloaded = 0
         max_url_refreshes_without_progress = 5
-        max_url_refreshes = 10
+        max_url_refreshes = 100
 
         download = ChunkedDownload(signed_url, chunk_size, file_pointer)
 
         while not download.finished:
             try:
+                # This downloads a chunk and writes it to file_object
                 download.consume_next_chunk(transport)
-                total_bytes_downloaded += download.bytes_downloaded
+                total_bytes_from_urls[-1] = download.bytes_downloaded
+            # Catch the signed URL expiring
             except InvalidResponse:
-                if total_bytes_downloaded <= bytes_at_last_refresh:
+                sum_total_bytes_from_urls = sum(total_bytes_from_urls)
+                # Check if download has made progress downloading since last time we got URL
+                if not sum_total_bytes_from_urls > bytes_at_last_refresh:
+                    # Limit new URLs without making progress downloading
                     if refreshes_without_progress <= max_url_refreshes_without_progress:
+                        # Limit total new URLs
                         if fetched_signed_urls <= max_url_refreshes:
                             new_signed_url = self._get_signed_url()
                             fetched_signed_urls += 1
                         else:
                             raise CruxClientError("Exceeded max new Signed URLs")
+                        total_bytes_from_urls.append(0)
                         refreshes_without_progress += 1
-                        total_bytes_downloaded += download.bytes_downloaded
-                        bytes_at_last_refresh = total_bytes_downloaded
+                        bytes_at_last_refresh = sum_total_bytes_from_urls
                     else:
+                        # Exceeded max new signed URLs without progress
                         raise CruxClientError(
                             "Exceeded max new Signed URLs without progress"
                         )
                 else:
                     refreshes_without_progress = 0
+                    # Limit total new URLs
                     if fetched_signed_urls <= max_url_refreshes:
                         new_signed_url = self._get_signed_url()
                         fetched_signed_urls += 1
                     else:
                         raise CruxClientError("Exceeded max new Signed URLs")
-                    total_bytes_downloaded += download.bytes_downloaded
-                    bytes_at_last_refresh = total_bytes_downloaded
+                    total_bytes_from_urls.append(0)
+                    bytes_at_last_refresh = sum_total_bytes_from_urls
+
+                # Replace the download object with a new one, using a new signed URL,
+                # but start where the last download object left off.
                 download = ChunkedDownload(
                     new_signed_url,
                     chunk_size,
                     file_pointer,
-                    start=download.bytes_downloaded,
+                    start=sum_total_bytes_from_urls,
                 )
         return True
 

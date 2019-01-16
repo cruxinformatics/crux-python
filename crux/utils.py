@@ -4,6 +4,12 @@ import os
 import posixpath
 from typing import List, Tuple  # noqa: F401 pylint: disable=unused-import
 
+from requests import Session
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disable=import-error
+    Retry,
+)
+
 from crux.compat import Enum, urllib_quote
 
 
@@ -119,6 +125,7 @@ def split_posixpath_filename_dirpath(path):
 
 
 def str_to_bool(string):
+    # type (str) -> bool
     """Converts string to boolean value.
 
     Args:
@@ -138,3 +145,44 @@ def str_to_bool(string):
         return False
     else:
         raise ValueError("Cannot convert {} to bool".format(string))
+
+
+def get_signed_url_session(max_connect=6, max_read=3, max_total=10, backoff_factor=1):
+    # type (int, int, int, float) -> Session
+    """Gets the session object.
+
+    Args:
+        max_connect (int): Max connect errors. Defaults to 6.
+        max_read (int): Max read errors. Defaults to 3.
+        max_total (int): Max total errors. Defaults to 10.
+        backoff_factor (float): Backoff factor. Defaults to 1.
+    Returns:
+        requests.Session: Session Object.
+    """
+    session = Session()
+    retries = Retry(
+        total=max_total,
+        connect=max_connect,
+        read=max_read,
+        backoff_factor=backoff_factor,
+        method_whitelist=False,
+        status_forcelist=[
+            429,
+            500,
+            502,
+            503,
+            504,
+            520,
+            521,
+            522,
+            523,
+            524,
+            525,
+            527,
+            530,
+        ],
+    )
+    session.mount("http://", HTTPAdapter(max_retries=retries))
+    session.mount("https://", HTTPAdapter(max_retries=retries))
+
+    return session

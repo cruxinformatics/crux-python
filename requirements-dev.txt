@@ -6,15 +6,16 @@ atomicwrites==1.2.1; python_version != '3.3.*'
 attrs==18.2.0
 babel==2.6.0
 black==18.9b0
-bleach==3.0.2; python_version != '3.1.*'
+bleach==3.1.0
 certifi==2018.11.29
 chardet==3.0.4
 click==7.0; python_version != '3.3.*'
 colorlog==3.2.0
-commonmark==0.5.4
+commonmark==0.8.1; python_version != '3.2.*'
 docutils==0.14
 flake8-import-order==0.18
 flake8==3.6.0
+future==0.17.1; python_version != '3.2.*'
 idna==2.8; python_version != '3.3.*'
 imagesize==1.1.0; python_version != '3.3.*'
 isort==4.3.4; python_version != '3.3.*'
@@ -28,18 +29,18 @@ mypy==0.650
 nox==2018.10.17
 packaging==18.0; python_version >= '2.6'
 pbr==5.1.1
-pkginfo==1.4.2
-pluggy==0.8.0; python_version != '3.3.*'
+pkginfo==1.5.0.1
+pluggy==0.8.1; python_version != '3.3.*'
 py==1.7.0; python_version != '3.3.*'
 pycodestyle==2.4.0
 pyflakes==2.0.0; python_version != '3.3.*'
 pygments==2.3.1
 pylint==2.2.2
-pyparsing==2.3.0; python_version >= '2.6'
-pytest==4.0.2
-pytz==2018.7
+pyparsing==2.3.1
+pytest==4.1.1
+pytz==2018.9
 readme-renderer==24.0
-recommonmark==0.4.0
+recommonmark==0.5.0
 requests-toolbelt==0.8.0
 requests==2.21.0
 six==1.12.0; python_version >= '2.6'
@@ -48,11 +49,11 @@ sphinx==1.8.3
 sphinxcontrib-apidoc==0.3.0
 sphinxcontrib-websupport==1.1.0; python_version != '3.3.*'
 toml==0.10.0
-tqdm==4.28.1; python_version != '3.1.*'
+tqdm==4.29.1; python_version != '3.1.*'
 twine==1.12.1
-typed-ast==1.1.1
+typed-ast==1.1.2
 urllib3==1.24.1; python_version != '3.3.*'
 virtualenv==16.2.0; python_version != '3.2.*'
 webencodings==0.5.1
 wheel==0.32.3
-wrapt==1.10.11
+wrapt==1.11.0

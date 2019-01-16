@@ -22,7 +22,7 @@ class Crux(object):
         proxies=None,  # type: Optional[MutableMapping[unicode, unicode]]
         user_agent=None,  # type: str
         api_prefix=None,  # type: str
-        only_use_crux_domains=False,  # type: bool
+        only_use_crux_domains=None,  # type: bool
     ):
         # type: (...) -> None
         crux_config = CruxConfig(

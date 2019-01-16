@@ -132,9 +132,9 @@ def str_to_bool(string):
         ValueError: If input string is not in True, true,
             False, false.
     """
-    if string in ["True", "true"]:
+    if string in ("True", "true"):
         return True
-    elif string in ["False", "false"]:
+    elif string in ("False", "false"):
         return False
     else:
         raise ValueError("Cannot convert {} to bool".format(string))

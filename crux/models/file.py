@@ -43,7 +43,15 @@ class File(Resource):
         response = self.connection.api_call(
             "POST", ["resources", self.id, "content-url"], headers=headers
         )
-        return response.json().get("url")
+
+        url = response.json().get("url")
+
+        if not url:
+            raise KeyError(
+                "Signed URL missing in response for resource {id}".format(id=self.id)
+            )
+
+        return url
 
     def _dl_via_api(self, local_path, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
         if content_type is not None:
@@ -166,8 +174,6 @@ class File(Resource):
         Args:
             local_path (str or file): Local OS path at which file resource will be downloaded.
             chunk_size (int): Number of bytes to be read in memory.
-            use_gcs (bool): If True, it will use Google signed url to download.
-                Defaults to True.
 
         Returns:
             bool: True if it is downloaded.

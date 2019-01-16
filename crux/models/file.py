@@ -61,32 +61,6 @@ class File(Resource):
 
         return url
 
-    def _dl_via_api(self, local_path, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
-
-        if content_type is not None:
-            headers = {"Accept": content_type}
-        else:
-            headers = None
-
-        data = self.connection.api_call(
-            "GET", ["resources", self.id, "content"], headers=headers, stream=True
-        )
-
-        if hasattr(local_path, "write"):
-            for chunk in data.iter_content(chunk_size=chunk_size):
-                local_path.write(chunk)
-            local_path.flush()
-            return True
-        elif isinstance(local_path, (str, unicode)):
-            with open(local_path, mode="wb") as local_file:
-                for chunk in data.iter_content(chunk_size=chunk_size):
-                    local_file.write(chunk)
-            return True
-        else:
-            raise TypeError(
-                "Invalid Data Type for local_path: {}".format(type(local_path))
-            )
-
     def _dl_signed_url_resumable(self, file_pointer, chunk_size=DEFAULT_CHUNK_SIZE):
 
         signed_url = self._get_signed_url()

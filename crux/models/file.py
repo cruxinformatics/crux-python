@@ -1,5 +1,6 @@
 """Module contains File model."""
 
+import json
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -41,7 +42,10 @@ class File(Resource):
     def _get_signed_url(self):
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
         response = self.connection.api_call(
-            "POST", ["resources", self.id, "content-url"], headers=headers
+            "POST",
+            ["resources", self.id, "content-url"],
+            headers=headers,
+            data=json.dumps({}),
         )
 
         url = response.json().get("url")
@@ -54,13 +58,11 @@ class File(Resource):
         return url
 
     def _dl_via_api(self, local_path, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
+
         if content_type is not None:
             headers = {"Accept": content_type}
         else:
             headers = None
-
-        if not valid_chunk_size(chunk_size):
-            raise ValueError("chunk_size should be multiple of 256 KiB")
 
         data = self.connection.api_call(
             "GET", ["resources", self.id, "content"], headers=headers, stream=True
@@ -184,6 +186,11 @@ class File(Resource):
         if not valid_chunk_size(chunk_size):
             raise ValueError("chunk_size should be multiple of 256 KiB")
 
+        # google-resumable-media has a bug where is expects the 'content-range' even
+        # for 200 OK responses, which happens when the range is larger than the size.
+        # There isn't much point in using resumable media for small files.
+        # Make sure size is greater than 2x chunk_size if Google Resumable media is
+        # to be used.
         small_enough = self.size < (chunk_size * 2)
 
         if self.connection.crux_config.only_use_crux_domains or small_enough:

@@ -61,112 +61,63 @@ class Dataset(CruxModel):
         Raises:
             ValueError: If name or tags are set to None.
         """
-        self._id = None
-        self._owner_identity_id = None
-        self._contact_identity_id = None
-        self._name = None
-        self._description = None
-        self._website = None
-        self._created_at = None
-        self._modified_at = None
-        self._tags = None
+        self._id = id
+        self._owner_identity_id = owner_identity_id
+        self._contact_identity_id = contact_identity_id
+        self._name = name
+        self._description = description
+        self._website = website
+        self._created_at = created_at
+        self._modified_at = modified_at
+        self._tags = tags
 
-        self.id = id
-        self.owner_identity_id = owner_identity_id
-        self.contact_identity_id = contact_identity_id
-        self.name = name
-        self.description = description
-        self.website = website
-        self.created_at = created_at
-        self.modified_at = modified_at
         self.connection = connection
         self.raw_response = raw_response
-        self.tags = tags
 
     @property
     def id(self):
-        """str: Gets and Sets the Dataset ID."""
+        """str: Gets the Dataset ID."""
         return self._id
-
-    @id.setter
-    def id(self, id):  # id name is by design pylint: disable=redefined-builtin
-        self._id = id
 
     @property
     def owner_identity_id(self):
-        """str: Gets and Sets the Owner Identity ID."""
+        """str: Gets the Owner Identity ID."""
         return self._owner_identity_id
-
-    @owner_identity_id.setter
-    def owner_identity_id(self, owner_identity_id):
-        self._owner_identity_id = owner_identity_id
 
     @property
     def contact_identity_id(self):
-        """str: Gets and Sets the Contact Identity ID."""
+        """str: Gets the Contact Identity ID."""
         return self._contact_identity_id
-
-    @contact_identity_id.setter
-    def contact_identity_id(self, contact_identity_id):
-        self._contact_identity_id = contact_identity_id
 
     @property
     def name(self):
-        """str: Gets and Sets the Dataset Name."""
+        """str: Gets the Dataset Name."""
         return self._name
-
-    @name.setter
-    def name(self, name):
-        if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")
-        self._name = name
 
     @property
     def tags(self):
-        """str: Gets and Sets the tags."""
+        """str: Gets the tags."""
         return self._tags
-
-    @tags.setter
-    def tags(self, tags):
-        if not isinstance(tags, list):
-            raise ValueError("Tags should be of type lists")
-        self._tags = tags
 
     @property
     def description(self):
-        """str: Gets and Sets the Dataset Description."""
+        """str: Gets the Dataset Description."""
         return self._description
-
-    @description.setter
-    def description(self, description):
-        self._description = description
 
     @property
     def website(self):
-        """str: Gets and Sets the Dataset Website."""
+        """str: Gets the Dataset Website."""
         return self._website
-
-    @website.setter
-    def website(self, website):
-        self._website = website
 
     @property
     def created_at(self):
-        """str: Gets and Sets the Dataset created_at."""
+        """str: Gets the Dataset created_at."""
         return self._created_at
-
-    @created_at.setter
-    def created_at(self, created_at):
-        self._created_at = created_at
 
     @property
     def modified_at(self):
-        """str: Gets and Sets the Dataset modified_at."""
+        """str: Gets the Dataset modified_at."""
         return self._modified_at
-
-    @modified_at.setter
-    def modified_at(self, modified_at):
-        self._modified_at = modified_at
 
     def to_dict(self):
         # type: () -> Dict[str, Any]

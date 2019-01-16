@@ -16,40 +16,24 @@ class Permission(CruxModel):
             identity_id (str): Identity ID. Defaults to None.
             permission_name (str): Permission name. Defaults to None.
         """
-        self._target_id = None
-        self._identity_id = None
-        self._permission_name = None
-
-        self.target_id = target_id
-        self.identity_id = identity_id
-        self.permission_name = permission_name
+        self._target_id = target_id
+        self._identity_id = identity_id
+        self._permission_name = permission_name
 
     @property
     def target_id(self):
-        """str: Gets and Sets the Target ID."""
+        """str: Gets the Target ID."""
         return self._target_id
-
-    @target_id.setter
-    def target_id(self, target_id):
-        self._target_id = target_id
 
     @property
     def identity_id(self):
-        """str: Gets and Sets the Identity ID."""
+        """str: Gets the Identity ID."""
         return self._identity_id
-
-    @identity_id.setter
-    def identity_id(self, identity_id):
-        self._identity_id = identity_id
 
     @property
     def permission_name(self):
-        """str: Gets and Sets the Permission Name."""
+        """str: Gets the Permission Name."""
         return self._permission_name
-
-    @permission_name.setter
-    def permission_name(self, permission_name):
-        self._permission_name = permission_name
 
     def to_dict(self):
         # type: () -> Dict[str, str]

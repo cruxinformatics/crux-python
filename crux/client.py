@@ -55,7 +55,7 @@ class CruxClient(object):
         params=None,  # type: Dict[Any,Any]
         data=None,  # type: Dict[Any,Any]
         stream=False,  # type: bool
-        retries=20,  # type: int
+        max_total_retries=20,  # type: int
         backoff=0.3,  # type: float
         status_forcelist=(
             500,
@@ -73,8 +73,10 @@ class CruxClient(object):
         ),  # type: Tuple
         retry_on_methods=("GET", "PUT", "DELETE", "POST"),  # type: Tuple
         max_http_redirects=10,  # type: int
-        timeout=60,  # type: int
+        connect_timeout=9.5,  # type: float
         max_conn_errors=10,  # type: int
+        read_timeout=60,  # type: float
+        max_read_errors=10,  # type: int
     ):
         # type:(...) -> Any
         """
@@ -89,7 +91,7 @@ class CruxClient(object):
             data (dict): Should be used while passing form encoded data. Defaults to None.
             stream (bool): Should be set to True, when response is required to be streamed.
                 Defaults to False.
-            retries (int): Total Retries to be performed. Defaults to 20.
+            max_total_retries (int): Total Retries to be performed. Defaults to 20.
             backoff (float): Backoff factor to be applied. Defaults to 0.3.
                 {backoff factor} * (2 ^ ({number of total retries} - 1))
             status_forcelist (tuple): A set of integer HTTP status codes
@@ -100,9 +102,13 @@ class CruxClient(object):
                 Defaults to ("GET", "PUT", "DELETE", "POST").
             max_http_redirects (int): Max HTTP sredirects to perform on API calls.
                 Defaults to 10.
-            timeout (int): Request timeout configuration in seconds.
-                Defaults to 60.
+            connect_timeout (float): Request connect timeout configuration in seconds.
+                Defaults to 60.5.
             max_conn_errors (int): Max connection-related errors to retry on.
+                Defaults to 10.
+            read_timeout (float): Request read timeout configuration in seconds.
+                Defaults to 60.
+            max_read_errors (int): Max read-related errors to retry on.
                 Defaults to 10.
 
         Returns:
@@ -142,12 +148,13 @@ class CruxClient(object):
         headers.update({"Authorization": bearer_token, "User-Agent": user_agent})
 
         retry = Retry(
-            total=retries,
+            total=max_total_retries,
             backoff_factor=backoff,
             status_forcelist=status_forcelist,
             method_whitelist=retry_on_methods,
             redirect=max_http_redirects,
             connect=max_conn_errors,
+            read=max_read_errors,
         )
 
         adapter = HTTPAdapter(max_retries=retry)
@@ -164,7 +171,7 @@ class CruxClient(object):
                         params=params,
                         stream=stream,
                         proxies=self.crux_config.proxies,
-                        timeout=timeout,
+                        timeout=(connect_timeout, read_timeout),
                     )
             except (HTTPError, TooManyRedirects) as err:
                 raise CruxClientHTTPError(str(err))
@@ -184,7 +191,7 @@ class CruxClient(object):
                             headers=headers,
                             data=data,
                             proxies=self.crux_config.proxies,
-                            timeout=timeout,
+                            timeout=(connect_timeout, read_timeout),
                         )
                 else:
                     with requests.session() as session:
@@ -196,7 +203,7 @@ class CruxClient(object):
                             headers=headers,
                             json=params,
                             proxies=self.crux_config.proxies,
-                            timeout=timeout,
+                            timeout=(connect_timeout, read_timeout),
                         )
             except (HTTPError, TooManyRedirects) as err:
                 raise CruxClientHTTPError(str(err))

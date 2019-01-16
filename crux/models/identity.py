@@ -46,143 +46,81 @@ class Identity(CruxModel):
         Raises:
             ValueError: If identity_id is none.
         """
-        self._identity_id = None
-        self._parent_identity_id = None
-        self._api_key = None
-        self._bucket_name = None
-        self._description = None
-        self._company_name = None
-        self._first_name = None
-        self._last_name = None
-        self._role = None
-        self._phone = None
-        self._image_name = None
-        self._image_url = None
-        self._email = None
-        self._type = None
-        self._website = None
-        self._landing_page = None
+        self._identity_id = identity_id
+        self._parent_identity_id = parent_identity_id
+        self._description = description
+        self._company_name = company_name
+        self._first_name = first_name
+        self._last_name = last_name
+        self._role = role
+        self._phone = phone
+        self._email = email
+        self._type = type
+        self._website = website
+        self._landing_page = landing_page
 
-        self.identity_id = identity_id
-        self.parent_identity_id = parent_identity_id
-        self.description = description
-        self.company_name = company_name
-        self.first_name = first_name
-        self.last_name = last_name
-        self.role = role
-        self.phone = phone
-        self.email = email
-        self.type = type
-        self.website = website
-        self.landing_page = landing_page
         self.connection = connection
         self.raw_response = raw_response
 
     @property
     def identity_id(self):
-        """str: Gets and Sets the Identity Id."""
+        """str: Gets the Identity Id."""
         return self._identity_id
-
-    @identity_id.setter
-    def identity_id(self, identity_id):
-        if identity_id is None:
-            raise ValueError("identity_id should not be none")
-        self._identity_id = identity_id
 
     @property
     def parent_identity_id(self):
-        """str: Gets and Sets the Parent Identity Id"""
+        """str: Gets the Parent Identity Id."""
         return self._parent_identity_id
-
-    @parent_identity_id.setter
-    def parent_identity_id(self, parent_identity_id):
-        self._parent_identity_id = parent_identity_id
 
     @property
     def company_name(self):
-        """str: Gets and Sets the Company name"""
+        """str: Gets the Company name."""
         return self._company_name
-
-    @company_name.setter
-    def company_name(self, company_name):
-        self._company_name = company_name
 
     @property
     def description(self):
-        """str: Gets and Sets the Description."""
+        """str: Gets the Description."""
         return self._description
-
-    @description.setter
-    def description(self, description):
-        self._description = description
 
     @property
     def first_name(self):
-        """str: Gets and Sets the First name."""
+        """str: Gets the First name."""
         return self._first_name
-
-    @first_name.setter
-    def first_name(self, first_name):
-        self._first_name = first_name
 
     @property
     def last_name(self):
-        """str: Gets and Sets the Last name."""
+        """str: Gets the Last name."""
         return self._last_name
-
-    @last_name.setter
-    def last_name(self, last_name):
-        self._last_name = last_name
 
     @property
     def role(self):
-        """str: Gets and Sets the Role."""
+        """str: Gets the Role."""
         return self._role
-
-    @role.setter
-    def role(self, role):
-        self._role = role
-
-    @property
-    def image_name(self):
-        """str: Gets and Sets the Image name."""
-        return self._image_name
 
     @property
     def email(self):
-        """str: Gets and Sets the Email."""
+        """str: Gets the Email."""
         return self._email
-
-    @email.setter
-    def email(self, email):
-        self._email = email
 
     @property
     def website(self):
-        """str: Gets and Sets the Website."""
+        """str: Gets the Website."""
         return self._website
-
-    @website.setter
-    def website(self, website):
-        self._website = website
 
     @property
     def landing_page(self):
-        """str: Gets and Sets the Landing Page."""
+        """str: Gets the Landing Page."""
         return self._landing_page
-
-    @landing_page.setter
-    def landing_page(self, landing_page):
-        self._landing_page = landing_page
 
     @property
     def type(self):
-        """str: Gets and Sets the Type."""
+        """str: Gets the Type."""
         return self._type
 
-    @type.setter
-    def type(self, type):  # type name is by design pylint: disable=redefined-builtin
-        self._type = type
+    @property
+    def phone(self):
+        """str: Gets the phone."""
+        return self._phone
 
     def to_dict(self):
         # type: () -> Dict[str, Any]

@@ -88,17 +88,16 @@ class File(Resource):
                 total_bytes_from_urls[-1] = download.bytes_downloaded
             # Catch the signed URL expiring
             except InvalidResponse:
+                # Limit total new URL(s)
+                if fetched_signed_urls >= max_url_refreshes:
+                    raise CruxClientError("Exceeded max new Signed URLs")
                 sum_total_bytes_from_urls = sum(total_bytes_from_urls)
                 # Check if download has made progress downloading since last time we got URL
                 if not sum_total_bytes_from_urls > bytes_at_last_refresh:
                     # Limit new URLs without making progress downloading
                     if refreshes_without_progress <= max_url_refreshes_without_progress:
-                        # Limit total new URLs
-                        if fetched_signed_urls <= max_url_refreshes:
-                            new_signed_url = self._get_signed_url()
-                            fetched_signed_urls += 1
-                        else:
-                            raise CruxClientError("Exceeded max new Signed URLs")
+                        new_signed_url = self._get_signed_url()
+                        fetched_signed_urls += 1
                         total_bytes_from_urls.append(0)
                         refreshes_without_progress += 1
                         bytes_at_last_refresh = sum_total_bytes_from_urls
@@ -109,12 +108,8 @@ class File(Resource):
                         )
                 else:
                     refreshes_without_progress = 0
-                    # Limit total new URLs
-                    if fetched_signed_urls <= max_url_refreshes:
-                        new_signed_url = self._get_signed_url()
-                        fetched_signed_urls += 1
-                    else:
-                        raise CruxClientError("Exceeded max new Signed URLs")
+                    new_signed_url = self._get_signed_url()
+                    fetched_signed_urls += 1
                     total_bytes_from_urls.append(0)
                     bytes_at_last_refresh = sum_total_bytes_from_urls
 

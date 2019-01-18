@@ -22,7 +22,7 @@ class CruxConfig(object):
     Crux Configuration Class.
     """
 
-    def __init__(  # pylint: disable=too-many-branches
+    def __init__(
         self,
         api_key=None,  # type: Optional[str]
         api_host=None,  # type: str
@@ -79,12 +79,9 @@ class CruxConfig(object):
         )  # type: Optional[MutableMapping[Text, Text]]
 
         if only_use_crux_domains is None:
-            if "CRUX_ONLY_USE_CRUX_DOMAINS" in os.environ:
-                self.only_use_crux_domains = str_to_bool(
-                    os.environ.get("CRUX_ONLY_USE_CRUX_DOMAINS")
-                )
-            else:
-                self.only_use_crux_domains = False
+            self.only_use_crux_domains = str_to_bool(
+                os.environ.get("CRUX_ONLY_USE_CRUX_DOMAINS", "false")
+            )
         else:
             self.only_use_crux_domains = only_use_crux_domains  # type: bool
 

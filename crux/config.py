@@ -14,6 +14,7 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 import requests
 
 from crux.__version__ import __version__
+from crux.utils import str_to_bool
 
 
 class CruxConfig(object):
@@ -28,6 +29,7 @@ class CruxConfig(object):
         api_prefix=None,  # type: str
         proxies=None,  # type: Optional[MutableMapping[Text, Text]]
         user_agent=None,  # type: str
+        only_use_crux_domains=None,  # type: bool
     ):
         # type: (...) -> None
         """
@@ -37,6 +39,9 @@ class CruxConfig(object):
             api_prefix (str): API prefix to be used. Defaults to None.
             proxies (dict): Proxies to be used. Defaults to None.
             user_agent (str): User agent to be used. Defaults to None.
+            only_use_crux_domains (bool): True if Crux domain should be
+                use for upload and download, False otherwise.
+                Defaults to False.
 
         Raises:
             ValueError: If CRUX_AP_KEY is not set.
@@ -72,6 +77,13 @@ class CruxConfig(object):
         self.proxies = (
             proxies if proxies else {}
         )  # type: Optional[MutableMapping[Text, Text]]
+
+        if only_use_crux_domains is None:
+            self.only_use_crux_domains = str_to_bool(
+                os.environ.get("CRUX_ONLY_USE_CRUX_DOMAINS", "false")
+            )
+        else:
+            self.only_use_crux_domains = only_use_crux_domains  # type: bool
 
     def _default_user_agent(self):
         # type: () -> str

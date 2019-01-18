@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-requests = "*"
+google-resumable-media = { version = "*", extras = ["requests"] }
 typing = {version = "*", markers="python_version < '3.5'"}
 
 [dev-packages]

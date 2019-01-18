@@ -11,11 +11,10 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
-from crux.compat import unicode
 from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
-from crux.utils import DEFAULT_CHUNK_SIZE, valid_chunk_size
+from crux.utils import DEFAULT_CHUNK_SIZE
 
 
 class Resource(CruxModel):
@@ -203,9 +202,9 @@ class Resource(CruxModel):
             "name": self.name,
             "size": self.size,
             "type": self.type,
-            # "config": self.config,
-            # "provenance": self.provenance,
-            "asof": self.as_of,
+            "config": self.config,
+            "provenance": self.provenance,
+            "asOf": self.as_of,
             "tags": self.tags,
             "labels": self.labels,
             "storageId": self.storage_id,
@@ -259,6 +258,7 @@ class Resource(CruxModel):
         created_at = a_dict["createdAt"]
         modified_at = a_dict["modifiedAt"]
         size = a_dict["size"]
+        as_of = a_dict["asOf"]
 
         return cls(
             dataset_id=dataset_id,
@@ -276,6 +276,7 @@ class Resource(CruxModel):
             created_at=created_at,
             modified_at=modified_at,
             size=size,
+            as_of=as_of,
         )
 
     def delete(self):
@@ -335,58 +336,6 @@ class Resource(CruxModel):
             return True
         else:
             raise ValueError("Name, Description or Tags should be set")
-
-    def _download(self, local_path, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
-        if content_type is not None:
-            headers = {"Accept": content_type}
-        else:
-            headers = None
-
-        if not valid_chunk_size(chunk_size):
-            raise ValueError("chunk_size should be multiple of 256 KiB")
-
-        data = self.connection.api_call(
-            "GET", ["resources", self.id, "content"], headers=headers, stream=True
-        )
-
-        if hasattr(local_path, "write"):
-            for chunk in data.iter_content(chunk_size=chunk_size):
-                local_path.write(chunk)
-            local_path.flush()
-            return True
-        elif isinstance(local_path, (str, unicode)):
-            with open(local_path, mode="wb") as local_file:
-                for chunk in data.iter_content(chunk_size=chunk_size):
-                    local_file.write(chunk)
-            return True
-        else:
-            raise TypeError(
-                "Invalid Data Type for local_path: {}".format(type(local_path))
-            )
-
-    def download(self, local_path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE):
-        # type: (...) -> bool
-        """Downloads the resource.
-
-        Args:
-            local_path (str or file): Local OS path at which resource will be downloaded.
-            content_type (str): Content Type of resource to be downloaded.
-                Defaults to None.
-            chunk_size (int): Number of bytes to be read in memory.
-
-        Returns:
-            bool: True if it is downloaded.
-
-        Raises:
-            ValueError: If chunk size is not multiple of 256 KB.
-            TypeError: If local_path is not str or file object.
-        """
-        if not valid_chunk_size(chunk_size):
-            raise ValueError("chunk_size should be multiple of 256 KiB")
-
-        return self._download(
-            local_path=local_path, content_type=content_type, chunk_size=chunk_size
-        )
 
     def add_permission(self, identity_id="_subscribed_", permission="Read"):
         # type: (str, str) -> Union[bool, Permission]
@@ -554,3 +503,19 @@ class Resource(CruxModel):
         )
 
         return response.json().get("path")
+
+    def _download(self, file_pointer, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
+
+        if content_type is not None:
+            headers = {"Accept": content_type}
+        else:
+            headers = None
+
+        data = self.connection.api_call(
+            "GET", ["resources", self.id, "content"], headers=headers, stream=True
+        )
+
+        for chunk in data.iter_content(chunk_size=chunk_size):
+            file_pointer.write(chunk)
+
+        return True

@@ -53,6 +53,7 @@ class CruxClient(object):
         model=None,  # type: Any
         headers=None,  # type: MutableMapping[Text, Text]
         params=None,  # type: Dict[Any,Any]
+        json=None,  # type: Dict[Any,Any]
         data=None,  # type: Dict[Any,Any]
         stream=False,  # type: bool
         max_total_retries=20,  # type: int
@@ -87,7 +88,8 @@ class CruxClient(object):
             path (str): API resource path.
             model (crux.models.CruxModel): Deserialization Model. Defaults to None.
             headers (dict): Additonal header parameters. Defaults to None.
-            params (dict): Body data to be passed with request. Defaults to None.
+            json (dict): Body data to be passed with request. Defaults to None.
+            params (dict): Data to be passed in query string. Defaults to None.
             data (dict): Should be used while passing form encoded data. Defaults to None.
             stream (bool): Should be set to True, when response is required to be streamed.
                 Defaults to False.
@@ -137,6 +139,9 @@ class CruxClient(object):
 
         if params is None:
             params = {}
+
+        if json is None:
+            json = {}
 
         auth_scheme = "Bearer"  # type: str
         bearer_token = "{scheme} {key}".format(
@@ -190,6 +195,7 @@ class CruxClient(object):
                             url,
                             headers=headers,
                             data=data,
+                            params=params,
                             proxies=self.crux_config.proxies,
                             timeout=(connect_timeout, read_timeout),
                         )
@@ -201,7 +207,8 @@ class CruxClient(object):
                             method,
                             url,
                             headers=headers,
-                            json=params,
+                            json=json,
+                            params=params,
                             proxies=self.crux_config.proxies,
                             timeout=(connect_timeout, read_timeout),
                         )

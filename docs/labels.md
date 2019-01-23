@@ -173,8 +173,8 @@ try:
     file_object = dataset_object.get_file(path="/test_folder1/test_folder2/test_file.csv")
     file_object2 = dataset_object.get_file(path="/test_folder1/test_folder2/test_file2.csv")
 
-    print(file_object.labels["test_label1"])
-    print(file_object2.labels["test_label1])
+    print(file_object.labels.get("test_label1"))
+    print(file_object2.labels.get("test_label1))
 
 except CruxAPIException as err:
     print(err.status_code, err.error_message)
@@ -239,7 +239,7 @@ try:
         print("Label Added to the Resource")
 
     for label in file_object.labels:
-        print(label, file_object.labels[label])
+        print(label, file_object.labels.get(label))
 
 except CruxAPIException as err:
     print(err.status_code, err.error_message)

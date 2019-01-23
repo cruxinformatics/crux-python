@@ -311,7 +311,7 @@ class Resource(CruxModel):
 
         if params:
             response = self.connection.api_call(
-                "PUT", ["resources", self.id], headers=headers, params=params
+                "PUT", ["resources", self.id], headers=headers, json=params
             )
 
             response_dict = response.json()

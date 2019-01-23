@@ -218,7 +218,7 @@ class Dataset(CruxModel):
                 "PUT",
                 ["datasets", self.id],
                 headers=headers,
-                params=params,
+                json=params,
                 model=Dataset,
             )
             self.__dict__.update(dataset_object.__dict__)
@@ -258,7 +258,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            params=file_resource.to_dict(),
+            json=file_resource.to_dict(),
             model=File,
             headers=headers,
         )
@@ -297,7 +297,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            params=table_resource.to_dict(),
+            json=table_resource.to_dict(),
             model=Table,
             headers=headers,
         )
@@ -336,7 +336,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            params=folder_resource.to_dict(),
+            json=folder_resource.to_dict(),
             model=Folder,
             headers=headers,
         )
@@ -690,7 +690,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["jobs", "loadtablefromfileresource"],
-            params=data,
+            json=data,
             model=LoadJob,
             headers=headers,
         )
@@ -806,7 +806,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            params=query_resource.to_dict(),
+            json=query_resource.to_dict(),
             model=Query,
             headers=headers,
         )
@@ -895,7 +895,7 @@ class Dataset(CruxModel):
             params["datasetId"] = self.id
 
         return self.connection.api_call(
-            "POST", ["permissions", "bulk"], headers=headers, params=params
+            "POST", ["permissions", "bulk"], headers=headers, json=params
         )
 
     def delete_permission(
@@ -961,7 +961,7 @@ class Dataset(CruxModel):
             params["datasetId"] = self.id
 
         return self.connection.api_call(
-            "POST", ["permissions", "bulk"], headers=headers, params=params
+            "POST", ["permissions", "bulk"], headers=headers, json=params
         )
 
     def add_label(self, label_key, label_value):

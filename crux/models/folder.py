@@ -49,7 +49,7 @@ class Folder(Resource):
         }
         if recursive:
             return self.connection.api_call(
-                "POST", ["permissions", "bulk"], headers=headers, params=params
+                "POST", ["permissions", "bulk"], headers=headers, json=params
             )
         else:
             return self.connection.api_call(
@@ -84,7 +84,7 @@ class Folder(Resource):
         }
         if recursive:
             return self.connection.api_call(
-                "POST", ["permissions", "bulk"], headers=headers, params=params
+                "POST", ["permissions", "bulk"], headers=headers, json=params
             )
         else:
             return self.connection.api_call(

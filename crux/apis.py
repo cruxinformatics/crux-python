@@ -71,11 +71,7 @@ class Crux(object):
         }  # type: MutableMapping[unicode, unicode]
         dataset = Dataset(name=name, description=description, tags=tags)
         return self.api_client.api_call(
-            "POST",
-            ["datasets"],
-            params=dataset.to_dict(),
-            model=Dataset,
-            headers=headers,
+            "POST", ["datasets"], json=dataset.to_dict(), model=Dataset, headers=headers
         )
 
     def get_dataset(self, id):  # id name is by design pylint: disable=redefined-builtin

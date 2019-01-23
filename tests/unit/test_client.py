@@ -108,6 +108,7 @@ def monkeypatch_get_call_with_no_model(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,
@@ -133,6 +134,7 @@ def monkeypatch_get_call(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,
@@ -158,6 +160,7 @@ def monkeypatch_post_call(
     url=None,
     headers=None,
     stream=False,
+    params=None,
     json=None,
     proxies=None,
     timeout=None,
@@ -172,10 +175,7 @@ def test_client_post(client, monkeypatch):
     monkeypatch.setattr(requests.sessions.Session, "request", monkeypatch_post_call)
     sample_obj = SampleModel(attr_1="attr1", attr_2="attr2")
     resp = client.api_call(
-        method="POST",
-        path=["test-path"],
-        model=SampleModel,
-        params=sample_obj.to_dict(),
+        method="POST", path=["test-path"], model=SampleModel, json=sample_obj.to_dict()
     )
 
     assert resp.attr_1 == "dummy1"
@@ -189,6 +189,7 @@ def monkeypatch_put_call(
     headers=None,
     stream=False,
     json=None,
+    params=None,
     proxies=None,
     timeout=None,
 ):
@@ -202,7 +203,7 @@ def test_client_put(client, monkeypatch):
     monkeypatch.setattr(requests.sessions.Session, "request", monkeypatch_put_call)
     sample_obj = SampleModel(attr_1="attr1", attr_2="attr2")
     resp = client.api_call(
-        method="PUT", path=["test-path"], model=SampleModel, params=sample_obj.to_dict()
+        method="PUT", path=["test-path"], model=SampleModel, json=sample_obj.to_dict()
     )
 
     assert resp.attr_1 == "dummy1"
@@ -215,6 +216,7 @@ def monkeypatch_get_list_call(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,
@@ -244,6 +246,7 @@ def monkeypatch_client_http_exception(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,
@@ -266,6 +269,7 @@ def monkeypatch_test_client_proxy_exception(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,
@@ -288,6 +292,7 @@ def monkeypatch_test_client_ssl_exception(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,
@@ -310,6 +315,7 @@ def monkeypatch_test_client_connect_timeout_exception(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,
@@ -334,6 +340,7 @@ def monkeypatch_test_client_read_timeout_exception(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,
@@ -358,6 +365,7 @@ def monkeypatch_test_too_many_redirects_exception(
     url=None,
     headers=None,
     params=None,
+    json=None,
     stream=False,
     proxies=None,
     timeout=None,

@@ -8,7 +8,7 @@ def test_add_get_label(dataset, helpers):
     )
     label_result = file_1.add_label("label1", "value1")
     assert label_result is True
-    assert file_1.labels["label1"] == "value1"
+    assert file_1.labels.get("label1") == "value1"
 
 
 @pytest.mark.usefixtures("dataset", "helpers")

@@ -4,7 +4,7 @@ import pytest
 from requests.models import Response
 
 from crux.client import CruxClient
-from crux.models import Label, Permission, Resource
+from crux.models import Permission, Resource
 
 
 @pytest.fixture(scope="module")
@@ -91,33 +91,6 @@ def test_delete_label(resource, monkeypatch):
     resp = resource.delete_label(label_key="test_label1")
 
     assert resp == {}
-
-
-def monkeypatch_get_label(label_key=None):
-    return Label(label_key="test_label1", label_value="test_value1")
-
-
-def test_get_label(resource, monkeypatch):
-    monkeypatch.setattr(resource, "get_label", monkeypatch_get_label)
-    label = resource.get_label(label_key="test_label1")
-    assert label.label_value == "test_value1"
-    assert label.label_key == "test_label1"
-
-
-def monkeypatch_get_all_labels(label_key=None):
-    return [
-        Label(label_key="test_label1", label_value="test_value1"),
-        Label(label_key="test_label2", label_value="test_value2"),
-    ]
-
-
-def test_get_all_labels(resource, monkeypatch):
-    monkeypatch.setattr(resource, "get_all_labels", monkeypatch_get_all_labels)
-    label_list = resource.get_all_labels()
-    assert label_list[0].label_value == "test_value1"
-    assert label_list[0].label_key == "test_label1"
-    assert label_list[1].label_value == "test_value2"
-    assert label_list[1].label_key == "test_label2"
 
 
 def monkeypatch_update_resource(*args, **kwargs):

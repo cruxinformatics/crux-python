@@ -173,10 +173,8 @@ try:
     file_object = dataset_object.get_file(path="/test_folder1/test_folder2/test_file.csv")
     file_object2 = dataset_object.get_file(path="/test_folder1/test_folder2/test_file2.csv")
 
-    label1 = file_object.get_label("test_label1")
-    label2 = file_object2.get_label("test_label1")
-
-    print(label1.label_value, label2.label_value)
+    print(file_object.labels["test_label1"])
+    print(file_object2.labels["test_label1])
 
 except CruxAPIException as err:
     print(err.status_code, err.error_message)
@@ -236,15 +234,13 @@ try:
 
 
     if file_object.add_label("test_label1","test_value1"):
-        print("Label Deleted from Resource")
+        print("Label Added to the Resource")
     if file_object.add_label("test_label2","test_value2"):
-        print("Label Deleted from Resource")
+        print("Label Added to the Resource")
 
-    label_list = file_object.get_all_labels()
-    for label in label_list:
-        print(label.label_key, label.label_value)
+    for label in file_object.labels:
+        print(label, file_object.labels[label])
 
-    resource =
 except CruxAPIException as err:
     print(err.status_code, err.error_message)
 except CruxClientException as err:

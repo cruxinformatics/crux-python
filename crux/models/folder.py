@@ -21,7 +21,6 @@ class Folder(Resource):
             "description": self.description,
             "tags": self.tags,
             "type": self.type,
-            "labels": self.labels,
             "folder": self.folder,
         }
 

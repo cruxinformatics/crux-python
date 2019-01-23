@@ -1,17 +1,10 @@
 """Module contains Resource model."""
 
 import posixpath
-from typing import (  # noqa: F401 pylint: disable=unused-import
-    Any,
-    Dict,
-    List,
-    Tuple,
-    Union,
-)
+from typing import Any, Dict, List, Union  # noqa: F401 pylint: disable=unused-import
 
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
-from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
 from crux.utils import DEFAULT_CHUNK_SIZE
@@ -38,7 +31,7 @@ class Resource(CruxModel):
         description=None,  # type: str
         media_type=None,  # type: str
         tags=None,  # type: List[str]
-        labels=(),  # type: Tuple[Label,...]
+        labels=None,  # type: Dict[str, str]
         connection=None,
         raw_response=None,  # type: Dict[Any, Any]
     ):
@@ -61,7 +54,7 @@ class Resource(CruxModel):
             description (str): Resource description. Defaults to None.
             media_type (str): Resource Media Type. Defaults to None.
             tags (:obj:`list` of :obj:`str`): Resource tags. Defaults to None.
-            labels (:obj:`list` of :obj:`crux.models.Label`): List of Label objects.
+            labels (dict): Dictionary containing Label Key and Values.
                 Defaults to None.
             connection (crux.client.CruxClient): Connection Object. Defaults to None.
             raw_response (dict): Response Content. Defaults to None.
@@ -86,7 +79,7 @@ class Resource(CruxModel):
         self._modified_at = modified_at
         self._tags = tags
         self._folder = None
-        self._labels = labels  # type: Tuple[Label, ...]
+        self._labels = labels if labels else {}  # type: Dict[str, str]
         self._folder = folder
 
         self.connection = connection
@@ -149,8 +142,8 @@ class Resource(CruxModel):
 
     @property
     def labels(self):
-        """:obj:`list` of :obj:`dict`: Gets the Resource labels."""
-        return tuple(self._labels)
+        """dict: Gets the Resource labels."""
+        return self._labels
 
     @property
     def as_of(self):
@@ -233,8 +226,6 @@ class Resource(CruxModel):
         media_type = a_dict["mediaType"]
         description = a_dict["description"]
         name = a_dict["name"]
-        # Added to provide compatibility with normal objects and Stitching objects,
-        # till the time it is resolved
         if "tags" in a_dict:
             tags = a_dict["tags"]
         else:
@@ -242,18 +233,16 @@ class Resource(CruxModel):
         type = a_dict[  # type name is by design pylint: disable=redefined-builtin
             "type"
         ]
-        # Added to provide compatibility with normal objects and Stitching objects,
-        # till the time it is resolved
         if "config" in a_dict:
             config = a_dict["config"]
         else:
             config = None
         if "labels" in a_dict:
-            labels = []
+            labels = {}
             for label in a_dict["labels"]:
-                labels.append(Label.from_dict(label))
+                labels.update({label["labelKey"]: label["labelValue"]})
         else:
-            labels = []
+            labels = {}
         provenance = a_dict["provenance"]
         created_at = a_dict["createdAt"]
         modified_at = a_dict["modifiedAt"]
@@ -269,7 +258,7 @@ class Resource(CruxModel):
             description=description,
             name=name,
             tags=tags,
-            labels=tuple(labels),
+            labels=labels,
             type=type,
             config=config,
             provenance=provenance,
@@ -416,7 +405,7 @@ class Resource(CruxModel):
         )
 
         if response_result:
-            self._labels = self._labels + (Label(label_key, label_value),)
+            self._labels.update({label_key: label_value})
             return True
         else:
             return False
@@ -439,56 +428,10 @@ class Resource(CruxModel):
         )
 
         if response_result:
-            for index, label in enumerate(self.labels):
-                if label.label_key == label_key:
-                    labels_list = list(self._labels)  # type: List[Label]
-                    labels_list.pop(index)
-                    self._labels = tuple(labels_list)
+            self._labels.pop(label_key)
             return True
         else:
             return False
-
-    def get_label(self, label_key):
-        # type: (str) -> Label
-        """Gets label value of Resource.
-
-        Args:
-            label_key (str): Label Key for Resource.
-
-        Returns:
-            crux.models.Label: Label Object.
-        """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        return self.connection.api_call(
-            "GET",
-            ["datasets", self.dataset_id, "resources", self.id, "labels", label_key],
-            headers=headers,
-            model=Label,
-        )
-
-    def get_all_labels(self):
-        # type: () -> Tuple[Label, ...]
-        """Fetches all labels of the Resource.
-
-        Returns:
-            list (:obj:`crux.models.Label`): List of Label Objects.
-        """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        response = self.connection.api_call(
-            "GET", ["resources", self.id, "labels"], headers=headers
-        )
-
-        label_objects = []  # type: List[Label]
-
-        labels = response.json().get("labels")
-
-        if labels:
-            for label in labels:
-                obj = Label.from_dict(label)
-                label_objects.append(obj)
-
-        label_tuple_obj = tuple(label_objects)  # type: Tuple[Label, ...]
-        return label_tuple_obj
 
     def _get_folder(self):
         # type: () -> str

@@ -23,7 +23,6 @@ class Table(Resource):
             "tags": self.tags,
             "type": self.type,
             "config": self.config,
-            "labels": self.labels,
             "folder": self.folder,
         }
 

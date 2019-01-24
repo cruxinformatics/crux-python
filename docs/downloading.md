@@ -29,10 +29,12 @@ dataset = conn.get_dataset(id="A_DATASET_ID")
 file = dataset.get_file(path="/path/to/file.csv")
 ten_mb = 10 * 1024 * 1024
 stream = file.iter_content(chunk_size=ten_mb)
-
-with open("/tmp/save", "wb") as fh:
-    for chunk in stream:
-        fh.write(chunk)
+try:
+    with open("/tmp/save", "wb") as fh:
+        for chunk in stream:
+            fh.write(chunk)
+finally:
+    stream.close()
 ```
 
 ## Download all files in a folder

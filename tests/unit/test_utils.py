@@ -1,7 +1,7 @@
 import pytest
 
 from crux.utils import (
-    ContentType,
+    MediaType,
     quote,
     split_posixpath_filename_dirpath,
     str_to_bool,
@@ -31,14 +31,14 @@ def test_valid_chunk_size():
     assert valid_chunk_size(10485761) is False
 
 
-def test_detect_content_type():
-    assert ContentType.detect("file.json") == "application/json"
-    assert ContentType.detect("file.ndjson") == "application/x-ndjson"
-    assert ContentType.detect("file.csv") == "text/csv"
-    assert ContentType.detect("file.parquet") == "application/parquet"
-    assert ContentType.detect("file.avro") == "avro/binary"
+def test_detect_media_type():
+    assert MediaType.detect("file.json") == "application/json"
+    assert MediaType.detect("file.ndjson") == "application/x-ndjson"
+    assert MediaType.detect("file.csv") == "text/csv"
+    assert MediaType.detect("file.parquet") == "application/parquet"
+    assert MediaType.detect("file.avro") == "avro/binary"
     with pytest.raises(LookupError):
-        ContentType.detect("file.txt")
+        MediaType.detect("file.txt")
 
 
 def test_split_posixpath_filename_dirpath():

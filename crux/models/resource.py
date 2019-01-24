@@ -450,10 +450,10 @@ class Resource(CruxModel):
 
         return response.json().get("path")
 
-    def _download(self, file_pointer, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
+    def _download(self, file_pointer, media_type, chunk_size=DEFAULT_CHUNK_SIZE):
 
-        if content_type is not None:
-            headers = {"Accept": content_type}
+        if media_type is not None:
+            headers = {"Accept": media_type}
         else:
             headers = None
 

@@ -17,8 +17,8 @@ DEFAULT_CHUNK_SIZE = 10485760  # 10 MB
 
 
 # https://github.com/python/mypy/issues/2477, mypy is performing checking with Python2
-class ContentType(Enum):  # type: ignore
-    """ContentType Enumeration Model."""
+class MediaType(Enum):  # type: ignore
+    """MediaType Enumeration Model."""
 
     JSON = "application/json"
     NDJSON = "application/x-ndjson"
@@ -29,13 +29,13 @@ class ContentType(Enum):  # type: ignore
     @classmethod
     def detect(cls, file_name):
         # type: (str) -> str
-        """Detects the content_type from the file extension.
+        """Detects the media_type from the file extension.
 
         Args:
             file_name (str): Absolute or Relative Path of the file.
 
         Returns:
-            str: ContentType extension.
+            str: MediaType extension.
 
         Raises:
             LookupError: If file type is not supported.

@@ -55,7 +55,7 @@ file_obj, job_id = dataset_object.stitch(
     }
 )
 
-if file_obj.download(local_path="/tmp/stitched_twitter.avro", content_type="avro/binary"):
+if file_obj.download(local_path="/tmp/stitched_twitter.avro", media_type="avro/binary"):
     print("Downloaded the file")
 
 job = datast_object.get_stitch_job(job_id)

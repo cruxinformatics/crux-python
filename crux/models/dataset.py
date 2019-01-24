@@ -22,7 +22,7 @@ from crux.models.model import CruxModel
 from crux.models.query import Query
 from crux.models.resource import Resource
 from crux.models.table import Table
-from crux.utils import ContentType, split_posixpath_filename_dirpath
+from crux.utils import MediaType, split_posixpath_filename_dirpath
 
 
 class Dataset(CruxModel):
@@ -514,14 +514,14 @@ class Dataset(CruxModel):
         return local_file_list
 
     def upload_files(
-        self, local_path, folder, content_type=None, description=None, tags=None
+        self, local_path, folder, media_type=None, description=None, tags=None
     ):
         # type: (str, str, str, str, List[str]) -> List[File]
         """Uploads the resources recursively.
 
         Args:
             local_path (str): Local OS Path from where the file resources should be uploaded.
-            content_type (str): Content Types of File resources to be uploaded.
+            media_type (str): Content Types of File resources to be uploaded.
                 Defaults to None.
             folder (str): Crux Dataset Folder where file resources
                 should be recursively uploaded.
@@ -558,7 +558,7 @@ class Dataset(CruxModel):
                     path=content_path, tags=tags, description=description
                 )
                 uploaded_file_objects += self.upload_files(
-                    content_type=content_type,
+                    media_type=media_type,
                     folder=content_path,
                     local_path=content_local_path,
                     tags=tags,
@@ -567,7 +567,7 @@ class Dataset(CruxModel):
 
             elif os.path.isfile(content_local_path):
                 fil_o = self.upload_file(
-                    content_type=content_type,
+                    media_type=media_type,
                     path=content_path,
                     local_path=content_local_path,
                     tags=tags,
@@ -692,7 +692,7 @@ class Dataset(CruxModel):
         )
 
     def upload_file(
-        self, local_path, path, content_type=None, description=None, tags=None
+        self, local_path, path, media_type=None, description=None, tags=None
     ):
         # type: (Union[IO, str], str, str, str, List[str]) -> File
         """Uploads the File.
@@ -701,7 +701,7 @@ class Dataset(CruxModel):
             local_path (str or file): Local OS path whose content
                 is to be uploaded to file resource.
             path (str): File resource path.
-            content_type (str): Content type of the file. Defaults to None.
+            media_type (str): Content type of the file. Defaults to None.
             description (str): Description of the file. Defaults to None.
             tags (:obj:`list` of :obj:`str`): Tags to be attached to the file resource.
 
@@ -720,14 +720,14 @@ class Dataset(CruxModel):
 
         if hasattr(local_path, "write"):
 
-            if content_type is None:
+            if media_type is None:
                 try:
-                    content_type = ContentType.detect(getattr(local_path, "name"))
+                    media_type = MediaType.detect(getattr(local_path, "name"))
                 except LookupError as err:
                     file_resource.delete()
                     raise LookupError(err)
 
-            headers = {"Content-Type": content_type, "Accept": "application/json"}
+            headers = {"Content-Type": media_type, "Accept": "application/json"}
 
             try:
                 return self.connection.api_call(
@@ -743,14 +743,14 @@ class Dataset(CruxModel):
 
         elif isinstance(local_path, str):
 
-            if content_type is None:
+            if media_type is None:
                 try:
-                    content_type = ContentType.detect(local_path)
+                    media_type = MediaType.detect(local_path)
                 except LookupError as err:
                     file_resource.delete()
                     raise LookupError(err)
 
-            headers = {"Content-Type": content_type, "Accept": "application/json"}
+            headers = {"Content-Type": media_type, "Accept": "application/json"}
 
             try:
                 with open(local_path, mode="rb") as data:

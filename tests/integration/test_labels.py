@@ -8,8 +8,7 @@ def test_add_get_label(dataset, helpers):
     )
     label_result = file_1.add_label("label1", "value1")
     assert label_result is True
-    label = file_1.get_label("label1")
-    assert label.label_value == "value1"
+    assert file_1.labels.get("label1") == "value1"
 
 
 @pytest.mark.usefixtures("dataset", "helpers")
@@ -42,6 +41,10 @@ def test_delete_label(dataset, helpers):
     file_2 = dataset.create_file(
         path="/test_file_" + helpers.generate_random_string(4) + ".csv"
     )
+
+    file_1.add_label("label1", "value1")
+
+    file_2.add_label("label1", "value1")
 
     d1_result = file_1.delete_label(label_key="label1")
 

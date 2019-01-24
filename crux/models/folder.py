@@ -21,7 +21,6 @@ class Folder(Resource):
             "description": self.description,
             "tags": self.tags,
             "type": self.type,
-            "labels": self.labels,
             "folder": self.folder,
         }
 
@@ -42,7 +41,7 @@ class Folder(Resource):
                 If recursive is unset then it returns Permission object.
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        params = {
+        body = {
             "identityId": identity_id,
             "permission": permission,
             "action": "add",
@@ -50,7 +49,7 @@ class Folder(Resource):
         }
         if recursive:
             return self.connection.api_call(
-                "POST", ["permissions", "bulk"], headers=headers, params=params
+                "POST", ["permissions", "bulk"], headers=headers, json=body
             )
         else:
             return self.connection.api_call(
@@ -77,7 +76,7 @@ class Folder(Resource):
             bool: True if it is able to delete it.
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        params = {
+        body = {
             "identityId": identity_id,
             "permission": permission,
             "action": "delete",
@@ -85,7 +84,7 @@ class Folder(Resource):
         }
         if recursive:
             return self.connection.api_call(
-                "POST", ["permissions", "bulk"], headers=headers, params=params
+                "POST", ["permissions", "bulk"], headers=headers, json=body
             )
         else:
             return self.connection.api_call(

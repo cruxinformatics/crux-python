@@ -240,7 +240,7 @@ class Resource(CruxModel):
         if "labels" in a_dict:
             labels = {}
             for label in a_dict["labels"]:
-                labels.update({label["labelKey"]: label["labelValue"]})
+                labels[label["labelKey"]] = label["labelValue"]
         else:
             labels = {}
         provenance = a_dict["provenance"]
@@ -297,21 +297,21 @@ class Resource(CruxModel):
             TypeError: It is raised if tags are not of type List.
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        params = {}  # type: Dict[str, Union[str, List, Dict]]
+        body = {}  # type: Dict[str, Union[str, List, Dict]]
 
         if name is not None:
-            params["name"] = name
+            body["name"] = name
         if description is not None:
-            params["description"] = description
+            body["description"] = description
         if tags is not None:
             if isinstance(tags, list):
-                params["tags"] = tags
+                body["tags"] = tags
             else:
                 raise TypeError("Tags should be of type list")
 
-        if params:
+        if body:
             response = self.connection.api_call(
-                "PUT", ["resources", self.id], headers=headers, json=params
+                "PUT", ["resources", self.id], headers=headers, json=body
             )
 
             response_dict = response.json()
@@ -405,7 +405,7 @@ class Resource(CruxModel):
         )
 
         if response_result:
-            self._labels.update({label_key: label_value})
+            self._labels[label_key] = label_value
             return True
         else:
             return False
@@ -428,7 +428,10 @@ class Resource(CruxModel):
         )
 
         if response_result:
-            self._labels.pop(label_key)
+            try:
+                del self._labels[label_key]
+            except KeyError:
+                return False
             return True
         else:
             return False

@@ -202,24 +202,20 @@ class Dataset(CruxModel):
             TypeError: It is raised if tags is not of type list.
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        params = {}  # type: Dict[str, Union[str, List]]
+        body = {}  # type: Dict[str, Union[str, List]]
         if name is not None:
-            params["name"] = name
+            body["name"] = name
         if description is not None:
-            params["description"] = description
+            body["description"] = description
         if tags is not None:
             if isinstance(tags, list):
-                params["tags"] = tags
+                body["tags"] = tags
             else:
                 raise TypeError("Tags should be of type list")
 
-        if params:
+        if body:
             dataset_object = self.connection.api_call(
-                "PUT",
-                ["datasets", self.id],
-                headers=headers,
-                json=params,
-                model=Dataset,
+                "PUT", ["datasets", self.id], headers=headers, json=body, model=Dataset
             )
             self.__dict__.update(dataset_object.__dict__)
             return True
@@ -867,7 +863,7 @@ class Dataset(CruxModel):
             bool: True if permission is applied.
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        params = {
+        body = {
             "identityId": identity_id,
             "permission": permission,
             "action": "add",
@@ -881,21 +877,21 @@ class Dataset(CruxModel):
                         path=resource_path, model=Resource
                     )
                     resource_ids.append(resource_object.id)
-                params["resourceIds"] = resource_ids
+                body["resourceIds"] = resource_ids
 
             if resource_objects:
                 resource_ids = list()
                 for resource_object in resource_objects:
                     resource_ids.append(resource_object.id)
-                params["resourceIds"] = resource_ids
+                body["resourceIds"] = resource_ids
 
             if resource_ids:
-                params["resourceIds"] = resource_ids
+                body["resourceIds"] = resource_ids
         else:
-            params["datasetId"] = self.id
+            body["datasetId"] = self.id
 
         return self.connection.api_call(
-            "POST", ["permissions", "bulk"], headers=headers, json=params
+            "POST", ["permissions", "bulk"], headers=headers, json=body
         )
 
     def delete_permission(
@@ -933,7 +929,7 @@ class Dataset(CruxModel):
             bool: True if it is able to delete the permission.
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        params = {
+        body = {
             "identityId": identity_id,
             "permission": permission,
             "action": "delete",
@@ -947,21 +943,21 @@ class Dataset(CruxModel):
                         path=resource_path, model=Resource
                     )
                     resource_ids.append(resource_object.id)
-                params["resourceIds"] = resource_ids
+                body["resourceIds"] = resource_ids
 
             if resource_objects:
                 resource_ids = list()
                 for resource_object in resource_objects:
                     resource_ids.append(resource_object.id)
-                params["resourceIds"] = resource_ids
+                body["resourceIds"] = resource_ids
 
             if resource_ids:
-                params["resourceIds"] = resource_ids
+                body["resourceIds"] = resource_ids
         else:
-            params["datasetId"] = self.id
+            body["datasetId"] = self.id
 
         return self.connection.api_call(
-            "POST", ["permissions", "bulk"], headers=headers, json=params
+            "POST", ["permissions", "bulk"], headers=headers, json=body
         )
 
     def add_label(self, label_key, label_value):

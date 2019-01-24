@@ -46,7 +46,7 @@ class CruxClient(object):
         else:
             self.crux_config = crux_config  # type: CruxConfig
 
-    def api_call(  # pylint: disable=too-many-branches,too-many-statements
+    def api_call(  # pylint: disable=too-many-branches
         self,
         method,  # type: str
         path,  # type: List[str]
@@ -140,9 +140,6 @@ class CruxClient(object):
         if params is None:
             params = {}
 
-        if json is None:
-            json = {}
-
         auth_scheme = "Bearer"  # type: str
         bearer_token = "{scheme} {key}".format(
             scheme=auth_scheme, key=self.crux_config.api_key
@@ -164,7 +161,7 @@ class CruxClient(object):
 
         adapter = HTTPAdapter(max_retries=retry)
 
-        if method in ("GET", "DELETE"):
+        if method in ("GET", "DELETE", "PUT", "POST"):
             try:
                 with requests.session() as session:
                     session.mount("http://", adapter)
@@ -173,45 +170,13 @@ class CruxClient(object):
                         method,
                         url,
                         headers=headers,
-                        params=params,
+                        data=data,
+                        json=json,
                         stream=stream,
+                        params=params,
                         proxies=self.crux_config.proxies,
                         timeout=(connect_timeout, read_timeout),
                     )
-            except (HTTPError, TooManyRedirects) as err:
-                raise CruxClientHTTPError(str(err))
-            except (ProxyError, SSLError) as err:
-                raise CruxClientConnectionError(str(err))
-            except (ConnectTimeout, ReadTimeout) as err:
-                raise CruxClientTimeout(str(err))
-        elif method in ("PUT", "POST"):
-            try:
-                if data:
-                    with requests.session() as session:
-                        session.mount("http://", adapter)
-                        session.mount("https://", adapter)
-                        response = session.request(
-                            method,
-                            url,
-                            headers=headers,
-                            data=data,
-                            params=params,
-                            proxies=self.crux_config.proxies,
-                            timeout=(connect_timeout, read_timeout),
-                        )
-                else:
-                    with requests.session() as session:
-                        session.mount("http://", adapter)
-                        session.mount("https://", adapter)
-                        response = session.request(
-                            method,
-                            url,
-                            headers=headers,
-                            json=json,
-                            params=params,
-                            proxies=self.crux_config.proxies,
-                            timeout=(connect_timeout, read_timeout),
-                        )
             except (HTTPError, TooManyRedirects) as err:
                 raise CruxClientHTTPError(str(err))
             except (ProxyError, SSLError) as err:

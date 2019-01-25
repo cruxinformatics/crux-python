@@ -273,7 +273,7 @@ def test_download_files(dataset, monkeypatch):
 
 
 def monkeypatch_upload_files(
-    content_type, folder, local_path, description=None, tags=None
+    media_type, folder, local_path, description=None, tags=None
 ):
     return [
         File(
@@ -294,7 +294,7 @@ def monkeypatch_upload_files(
 def test_upload_files(dataset, monkeypatch):
     monkeypatch.setattr(dataset, "upload_files", monkeypatch_upload_files)
     file_list = dataset.upload_files(
-        content_type="avro/binary",
+        media_type="avro/binary",
         folder="/",
         local_path="/tmp",
         description="test_description",

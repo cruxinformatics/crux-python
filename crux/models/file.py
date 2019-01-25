@@ -17,9 +17,9 @@ from crux.compat import unicode
 from crux.exceptions import CruxClientError
 from crux.models.resource import Resource
 from crux.utils import (
-    ContentType,
     DEFAULT_CHUNK_SIZE,
     get_signed_url_session,
+    MediaType,
     valid_chunk_size,
 )
 
@@ -158,7 +158,7 @@ class File(Resource):
 
         if self.connection.crux_config.only_use_crux_domains or small_enough:
             return self._download(
-                file_pointer=file_pointer, content_type=None, chunk_size=chunk_size
+                file_pointer=file_pointer, media_type=None, chunk_size=chunk_size
             )
         else:
             return self._dl_signed_url_resumable(
@@ -189,13 +189,13 @@ class File(Resource):
                 "Invalid Data Type for local_path: {}".format(type(local_path))
             )
 
-    def upload(self, local_path, content_type=None):
+    def upload(self, local_path, media_type=None):
         # type: (Union[IO, str], str) -> bool
         """Uploads the content to empty file resource.
 
         Args:
             local_path (str or file): Local OS path whose content is to be uploaded.
-            content_type (str): Content type of the file. Defaults to None.
+            media_type (str): Content type of the file. Defaults to None.
 
         Returns
             bool: True if it is uploaded.
@@ -206,10 +206,10 @@ class File(Resource):
 
         if hasattr(local_path, "read"):
 
-            if content_type is None:
-                content_type = ContentType.detect(getattr(local_path, "name"))
+            if media_type is None:
+                media_type = MediaType.detect(getattr(local_path, "name"))
 
-            headers = {"Content-Type": content_type, "Accept": "application/json"}
+            headers = {"Content-Type": media_type, "Accept": "application/json"}
 
             resp = self.connection.api_call(
                 "PUT",
@@ -222,10 +222,10 @@ class File(Resource):
 
         elif isinstance(local_path, str):
 
-            if content_type is None:
-                content_type = ContentType.detect(local_path)
+            if media_type is None:
+                media_type = MediaType.detect(local_path)
 
-            headers = {"Content-Type": content_type, "Accept": "application/json"}
+            headers = {"Content-Type": media_type, "Accept": "application/json"}
 
             with open(local_path, mode="rb") as data:
                 resp = self.connection.api_call(

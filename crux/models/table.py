@@ -26,13 +26,13 @@ class Table(Resource):
             "folder": self.folder,
         }
 
-    def download(self, local_path, content_type, chunk_size=DEFAULT_CHUNK_SIZE):
+    def download(self, local_path, media_type, chunk_size=DEFAULT_CHUNK_SIZE):
         # type: (str, str, int) -> bool
         """Downloads the table resource.
 
         Args:
             local_path (str or file): Local OS path at which file resource will be downloaded.
-            content_type (str): Content Type for download.
+            media_type (str): Content Type for download.
             chunk_size (int): Number of bytes to be read in memory.
 
         Returns:
@@ -43,12 +43,12 @@ class Table(Resource):
         """
         if hasattr(local_path, "write"):
             return self._download(
-                local_path, content_type=content_type, chunk_size=chunk_size
+                local_path, media_type=media_type, chunk_size=chunk_size
             )
         elif isinstance(local_path, (str, unicode)):
             with open(local_path, "wb") as file_pointer:
                 return self._download(
-                    file_pointer, content_type=content_type, chunk_size=chunk_size
+                    file_pointer, media_type=media_type, chunk_size=chunk_size
                 )
         else:
             raise TypeError(

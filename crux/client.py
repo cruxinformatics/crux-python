@@ -163,7 +163,7 @@ class CruxClient(object):
 
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
-                with requests.session() as session:
+                with requests.Session() as session:
                     session.mount("http://", adapter)
                     session.mount("https://", adapter)
                     response = session.request(

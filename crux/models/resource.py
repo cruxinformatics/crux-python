@@ -162,8 +162,8 @@ class Resource(CruxModel):
 
     @property
     def size(self):
-        """str: Gets the size."""
-        return self._size
+        """int: Gets the size."""
+        return int(self._size)
 
     @property
     def path(self):

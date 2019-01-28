@@ -1011,8 +1011,8 @@ class Dataset(CruxModel):
             model=Label,
         )
 
-    def find_resources_by_label(self, predicates=None):
-        # type: (List[Dict[str, str]]) -> List[Union[File, Folder, Query, Table]]
+    def find_resources_by_label(self, predicates=None, page_limit=250):
+        # type: (List[Dict[str, str]], int) -> List[Union[File, Folder, Query, Table]]
         """Method which searches the resouces for given labels in Dataset
 
         Each predicate can be either:
@@ -1051,6 +1051,7 @@ class Dataset(CruxModel):
         Args:
             predicates (:obj:`list` of :obj:`dict`): List of dictionary predicates
                 for finding resources.
+            page_limit (int): Pagination limit. Defaults to 250.
 
         Returns:
             list (:obj:`crux.models.Resource`): List of resource matching the query parameters.
@@ -1072,28 +1073,41 @@ class Dataset(CruxModel):
 
         predicates = predicates if predicates else []
 
+        query_params = {"limit": page_limit}
+
         predicates_query = {
             "basic_query": predicates
         }  # type: Dict[str, List[Dict[str,str]]]
 
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        response = self.connection.api_call(
-            "POST",
-            ["datasets", self.id, "labels", "search"],
-            headers=headers,
-            data=json.dumps(predicates_query),
-        )
-
+        after = None
         resource_objects = []
-        results = response.json().get("results")
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
 
-        if results:
-            for resource in results:
-                obj = get_resource_object(
-                    resource_type=resource.get("type"), data=resource
-                )
-                obj.connection = self.connection
-                resource_objects.append(obj)
+        while True:
+
+            if after:
+                query_params["after"] = after
+
+            response = self.connection.api_call(
+                "POST",
+                ["datasets", self.id, "labels", "search"],
+                headers=headers,
+                data=json.dumps(predicates_query),
+                params=query_params,
+            )
+
+            resource_list = response.json().get("results")
+            if resource_list:
+                after = resource_list[-1].get("resourceId")
+                for resource in resource_list:
+                    obj = get_resource_object(
+                        resource_type=resource.get("type"), data=resource
+                    )
+                    obj.connection = self.connection
+                    obj.raw_response = resource
+                    resource_objects.append(obj)
+            else:
+                break
 
         return resource_objects
 

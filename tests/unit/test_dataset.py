@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from crux.client import CruxClient
+from crux._client import CruxClient
 from crux.models import Dataset, File, Folder, Label, Query, Resource, StitchJob, Table
 
 

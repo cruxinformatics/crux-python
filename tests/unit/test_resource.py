@@ -3,7 +3,7 @@ import os
 import pytest
 from requests.models import Response
 
-from crux.client import CruxClient
+from crux._client import CruxClient
 from crux.models import Permission, Resource
 
 

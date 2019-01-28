@@ -7,8 +7,8 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     Optional,
 )
 
-from crux.client import CruxClient
-from crux.config import CruxConfig
+from crux._client import CruxClient
+from crux._config import CruxConfig
 from crux.models import Dataset, Identity, Job
 
 

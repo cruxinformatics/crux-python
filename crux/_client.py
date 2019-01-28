@@ -25,7 +25,8 @@ from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disab
     Retry,
 )
 
-from crux.config import CruxConfig
+from crux._config import CruxConfig
+from crux._utils import url_builder
 from crux.exceptions import (
     CruxAPIError,
     CruxClientConnectionError,
@@ -33,7 +34,6 @@ from crux.exceptions import (
     CruxClientTimeout,
     CruxResourceNotFoundError,
 )
-from crux.utils import url_builder
 
 
 class CruxClient(object):

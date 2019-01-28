@@ -40,7 +40,7 @@ class Identity(CruxModel):
             type (str): Type. Defaults to None.
             website (str): Website. Defaults to None.
             landing_page (str): Landing page. Defaults to None.
-            connection (crux.client.CruxClient): Connection Object. Defaults to None.
+            connection (crux._client.CruxClient): Connection Object. Defaults to None.
             raw_response (dict): Response Content. Defaults to None.
 
         Raises:

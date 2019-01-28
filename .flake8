@@ -8,4 +8,4 @@ exclude =
   .nox,
   *.pyc,
   dist,
-  vendor
+  _vendor

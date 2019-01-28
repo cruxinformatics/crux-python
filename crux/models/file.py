@@ -13,15 +13,10 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 from google.resumable_media.common import InvalidResponse  # type: ignore
 from google.resumable_media.requests import ChunkedDownload  # type: ignore
 
-from crux.compat import unicode
+from crux._compat import unicode
+from crux._utils import DEFAULT_CHUNK_SIZE, get_signed_url_session, valid_chunk_size
 from crux.exceptions import CruxClientError
-from crux.models.resource import Resource
-from crux.utils import (
-    DEFAULT_CHUNK_SIZE,
-    get_signed_url_session,
-    MediaType,
-    valid_chunk_size,
-)
+from crux.models.resource import MediaType, Resource
 
 
 class File(Resource):

@@ -1,6 +1,5 @@
 import pytest
 
-from crux.models.resource import MediaType
 from crux._utils import (
     quote,
     split_posixpath_filename_dirpath,
@@ -8,6 +7,7 @@ from crux._utils import (
     url_builder,
     valid_chunk_size,
 )
+from crux.models.resource import MediaType
 
 
 def test_quote():

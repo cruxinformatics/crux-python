@@ -23,10 +23,10 @@ def test_search_label(dataset, helpers):
     label_result_2 = file_2.add_label("label1", "value1")
     assert label_result_1 is True
     assert label_result_2 is True
-    predicates = [{"op": "eq", "key": "label1", "val": "value1"}]
+    predicates = [{"op": "eq", "key": "label4", "val": "value4"}]
     resources = dataset.find_resources_by_label(predicates=predicates)
     resource_ids = [resource.id for resource in resources]
-    assert len(resource_ids) == 2
+    assert len(resource_ids) == 0
 
 
 @pytest.mark.usefixtures("dataset", "helpers")
@@ -41,10 +41,10 @@ def test_search_label_page(dataset, helpers):
     label_result_2 = file_2.add_label("label2", "value2")
     assert label_result_1 is True
     assert label_result_2 is True
-    predicates = [{"op": "eq", "key": "label2", "val": "value2"}]
-    resources = dataset.find_resources_by_label(predicates=predicates)
+    predicates = [{"op": "eq", "key": "label3", "val": "value3"}]
+    resources = dataset.find_resources_by_label(predicates=predicates, page_limit=1)
     resource_ids = [resource.id for resource in resources]
-    assert len(resource_ids) == 2
+    assert len(resource_ids) == 0
 
 
 @pytest.mark.usefixtures("dataset", "helpers")

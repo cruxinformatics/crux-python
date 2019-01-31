@@ -9,7 +9,7 @@ try:
 except ImportError:
     # Python 2 imports
     from __builtin__ import unicode  # type: ignore
-    from crux.vendor.enum import Enum  # type: ignore
+    from crux._vendor.enum import Enum  # type: ignore
     from urllib import quote as urllib_quote
 
 __all__ = ("Enum", "unicode", "urllib_quote")

@@ -1,13 +1,15 @@
 """Module contains Resource model."""
 
+import os
 import posixpath
 from typing import Any, Dict, List, Union  # noqa: F401 pylint: disable=unused-import
 
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
+from crux._compat import Enum
+from crux._utils import DEFAULT_CHUNK_SIZE
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
-from crux.utils import DEFAULT_CHUNK_SIZE
 
 
 class Resource(CruxModel):
@@ -56,7 +58,7 @@ class Resource(CruxModel):
             tags (:obj:`list` of :obj:`str`): Resource tags. Defaults to None.
             labels (dict): Dictionary containing Label Key and Values.
                 Defaults to None.
-            connection (crux.client.CruxClient): Connection Object. Defaults to None.
+            connection (crux._client.CruxClient): Connection Object. Defaults to None.
             raw_response (dict): Response Content. Defaults to None.
 
         Raises:
@@ -465,3 +467,35 @@ class Resource(CruxModel):
             file_pointer.write(chunk)
 
         return True
+
+
+# https://github.com/python/mypy/issues/2477, mypy is performing checking with Python2
+class MediaType(Enum):  # type: ignore
+    """MediaType Enumeration Model."""
+
+    JSON = "application/json"
+    NDJSON = "application/x-ndjson"
+    CSV = "text/csv"
+    PARQUET = "application/parquet"
+    AVRO = "avro/binary"
+
+    @classmethod
+    def detect(cls, file_name):
+        # type: (str) -> str
+        """Detects the media_type from the file extension.
+
+        Args:
+            file_name (str): Absolute or Relative Path of the file.
+
+        Returns:
+            str: MediaType extension.
+
+        Raises:
+            LookupError: If file type is not supported.
+        """
+        file_ext = os.path.splitext(file_name)[1][1:].upper()
+
+        if file_ext in cls.__members__:
+            return cls[file_ext].value  # type: ignore
+        else:
+            raise LookupError("File/Media Type not supported.")

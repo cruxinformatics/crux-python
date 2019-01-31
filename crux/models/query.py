@@ -2,8 +2,8 @@
 
 from typing import Any, Dict, Iterable  # noqa: F401 pylint: disable=unused-import
 
+from crux._utils import DEFAULT_CHUNK_SIZE, valid_chunk_size
 from crux.models.resource import Resource
-from crux.utils import DEFAULT_CHUNK_SIZE, valid_chunk_size
 
 
 class Query(Resource):

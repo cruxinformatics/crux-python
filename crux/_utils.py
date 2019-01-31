@@ -1,6 +1,5 @@
 """Modules contains set of utility functions."""
 
-import os
 import posixpath
 from typing import List, Tuple  # noqa: F401 pylint: disable=unused-import
 
@@ -10,42 +9,10 @@ from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disab
     Retry,
 )
 
-from crux.compat import Enum, urllib_quote
+from crux._compat import urllib_quote
 
 
 DEFAULT_CHUNK_SIZE = 10485760  # 10 MB
-
-
-# https://github.com/python/mypy/issues/2477, mypy is performing checking with Python2
-class MediaType(Enum):  # type: ignore
-    """MediaType Enumeration Model."""
-
-    JSON = "application/json"
-    NDJSON = "application/x-ndjson"
-    CSV = "text/csv"
-    PARQUET = "application/parquet"
-    AVRO = "avro/binary"
-
-    @classmethod
-    def detect(cls, file_name):
-        # type: (str) -> str
-        """Detects the media_type from the file extension.
-
-        Args:
-            file_name (str): Absolute or Relative Path of the file.
-
-        Returns:
-            str: MediaType extension.
-
-        Raises:
-            LookupError: If file type is not supported.
-        """
-        file_ext = os.path.splitext(file_name)[1][1:].upper()
-
-        if file_ext in cls.__members__:
-            return cls[file_ext].value  # type: ignore
-        else:
-            raise LookupError("File/Media Type not supported.")
 
 
 def quote(data):

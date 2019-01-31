@@ -1,5 +1,5 @@
 [MASTER]
-ignore=vendor
+ignore=_vendor
 suggestion-mode=yes
 
 [MESSAGES CONTROL]

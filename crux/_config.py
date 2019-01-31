@@ -14,7 +14,7 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 import requests
 
 from crux.__version__ import __version__
-from crux.utils import str_to_bool
+from crux._utils import str_to_bool
 
 
 class CruxConfig(object):

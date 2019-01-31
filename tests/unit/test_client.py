@@ -13,7 +13,7 @@ from requests.exceptions import (
 from requests.models import Response
 
 
-from crux.client import CruxClient
+from crux._client import CruxClient
 from crux.exceptions import (
     CruxClientConnectionError,
     CruxClientHTTPError,

@@ -3,7 +3,7 @@ import os
 import pytest
 
 from crux.__version__ import __version__
-from crux.config import CruxConfig
+from crux._config import CruxConfig
 
 
 @pytest.fixture

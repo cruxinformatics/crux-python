@@ -70,6 +70,7 @@ class Dataset(CruxModel):
         self._created_at = created_at
         self._modified_at = modified_at
         self._tags = tags
+        self._provenance = None
 
         self.connection = connection
         self.raw_response = raw_response
@@ -118,6 +119,15 @@ class Dataset(CruxModel):
     def modified_at(self):
         """str: Gets the Dataset modified_at."""
         return self._modified_at
+
+    @property
+    def provenance(self):
+        """str: Compute or Get the provenance."""
+        if self._provenance:
+            return self._provenance
+
+        self._provenance = self._get_provenance()
+        return self._provenance
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -172,6 +182,21 @@ class Dataset(CruxModel):
             modified_at=modified_at,
             tags=tags,
         )
+
+    def _get_provenance(self):
+        # type: () -> str
+        """Fetches the provenance of the Dataset.
+
+        Returns:
+            list: List of provenance dictionaries containing DatasetID, WorkFlowID,
+                systemOfRecord, cronSpec, createdAt and modifiedAt keys.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = self.connection.api_call(
+            "GET", ["datasets", self.id, "provenance"], headers=headers
+        )
+
+        return response.json()
 
     def delete(self):
         # type: () -> bool

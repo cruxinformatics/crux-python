@@ -152,33 +152,33 @@ class Crux(object):
             "GET", ["jobs", job_id], model=Job, headers=headers
         )
 
-    def set_datasets_provenance(self, provenance=None):
+    def set_datasets_provenance(self, provenance):
         # type(Dict[Any, Any]) -> Dict[Any, Any]
         """ Sets the Dataset Provenance
 
         Args:
             provenance (dict): Provenance dictionary
 
-            .. code-block:: python
-
-            provenance = {
-                "dataset_id":[
-                        {
-                            "workflow_id": "test_id",
-                            "pipeline_ids": [
-                                "test_id_1",
-                                "test_id_2"
-                            ],
-                            "cron_spec": "* * * * *"
-                        }
-                    ]
-                }
         Returns:
             dict: Response dictionary.
+
+        Example:
+            .. code-block:: python
+
+                from crux import Crux
+                conn = Crux(api_key="api_key", api_host="https://api-host")
+                provenance = {
+                    "dataset_id":[
+                        {
+                            "workflow_id": "test_id",
+                            "pipeline_ids": ["test_id_1","test_id_2"],
+                            "cron_spec": "0 0 1 1 0"
+                            }
+                        ]
+                    }
+                response = conn.set_datasets_provenance(provenance=provenance)
         """
         headers = {"Accept": "application/json"}
-
-        provenance = provenance if provenance else {}
 
         response = self.api_client.api_call(
             "POST", ["datasets", "provenance"], headers=headers, json=provenance

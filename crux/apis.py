@@ -160,7 +160,7 @@ class Crux(object):
             provenance (dict): Provenance dictionary
 
         Returns:
-            dict: Response dictionary.
+            dict: Provenance response dictionary.
 
         Example:
             .. code-block:: python

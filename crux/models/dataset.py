@@ -6,6 +6,7 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
     IO,
+    Iterator,
     List,
     Tuple,
     Union,
@@ -1036,7 +1037,7 @@ class Dataset(CruxModel):
         )
 
     def find_resources_by_label(self, predicates, max_per_page=1000):
-        # type: (List[Dict[str, str]], int) -> List[Union[File, Folder, Query, Table]]
+        # type: (List[Dict[str,str]],int)->Iterator[Union[File,Folder,Query,Table]]
         """Method which searches the resouces for given labels in Dataset
 
         Each predicate can be either:
@@ -1075,7 +1076,7 @@ class Dataset(CruxModel):
         Args:
             predicates (:obj:`list` of :obj:`dict`): List of dictionary predicates
                 for finding resources.
-            max_per_page (int): Pagination limit. Defaults to 250.
+            max_per_page (int): Pagination limit. Defaults to 1000.
 
         Returns:
             list (:obj:`crux.models.Resource`): List of resource matching the query parameters.
@@ -1104,7 +1105,6 @@ class Dataset(CruxModel):
         }  # type: Dict[str, List[Dict[str,str]]]
 
         after = None
-        resource_objects = []
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
 
         while True:
@@ -1129,11 +1129,9 @@ class Dataset(CruxModel):
                     )
                     obj.connection = self.connection
                     obj.raw_response = resource
-                    resource_objects.append(obj)
+                    yield obj
             else:
-                break
-
-        return resource_objects
+                return
 
     def stitch(
         self,

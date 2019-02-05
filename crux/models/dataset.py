@@ -1,6 +1,5 @@
 """Module contains Dataset model."""
 
-import json
 import os
 import posixpath
 from typing import (  # noqa: F401 pylint: disable=unused-import
@@ -702,7 +701,7 @@ class Dataset(CruxModel):
                 "Invalid Type. It should be path string or Table resource object"
             )
 
-        data = {
+        payload = {
             "sourceId": src_file.id,
             "destinationId": dst_table.id,
             "append": append,
@@ -711,7 +710,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["jobs", "loadtablefromfileresource"],
-            json=data,
+            json=payload,
             model=LoadJob,
             headers=headers,
         )
@@ -1036,7 +1035,7 @@ class Dataset(CruxModel):
             model=Label,
         )
 
-    def find_resources_by_label(self, predicates=None, page_limit=250):
+    def find_resources_by_label(self, predicates, page_limit=1000):
         # type: (List[Dict[str, str]], int) -> List[Union[File, Folder, Query, Table]]
         """Method which searches the resouces for given labels in Dataset
 
@@ -1117,7 +1116,7 @@ class Dataset(CruxModel):
                 "POST",
                 ["datasets", self.id, "labels", "search"],
                 headers=headers,
-                data=json.dumps(predicates_query),
+                json=predicates_query,
                 params=query_params,
             )
 
@@ -1199,10 +1198,7 @@ class Dataset(CruxModel):
             "labelsToApply": labels if labels else {},
         }
         response = self.connection.api_call(
-            "POST",
-            ["datasets", self.id, "stitch"],
-            headers=headers,
-            data=json.dumps(data),
+            "POST", ["datasets", self.id, "stitch"], headers=headers, json=data
         )
 
         file_object = Resource.from_dict(response.json().get("destinationResource"))

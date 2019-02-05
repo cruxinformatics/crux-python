@@ -2,8 +2,6 @@
 
 The Crux Python Client interacts with the Crux API, which requires an API key. Your API key can be retrieved from your Profile within the [Crux web application](https://app.cruxinformatics.com/).
 
-TODO: Are there organizational API keys?
-
 ## Function arguments
 
 For basic scripts you can set the API key with the `api_key` argument when instantiating the Crux client.

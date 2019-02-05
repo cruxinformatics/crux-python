@@ -1085,7 +1085,7 @@ class Dataset(CruxModel):
 
                 from crux import Crux
 
-                conn = Crux(api_key="api_key", api_host="https://api-host")
+                conn = Crux()
                 dataset_object = conn.get_dataset(id="dataset_id")
                 predicates=[
                     {"op":"eq","key":"test_label1","val":"test_value1"}

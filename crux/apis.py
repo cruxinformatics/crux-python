@@ -166,7 +166,9 @@ class Crux(object):
             .. code-block:: python
 
                 from crux import Crux
-                conn = Crux(api_key="api_key", api_host="https://api-host")
+
+                conn = Crux()
+
                 provenance = {
                     "dataset_id":[
                         {

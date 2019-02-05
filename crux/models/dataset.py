@@ -1035,7 +1035,7 @@ class Dataset(CruxModel):
             model=Label,
         )
 
-    def find_resources_by_label(self, predicates, page_limit=1000):
+    def find_resources_by_label(self, predicates, max_per_page=1000):
         # type: (List[Dict[str, str]], int) -> List[Union[File, Folder, Query, Table]]
         """Method which searches the resouces for given labels in Dataset
 
@@ -1075,7 +1075,7 @@ class Dataset(CruxModel):
         Args:
             predicates (:obj:`list` of :obj:`dict`): List of dictionary predicates
                 for finding resources.
-            page_limit (int): Pagination limit. Defaults to 250.
+            max_per_page (int): Pagination limit. Defaults to 250.
 
         Returns:
             list (:obj:`crux.models.Resource`): List of resource matching the query parameters.
@@ -1097,7 +1097,7 @@ class Dataset(CruxModel):
 
         predicates = predicates if predicates else []
 
-        query_params = {"limit": page_limit}
+        query_params = {"limit": max_per_page}
 
         predicates_query = {
             "basic_query": predicates

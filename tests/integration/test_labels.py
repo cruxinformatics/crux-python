@@ -11,6 +11,7 @@ def test_add_get_label(dataset, helpers):
     assert file_1.labels.get("label1") == "value1"
 
 
+# Negative Test case which verifies label search by searching unset labels without pagination.
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_search_label(dataset, helpers):
     file_1 = dataset.create_file(
@@ -29,6 +30,7 @@ def test_search_label(dataset, helpers):
     assert len(resource_ids) == 0
 
 
+# Negative Test case which verifies label search by searching unset labels with pagination.
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_search_label_page(dataset, helpers):
     file_1 = dataset.create_file(
@@ -42,7 +44,7 @@ def test_search_label_page(dataset, helpers):
     assert label_result_1 is True
     assert label_result_2 is True
     predicates = [{"op": "eq", "key": "label3", "val": "value3"}]
-    resources = dataset.find_resources_by_label(predicates=predicates, page_limit=1)
+    resources = dataset.find_resources_by_label(predicates=predicates, max_per_page=1)
     resource_ids = [resource.id for resource in resources]
     assert len(resource_ids) == 0
 

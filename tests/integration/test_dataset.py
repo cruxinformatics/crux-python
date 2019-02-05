@@ -26,6 +26,23 @@ def test_whoami(connection):
     assert identity.type == "user"
 
 
+@pytest.mark.usefixtures("connection", "dataset")
+def test_set_datasets_provenance(connection, dataset):
+    provenance = {
+        dataset.id: [
+            {
+                "workflow_id": "test_id",
+                "pipeline_ids": ["test_id_1", "test_id_2"],
+                "cron_spec": "0 0 1 1 0",
+            }
+        ]
+    }
+    response = connection.set_datasets_provenance(provenance)
+
+    assert bool(response) is True
+    assert dataset.provenance[0]["workflow_id"] == "test_id"
+
+
 @pytest.mark.usefixtures("connection", "helpers")
 def test_dataset_description_limit(connection, helpers):
     description_too_long = helpers.generate_random_string(2049)

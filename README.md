@@ -4,32 +4,50 @@ A Python library for interacting with the Crux platform.
 
 The aim of this client is to be a Pythonic way to use the Crux API reliably. It covers core functionality, such as uploading and downloading files, but does not cover all API functionality. It isn't an SDK.
 
-Python 2.7 and 3.5+ are supported, Python 3.6+ is recommended.
+Python 3.6+ is recommended. Python 2.7 and 3.5 are supported but deprecated, with support planned for removal in early-2020 and mid-2020 respectively.
 
 **This library is ALPHA.** Breaking changes are expected. Pin to a specific version when using this library, and test upgrades thoroughly.
 
-## Usage
+**See [crux-python.cruxinformatics.com](https://crux-python.cruxinformatics.com/) for detailed documentation.**
 
-Install with [pipenv](https://pipenv.readthedocs.io/en/latest/), pip, or another package manager.
+## Installation
+
+Install a recent version of Python, and a Python dependency and virtual environment manager like [pipenv](https://pipenv.readthedocs.io/en/latest/). On macOS run:
 
 ```bash
-pipenv install "crux==0.0.2"
+brew install python
+brew install pipenv
 ```
 
-Use the `crux` module.
+Install `crux` [from PyPI](https://pypi.org/project/crux/) in a virtual environment, and get a shell in that environment:
+
+```bash
+mkdir -p crux_example
+cd crux_example
+pipenv install "crux==0.0.3"
+pipenv shell
+```
+## Getting Started
+
+Create a file, like example.py, and use the `crux` module:
 
 ```python
 from crux import Crux
 
-# The environment variable CRUX_API_KEY can be set instead of passing api_key to Crux().
-conn = Crux(api_key="YOUR_API_KEY")
-
-dataset = conn.get_dataset("A_DATASET_ID")
-file = dataset.get_file(path="/path/to/file.csv")
-file.download(local_path="/tmp/test.csv")
+conn = Crux()
+identity = conn.whoami()
+print("I am", identity.email)
 ```
 
-**See [docs/](docs/index.md) for detailed documentation.**
+Run the script:
+
+```bash
+HISTCONTROL=ignoreboth
+ export CRUX_API_KEY='YOUR_API_KEY'
+python3 example.py
+```
+
+See the [installation](https://crux-python.cruxinformatics.com/en/latest/installation.html) and [authentication](https://crux-python.cruxinformatics.com/en/latest/authentication.html) documentation for details.
 
 ## Development
 
@@ -45,7 +63,7 @@ Python 3.7 is required for development, which can be installed with `brew instal
 
 ### Multiple Python versions
 
-To be able to run unit tests against all supported Python versions, you must have all supported Python versions installed. The test runner will look for binaries called `python2.7`, `python3.5`, `python3.6`, etc. There are multiple ways to install Python versions, we'll document using [pyenv](https://github.com/pyenv/pyenv).
+To be able to run tests against all supported Python versions, you must have all supported Python versions installed. The test runner will look for binaries called `python2.7`, `python3.5`, `python3.6`, etc. There are multiple ways to install Python versions, we'll document using [pyenv](https://github.com/pyenv/pyenv).
 
 1. `brew install pyenv` to install
 2. Put `eval "$(pyenv init -)"` towards the end of the shell configuration file (~/.bashrc or ~/.bash_profile), because it manipulates `$PATH`, for example:
@@ -64,7 +82,7 @@ To be able to run unit tests against all supported Python versions, you must hav
     ```
 
 5. `pyenv global system 3.5.6 3.6.6 3.7.0` to make all the Python versions available
-6. If you already have pipenv virtual environment, remove it with `pipenv --rm` so it detects the Python version
+6. If you already have pipenv virtual environment, remove it with `pipenv --rm` so it detects the Python versions
 7. `pipenv install --dev` to install all the dependancies
 8. `pipenv shell` to get a shell in the virtual environment
 
@@ -89,11 +107,11 @@ make unit
 nox -s unit
 
 # Run integration tests agains all available Python versions
-export CRUX_API_KEY="12345"
+ export CRUX_API_KEY="12345"
 export CRUX_API_HOST="https://api.example.com"
 make integration
 # Or
-export CRUX_API_KEY="12345"
+ export CRUX_API_KEY="12345"
 export CRUX_API_HOST="https://api.example.com"
 nox --s integration
 

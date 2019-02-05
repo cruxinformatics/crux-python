@@ -6,13 +6,7 @@
 from crux import Crux
 from crux.exceptions import CruxAPIException, CruxClientException
 
-# Set the `CRUX_API_KEY`, `CRUX_API_HOST` environment variables.
-# By default `CRUX_API_HOST` will point to Production environment
 conn = Crux()
-
-# Custom connection attributes can be set via following
-
-conn = Crux(api_key="123456789", api_host="https://api.example.com")
 
 try:
     dataset_object = conn.get_dataset(id="567890")
@@ -32,13 +26,7 @@ except CruxClientException as err:
 from crux import Crux
 from crux.exceptions import CruxAPIException, CruxClientException
 
-# Set the `CRUX_API_KEY`, `CRUX_API_HOST` environment variables.
-# By default `CRUX_API_HOST` will point to Production environment
 conn = Crux()
-
-# Custom connection attributes can be set via following
-
-conn = Crux(api_key="123456789", api_host="https://api.example.com")
 
 try:
     dataset_object = conn.get_dataset(id="567890")
@@ -59,13 +47,7 @@ except CruxClientException as err:
 from crux import Crux
 from crux.exceptions import CruxAPIException, CruxClientException
 
-# Set the `CRUX_API_KEY`, `CRUX_API_HOST` environment variables.
-# By default `CRUX_API_HOST` will point to Production environment
 conn = Crux()
-
-# Custom connection attributes can be set via following
-
-conn = Crux(api_key="123456789", api_host="https://api.example.com")
 
 try:
     dataset_object = conn.get_dataset(id="567890")
@@ -85,13 +67,7 @@ except CruxClientException as err:
 from crux import Crux
 from crux.exceptions import CruxAPIException, CruxClientException
 
-# Set the `CRUX_API_KEY`, `CRUX_API_HOST` environment variables.
-# By default `CRUX_API_HOST` will point to Production environment
 conn = Crux()
-
-# Custom connection attributes can be set via following
-
-conn = Crux(api_key="123456789", api_host="https://api.example.com")
 
 try:
     dataset_object = conn.get_dataset(id="567890")
@@ -117,13 +93,7 @@ except CruxClientException as err:
 from crux import Crux
 from crux.exceptions import CruxAPIException, CruxClientException
 
-# Set the `CRUX_API_KEY`, `CRUX_API_HOST` environment variables.
-# By default `CRUX_API_HOST` will point to Production environment
 conn = Crux()
-
-# Custom connection attributes can be set via following
-
-conn = Crux(api_key="123456789", api_host="https://api.example.com")
 
 try:
     dataset_object = conn.get_dataset(id="567890")
@@ -159,13 +129,7 @@ except CruxClientException as err:
 from crux import Crux
 from crux.exceptions import CruxAPIException, CruxClientException
 
-# Set the `CRUX_API_KEY`, `CRUX_API_HOST` environment variables.
-# By default `CRUX_API_HOST` will point to Production environment
 conn = Crux()
-
-# Custom connection attributes can be set via following
-
-conn = Crux(api_key="123456789", api_host="https://api.example.com")
 
 try:
     dataset_object = conn.get_dataset(id="567890")
@@ -188,13 +152,7 @@ except CruxClientException as err:
 from crux import Crux
 from crux.exceptions import CruxAPIException, CruxClientException
 
-# Set the `CRUX_API_KEY`, `CRUX_API_HOST` environment variables.
-# By default `CRUX_API_HOST` will point to Production environment
 conn = Crux()
-
-# Custom connection attributes can be set via following
-
-conn = Crux(api_key="123456789", api_host="https://api.example.com")
 
 try:
     dataset_object = conn.get_dataset(id="567890")
@@ -219,13 +177,7 @@ except CruxClientException as err:
 from crux import Crux
 from crux.exceptions import CruxAPIException, CruxClientException
 
-# Set the `CRUX_API_KEY`, `CRUX_API_HOST` environment variables.
-# By default `CRUX_API_HOST` will point to Production environment
 conn = Crux()
-
-# Custom connection attributes can be set via following
-
-conn = Crux(api_key="123456789", api_host="https://api.example.com")
 
 try:
     dataset_object = conn.get_dataset(id="567890")

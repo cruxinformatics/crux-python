@@ -1,20 +1,30 @@
 # Crux Python Client
 
-The Crux Python Client, provided as the `crux` Python package, it a way to interact with the Crux platform from Python. It provides functionality such as uploading, downloading, and searching for files.
+A Python library for interacting with the Crux platform.
 
-## Installation (macOS)
+The aim of this client is to be a Pythonic way to use the Crux API reliably. It covers core functionality, such as uploading and downloading files, but does not cover all API functionality. It isn't an SDK.
 
-Install a recent version of Python, and a Python dependency and virtual environment manager:
+Python 3.6+ is recommended. Python 2.7 and 3.5 are supported but deprecated, with support planned for removal in early-2020 and mid-2020 respectively.
+
+**This library is ALPHA.** Breaking changes are expected. Pin to a specific version when using this library, and test upgrades thoroughly.
+
+Source code is available on GitHub at [github.com/cruxinformatics/crux-python](https://github.com/cruxinformatics/crux-python).
+
+## Installation
+
+Install a recent version of Python, and a Python dependency and virtual environment manager like [pipenv](https://pipenv.readthedocs.io/en/latest/). On macOS run:
 
 ```bash
 brew install python
 brew install pipenv
 ```
 
-Install `crux` in a virtual environment, and get a shell in that environment:
+Install `crux` [from PyPI](https://pypi.org/project/crux/) in a virtual environment, and get a shell in that environment:
 
 ```bash
-pipenv install "crux==0.0.2"
+mkdir -p crux_example
+cd crux_example
+pipenv install "crux==0.0.3"
 pipenv shell
 ```
 ## Getting Started
@@ -22,11 +32,9 @@ pipenv shell
 Create a file, like example.py, and use the `crux` module:
 
 ```python
-import os
-
 from crux import Crux
 
-conn = Crux(api_key="YOUR_API_KEY")
+conn = Crux()
 identity = conn.whoami()
 print("I am", identity.email)
 ```
@@ -34,12 +42,17 @@ print("I am", identity.email)
 Run the script:
 
 ```bash
+HISTCONTROL=ignoreboth
+ export CRUX_API_KEY='YOUR_API_KEY'
 python3 example.py
 ```
 
-## Examples
+See the [installation](installation.md) and [authentication](authentication.md) documentation for details.
 
-Examples for specific topics:
+## Details
+
+Details on specific topics:
+
 - [Installation](installation.md)
 - [Authentication](authentication.md)
 - [Searching](searching.md)

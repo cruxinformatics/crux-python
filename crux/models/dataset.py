@@ -12,17 +12,17 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     Union,
 )
 
+from crux._utils import split_posixpath_filename_dirpath
 from crux.exceptions import CruxAPIError, CruxClientError, CruxResourceNotFoundError
-from crux.models.factory import get_resource_object
+from crux.models._factory import get_resource_object
 from crux.models.file import File
 from crux.models.folder import Folder
 from crux.models.job import LoadJob, StitchJob
 from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.query import Query
-from crux.models.resource import Resource
+from crux.models.resource import MediaType, Resource
 from crux.models.table import Table
-from crux.utils import MediaType, split_posixpath_filename_dirpath
 
 
 class Dataset(CruxModel):
@@ -53,7 +53,7 @@ class Dataset(CruxModel):
             website (str): Dataset website. Defaults to None.
             created_at (str): Dataset created. Defaults to None.
             modified_at (str): Dataset Modified. Defaults to None.
-            connection (crux.client.CruxClient): Connection Object. Defaults to None.
+            connection (crux._client.CruxClient): Connection Object. Defaults to None.
             raw_response (dict): Response Content. Defaults to None.
             tags (:obj:`list` of :obj:`str`): List of tags to be applied to dataset.
                 Defaults to None.
@@ -70,6 +70,7 @@ class Dataset(CruxModel):
         self._created_at = created_at
         self._modified_at = modified_at
         self._tags = tags
+        self._provenance = None
 
         self.connection = connection
         self.raw_response = raw_response
@@ -118,6 +119,15 @@ class Dataset(CruxModel):
     def modified_at(self):
         """str: Gets the Dataset modified_at."""
         return self._modified_at
+
+    @property
+    def provenance(self):
+        """str: Compute or Get the provenance."""
+        if self._provenance:
+            return self._provenance
+
+        self._provenance = self._get_provenance()
+        return self._provenance
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -172,6 +182,21 @@ class Dataset(CruxModel):
             modified_at=modified_at,
             tags=tags,
         )
+
+    def _get_provenance(self):
+        # type: () -> str
+        """Fetches the provenance of the Dataset.
+
+        Returns:
+            list: List of provenance dictionaries containing DatasetID, WorkFlowID,
+                systemOfRecord, cronSpec, createdAt and modifiedAt keys.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = self.connection.api_call(
+            "GET", ["datasets", self.id, "provenance"], headers=headers
+        )
+
+        return response.json()
 
     def delete(self):
         # type: () -> bool
@@ -366,7 +391,7 @@ class Dataset(CruxModel):
             # hence raising the 404 error from the Python client
             raise CruxResourceNotFoundError({"statusCode": 404, "name": resource_name})
 
-    def resource_exists(self, path):
+    def _resource_exists(self, path):
         # type: (str) -> bool
         """Checks the existence of resource.
 
@@ -1061,7 +1086,7 @@ class Dataset(CruxModel):
 
                 from crux import Crux
 
-                conn = Crux(api_key="api_key", api_host="https://api-host")
+                conn = Crux()
                 dataset_object = conn.get_dataset(id="dataset_id")
                 predicates=[
                     {"op":"eq","key":"test_label1","val":"test_value1"}
@@ -1153,7 +1178,7 @@ class Dataset(CruxModel):
         if isinstance(destination_resource, File):
             destination_file_object = destination_resource
         elif isinstance(destination_resource, str):
-            if self.resource_exists(path=destination_resource):
+            if self._resource_exists(path=destination_resource):
                 destination_file_object = self._get_resource(
                     path=destination_resource, model=File
                 )

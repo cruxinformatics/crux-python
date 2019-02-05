@@ -24,7 +24,7 @@ import crux  # noqa: E402
 # -- Project information -----------------------------------------------------
 
 project = u"crux-python"
-copyright = u"2018, Crux Informatics, Inc"
+copyright = u"2019, Crux Informatics, Inc"
 author = u"Crux Informatics, Inc."
 
 # The short X.Y version

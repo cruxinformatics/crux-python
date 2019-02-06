@@ -1,6 +1,5 @@
 """Module contains File model."""
 
-import json
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -40,10 +39,7 @@ class File(Resource):
     def _get_signed_url(self):
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
         response = self.connection.api_call(
-            "POST",
-            ["resources", self.id, "content-url"],
-            headers=headers,
-            data=json.dumps({}),
+            "POST", ["resources", self.id, "content-url"], headers=headers, json={}
         )
 
         url = response.json().get("url")

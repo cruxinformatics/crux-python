@@ -1,12 +1,12 @@
 """Module contains Dataset model."""
 
-import json
 import os
 import posixpath
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
     IO,
+    Iterator,
     List,
     Tuple,
     Union,
@@ -702,7 +702,7 @@ class Dataset(CruxModel):
                 "Invalid Type. It should be path string or Table resource object"
             )
 
-        data = {
+        payload = {
             "sourceId": src_file.id,
             "destinationId": dst_table.id,
             "append": append,
@@ -711,7 +711,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["jobs", "loadtablefromfileresource"],
-            json=data,
+            json=payload,
             model=LoadJob,
             headers=headers,
         )
@@ -1036,8 +1036,8 @@ class Dataset(CruxModel):
             model=Label,
         )
 
-    def find_resources_by_label(self, predicates=None):
-        # type: (List[Dict[str, str]]) -> List[Union[File, Folder, Query, Table]]
+    def find_resources_by_label(self, predicates, max_per_page=1000):
+        # type: (List[Dict[str,str]],int)->Iterator[Union[File,Folder,Query,Table]]
         """Method which searches the resouces for given labels in Dataset
 
         Each predicate can be either:
@@ -1076,6 +1076,7 @@ class Dataset(CruxModel):
         Args:
             predicates (:obj:`list` of :obj:`dict`): List of dictionary predicates
                 for finding resources.
+            max_per_page (int): Pagination limit. Defaults to 1000.
 
         Returns:
             list (:obj:`crux.models.Resource`): List of resource matching the query parameters.
@@ -1097,30 +1098,40 @@ class Dataset(CruxModel):
 
         predicates = predicates if predicates else []
 
+        query_params = {"limit": max_per_page}
+
         predicates_query = {
             "basic_query": predicates
         }  # type: Dict[str, List[Dict[str,str]]]
 
+        after = None
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        response = self.connection.api_call(
-            "POST",
-            ["datasets", self.id, "labels", "search"],
-            headers=headers,
-            data=json.dumps(predicates_query),
-        )
 
-        resource_objects = []
-        results = response.json().get("results")
+        while True:
 
-        if results:
-            for resource in results:
-                obj = get_resource_object(
-                    resource_type=resource.get("type"), data=resource
-                )
-                obj.connection = self.connection
-                resource_objects.append(obj)
+            if after:
+                query_params["after"] = after
 
-        return resource_objects
+            response = self.connection.api_call(
+                "POST",
+                ["datasets", self.id, "labels", "search"],
+                headers=headers,
+                json=predicates_query,
+                params=query_params,
+            )
+
+            resource_list = response.json().get("results")
+            if resource_list:
+                after = resource_list[-1].get("resourceId")
+                for resource in resource_list:
+                    obj = get_resource_object(
+                        resource_type=resource.get("type"), data=resource
+                    )
+                    obj.connection = self.connection
+                    obj.raw_response = resource
+                    yield obj
+            else:
+                return
 
     def stitch(
         self,
@@ -1185,10 +1196,7 @@ class Dataset(CruxModel):
             "labelsToApply": labels if labels else {},
         }
         response = self.connection.api_call(
-            "POST",
-            ["datasets", self.id, "stitch"],
-            headers=headers,
-            data=json.dumps(data),
+            "POST", ["datasets", self.id, "stitch"], headers=headers, json=data
         )
 
         file_object = Resource.from_dict(response.json().get("destinationResource"))

@@ -70,7 +70,7 @@ class Resource(CruxModel):
         self._folder_id = folder_id
         self._description = description
         self._name = name
-        self._size = size
+        self._size = size if size else 0
         self._type = type
         self._config = config
         self._provenance = provenance
@@ -467,6 +467,13 @@ class Resource(CruxModel):
             file_pointer.write(chunk)
 
         return True
+
+    def _get_metadata(self):
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        response = self.connection.api_call(
+            "GET", ["resources", self.id], headers=headers
+        )
+        return response.json()
 
 
 # https://github.com/python/mypy/issues/2477, mypy is performing checking with Python2

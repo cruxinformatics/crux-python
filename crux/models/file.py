@@ -10,10 +10,18 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 )
 
 from google.resumable_media.common import InvalidResponse  # type: ignore
-from google.resumable_media.requests import ChunkedDownload  # type: ignore
+from google.resumable_media.requests import (  # type: ignore
+    ChunkedDownload,
+    ResumableUpload,
+)
 
 from crux._compat import unicode
-from crux._utils import DEFAULT_CHUNK_SIZE, get_signed_url_session, valid_chunk_size
+from crux._utils import (
+    DEFAULT_CHUNK_SIZE,
+    get_signed_url_session,
+    ResumableUploadSignedSession,
+    valid_chunk_size,
+)
 from crux.exceptions import CruxClientError
 from crux.models.resource import MediaType, Resource
 
@@ -113,14 +121,12 @@ class File(Resource):
                 )
         return True
 
-    def iter_content(self, chunk_size=DEFAULT_CHUNK_SIZE, decode_unicode=False):
-        # type: (int, bool) -> Iterable[str]
+    def iter_content(self, chunk_size=DEFAULT_CHUNK_SIZE):
+        # type: (int) -> Iterable[str]
         """Streams the file resource.
 
         Args:
             chunk_size (int): Chunk Size for the stream.
-            decode_unicode (bool): If decode_unicode is True, content will be decoded using the
-                best available encoding based on the response.
 
         Yields:
             bytes: Bytes of file resource.
@@ -137,7 +143,7 @@ class File(Resource):
             "GET", ["resources", self.id, "content"], headers=headers, stream=True
         )
 
-        return data.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+        return data.iter_content(chunk_size=chunk_size)
 
     def _download_file(self, file_pointer, chunk_size=DEFAULT_CHUNK_SIZE):
         # google-resumable-media has a bug where is expects the 'content-range' even
@@ -180,8 +186,80 @@ class File(Resource):
                 "Invalid Data Type for local_path: {}".format(type(local_path))
             )
 
+    def _ul_signed_url_resumable(self, file_pointer, media_type):
+
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-Upload-Content-Type": media_type,
+        }
+
+        upload_session_response = self.connection.api_call(
+            "POST",
+            ["resources", self.id, "upload-session-start"],
+            headers=headers,
+            json={},
+        )
+
+        upload_response_json = upload_session_response.json()
+
+        signed_url = upload_response_json.get("signedURL").get("url")
+        if not signed_url:
+            raise KeyError(
+                "Signed URL missing in response for resource {id}".format(id=self.id)
+            )
+
+        signed_url_headers = upload_response_json.get("signedURL").get("headers")
+
+        if not signed_url_headers:
+            raise KeyError(
+                "Signed URL Headers missing in response for resource {id}".format(
+                    id=self.id
+                )
+            )
+
+        upload = ResumableUpload(signed_url, DEFAULT_CHUNK_SIZE)
+
+        metadata = {"name": self.name}
+
+        transport = get_signed_url_session(session_class=ResumableUploadSignedSession)
+
+        transport.headers = signed_url_headers
+
+        upload.initiate(
+            transport, file_pointer, metadata, signed_url_headers["Content-Type"]
+        )
+
+        while not upload.finished:
+            if upload.invalid:
+                upload.recover(transport)
+            upload.transmit_next_chunk(transport)
+
+        payload = {"sessionId": upload_response_json.get("sessionId")}
+        return self.connection.api_call(
+            "POST",
+            ["resources", self.id, "upload-session-complete"],
+            headers=headers,
+            json=payload,
+        )
+
+    def _upload(self, file_pointer, media_type):
+
+        if self.connection.crux_config.only_use_crux_domains:
+            headers = {"Content-Type": media_type, "Accept": "application/json"}
+            return self.connection.api_call(
+                "PUT",
+                ["resources", self.id, "content"],
+                data=file_pointer,
+                headers=headers,
+                model=File,
+            )
+
+        else:
+            return self._ul_signed_url_resumable(file_pointer, media_type)
+
     def upload(self, local_path, media_type=None):
-        # type: (Union[IO, str], str) -> bool
+        # type: (Union[IO, str], str) -> File
         """Uploads the content to empty file resource.
 
         Args:
@@ -189,41 +267,42 @@ class File(Resource):
             media_type (str): Content type of the file. Defaults to None.
 
         Returns
-            bool: True if it is uploaded.
+            File: File model object.
 
         Raises:
             TypeError: If local_path type is invalid.
         """
 
-        if hasattr(local_path, "read"):
+        if hasattr(local_path, "write"):
 
             if media_type is None:
                 media_type = MediaType.detect(getattr(local_path, "name"))
 
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
+            upload_result = self._upload(local_path, media_type=media_type)
 
-            resp = self.connection.api_call(
-                "PUT",
-                ["resources", self.id, "content"],
-                data=local_path,
-                headers=headers,
-            )
-
-            return resp.status_code == 200
-
-        elif isinstance(local_path, str):
+        elif isinstance(local_path, (str, unicode)):
 
             if media_type is None:
                 media_type = MediaType.detect(local_path)
 
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
-
-            with open(local_path, mode="rb") as data:
-                resp = self.connection.api_call(
-                    "PUT", ["resources", self.id, "content"], data=data, headers=headers
-                )
-
-            return resp.status_code == 200
+            with open(local_path, "rb") as file_pointer:
+                upload_result = self._upload(file_pointer, media_type=media_type)
 
         else:
-            raise TypeError("Invalid Data Type for local_path")
+            raise TypeError(
+                "Invalid Data Type for local_path: {}".format(type(local_path))
+            )
+
+        if upload_result:
+            # Refresh metadata to reflect actual size after uploading the file.
+            raw_response = self._get_metadata()
+            refreshed_object = File.from_dict(raw_response)
+            refreshed_object.connection = self.connection
+            refreshed_object.raw_response = raw_response
+            return refreshed_object
+        else:
+            raise CruxClientError(
+                "Unable to upload file {file_name} to path {path}".format(
+                    file_name=self.name, path=self.path
+                )
+            )

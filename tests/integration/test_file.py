@@ -18,12 +18,12 @@ def test_stream_file(dataset, helpers):
 
     assert file_1.name == file_name
 
-    stream = file_1.iter_content(decode_unicode=True)
+    stream = file_1.iter_content()
 
     result = ""
 
     for chunk in stream:
-        result += chunk
+        result += chunk.decode("utf-8")
 
     assert "bank" in result
     assert "location" in result
@@ -63,9 +63,9 @@ def test_upload_file_string(dataset, helpers):
         "/test_file_" + helpers.generate_random_string(4) + ".csv"
     )
 
-    upload_result = file_1.upload(upload_file_string)
+    uploaded_object = file_1.upload(upload_file_string)
 
-    assert upload_result is True
+    assert uploaded_object.name == file_1.name
 
 
 @pytest.mark.usefixtures("dataset", "helpers")
@@ -82,8 +82,6 @@ def test_upload_file_object(dataset, helpers):
         "/test_file_" + helpers.generate_random_string(4) + ".csv"
     )
 
-    upload_result = file_1.upload(file_os_object)
+    uploaded_object = file_1.upload(file_os_object)
 
-    assert upload_result is True
-
-    file_os_object.close()
+    assert uploaded_object.name == file_1.name

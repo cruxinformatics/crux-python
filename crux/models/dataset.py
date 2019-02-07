@@ -21,7 +21,7 @@ from crux.models.job import LoadJob, StitchJob
 from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.query import Query
-from crux.models.resource import MediaType, Resource
+from crux.models.resource import Resource
 from crux.models.table import Table
 
 
@@ -735,63 +735,16 @@ class Dataset(CruxModel):
 
         Raises:
             TypeError: If local_path is not file or string object.
-            LookupError: If media type is not a valid type.
-            CruxClientError: If error occurs in api or in client.
         """
-
         tags = tags if tags else []
 
         file_resource = self.create_file(tags=tags, description=description, path=path)
 
-        if hasattr(local_path, "write"):
-
-            if media_type is None:
-                try:
-                    media_type = MediaType.detect(getattr(local_path, "name"))
-                except LookupError as err:
-                    file_resource.delete()
-                    raise LookupError(err)
-
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
-
-            try:
-                return self.connection.api_call(
-                    "PUT",
-                    ["resources", file_resource.id, "content"],
-                    data=local_path,
-                    headers=headers,
-                    model=File,
-                )
-            except (CruxClientError, CruxAPIError) as err:
-                file_resource.delete()
-                raise CruxClientError(err.message)
-
-        elif isinstance(local_path, str):
-
-            if media_type is None:
-                try:
-                    media_type = MediaType.detect(local_path)
-                except LookupError as err:
-                    file_resource.delete()
-                    raise LookupError(err)
-
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
-
-            try:
-                with open(local_path, mode="rb") as data:
-                    return self.connection.api_call(
-                        "PUT",
-                        ["resources", file_resource.id, "content"],
-                        data=data,
-                        headers=headers,
-                        model=File,
-                    )
-            except (CruxClientError, CruxAPIError, IOError, OSError) as err:
-                file_resource.delete()
-                raise CruxClientError(str(err))
-
-        else:
-            raise TypeError("Invalid Data Type for local_path")
+        try:
+            return file_resource.upload(local_path, media_type=media_type)
+        except (CruxClientError, CruxAPIError):
+            file_resource.delete()
+            raise
 
     def create_query(self, path, config, tags=None, description=None):
         # type: (str, Dict[str, Any], List[str], str) -> Query

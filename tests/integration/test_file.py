@@ -5,6 +5,41 @@ import pytest
 from crux.exceptions import CruxResourceNotFoundError
 
 
+@pytest.mark.usefixtures("dataset_with_crux_domain", "helpers")
+def test_upload_file_string_with_crux_domain(dataset_with_crux_domain, helpers):
+    upload_file_string = os.path.join(
+        os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
+        "data",
+        "test_file.csv",
+    )
+
+    file_1 = dataset_with_crux_domain.create_file(
+        "/test_file_" + helpers.generate_random_string(4) + ".csv"
+    )
+
+    uploaded_object = file_1.upload(upload_file_string)
+
+    assert uploaded_object.name == file_1.name
+
+
+@pytest.mark.usefixtures("dataset_with_crux_domain", "helpers")
+def test_upload_file_object_with_crux_domain(dataset_with_crux_domain, helpers):
+    upload_file_string = os.path.join(
+        os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
+        "data",
+        "test_file.csv",
+    )
+
+    file_os_object = open(upload_file_string, "rb")
+
+    file_1 = dataset_with_crux_domain.create_file(
+        "/test_file_" + helpers.generate_random_string(4) + ".csv"
+    )
+
+    uploaded_object = file_1.upload(file_os_object)
+
+    assert uploaded_object.name == file_1.name
+
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_stream_file(dataset, helpers):
     upload_path = os.path.join(

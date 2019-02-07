@@ -40,6 +40,7 @@ def test_upload_file_object_with_crux_domain(dataset_with_crux_domain, helpers):
 
     assert uploaded_object.name == file_1.name
 
+
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_stream_file(dataset, helpers):
     upload_path = os.path.join(

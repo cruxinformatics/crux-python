@@ -273,7 +273,7 @@ class File(Resource):
             TypeError: If local_path type is invalid.
         """
 
-        if hasattr(local_path, "write"):
+        if hasattr(local_path, "read"):
 
             if media_type is None:
                 media_type = MediaType.detect(getattr(local_path, "name"))

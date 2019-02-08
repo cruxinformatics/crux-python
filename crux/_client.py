@@ -189,7 +189,6 @@ class CruxClient(object):
                         proxies=self.crux_config.proxies,
                         timeout=(connect_timeout, read_timeout),
                     )
-                    LOG.debug("Response Text: %s", response.text)
             except (HTTPError, TooManyRedirects) as err:
                 raise CruxClientHTTPError(str(err))
             except (ProxyError, SSLError) as err:

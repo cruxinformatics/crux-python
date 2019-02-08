@@ -19,6 +19,7 @@ from crux._utils import str_to_bool
 
 LOG = logging.getLogger(__name__)
 
+
 class CruxConfig(object):
     """
     Crux Configuration Class.

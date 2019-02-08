@@ -1,5 +1,6 @@
 """Module contains File model."""
 
+import logging
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -16,6 +17,9 @@ from crux._compat import unicode
 from crux._utils import DEFAULT_CHUNK_SIZE, get_signed_url_session, valid_chunk_size
 from crux.exceptions import CruxClientError
 from crux.models.resource import MediaType, Resource
+
+
+LOG = logging.getLogger(__name__)
 
 
 class File(Resource):
@@ -69,6 +73,7 @@ class File(Resource):
         max_url_refreshes_without_progress = 5
         max_url_refreshes = 100
 
+        LOG.info("Starting ChunkedDownload with signed_url %s", signed_url)
         download = ChunkedDownload(signed_url, chunk_size, file_pointer)
 
         while not download.finished:
@@ -88,8 +93,16 @@ class File(Resource):
                     if refreshes_without_progress <= max_url_refreshes_without_progress:
                         new_signed_url = self._get_signed_url()
                         fetched_signed_urls += 1
+                        LOG.debug(
+                            "fetched_signed_urls count for download is %s",
+                            fetched_signed_urls,
+                        )
                         total_bytes_from_urls.append(0)
                         refreshes_without_progress += 1
+                        LOG.debug(
+                            "refreshes_without_progress count for download is %s",
+                            refreshes_without_progress,
+                        )
                         bytes_at_last_refresh = sum_total_bytes_from_urls
                     else:
                         # Exceeded max new signed URLs without progress
@@ -98,13 +111,23 @@ class File(Resource):
                         )
                 else:
                     refreshes_without_progress = 0
+                    LOG.debug("Fetching new singed url")
                     new_signed_url = self._get_signed_url()
                     fetched_signed_urls += 1
+                    LOG.debug(
+                        "fetched_signed_urls count for download is %s",
+                        fetched_signed_urls,
+                    )
                     total_bytes_from_urls.append(0)
                     bytes_at_last_refresh = sum_total_bytes_from_urls
 
                 # Replace the download object with a new one, using a new signed URL,
                 # but start where the last download object left off.
+                LOG.info(
+                    "Continue downloading with new_signed_url %s starting at %s bytes",
+                    new_signed_url,
+                    sum_total_bytes_from_urls,
+                )
                 download = ChunkedDownload(
                     new_signed_url,
                     chunk_size,
@@ -148,10 +171,12 @@ class File(Resource):
         small_enough = self.size < (chunk_size * 2)
 
         if self.connection.crux_config.only_use_crux_domains or small_enough:
+            LOG.info("Using Crux Domain for downloading file resource %s", self.id)
             return self._download(
                 file_pointer=file_pointer, media_type=None, chunk_size=chunk_size
             )
         else:
+            LOG.info("Using Signed url for downloading file resource %s", self.id)
             return self._dl_signed_url_resumable(
                 file_pointer=file_pointer, chunk_size=chunk_size
             )
@@ -171,8 +196,13 @@ class File(Resource):
             TypeError: If local_path is not a file like or string type.
         """
         if hasattr(local_path, "write"):
+            LOG.info("Using File Object for downloading file resource %s", self.id)
             return self._download_file(local_path, chunk_size=chunk_size)
         elif isinstance(local_path, (str, unicode)):
+            LOG.info(
+                "Creating File Object from string for downloading file resource %s",
+                self.id,
+            )
             with open(local_path, "wb") as file_pointer:
                 return self._download_file(file_pointer, chunk_size=chunk_size)
         else:

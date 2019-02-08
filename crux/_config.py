@@ -1,5 +1,6 @@
 """Module provides CruxConfig object to manage API configuration settings."""
 
+import logging
 import os
 import platform
 import re
@@ -16,6 +17,7 @@ import requests
 from crux.__version__ import __version__
 from crux._utils import str_to_bool
 
+LOG = logging.getLogger(__name__)
 
 class CruxConfig(object):
     """
@@ -51,6 +53,7 @@ class CruxConfig(object):
 
         if api_key is None:
             if "CRUX_API_KEY" in os.environ:
+                LOG.info("Fetching API KEY from OS Environment Variable")
                 self.api_key = os.environ.get("CRUX_API_KEY")  # type: Optional[str]
             else:
                 raise ValueError("API KEY is required")
@@ -61,6 +64,7 @@ class CruxConfig(object):
             self.api_host = os.environ.get(
                 "CRUX_API_HOST", "https://api.cruxinformatics.com"
             )
+            LOG.info("Setting API host to %s", self.api_host)
         else:
             self.api_host = api_host
 
@@ -71,6 +75,7 @@ class CruxConfig(object):
 
         if user_agent is None:
             self.user_agent = self._default_user_agent()
+            LOG.info("Setting User Agent to %s", self.user_agent)
         else:
             self.user_agent = user_agent
 
@@ -82,6 +87,7 @@ class CruxConfig(object):
             self.only_use_crux_domains = str_to_bool(
                 os.environ.get("CRUX_ONLY_USE_CRUX_DOMAINS", "false")
             )
+            LOG.info("Setting only_use_crux_domain to %s", self.only_use_crux_domains)
         else:
             self.only_use_crux_domains = only_use_crux_domains  # type: bool
 

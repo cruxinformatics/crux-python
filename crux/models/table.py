@@ -1,10 +1,14 @@
 """Module contains Table model."""
 
+import logging
 from typing import Any, Dict  # noqa: F401 pylint: disable=unused-import
 
 from crux._compat import unicode
 from crux._utils import DEFAULT_CHUNK_SIZE
 from crux.models.resource import Resource
+
+
+LOG = logging.getLogger(__name__)
 
 
 class Table(Resource):
@@ -42,10 +46,15 @@ class Table(Resource):
             TypeError: If local_path is not a file like or string type.
         """
         if hasattr(local_path, "write"):
+            LOG.info("Using File Object for downloading table resource %s", self.id)
             return self._download(
                 local_path, media_type=media_type, chunk_size=chunk_size
             )
         elif isinstance(local_path, (str, unicode)):
+            LOG.info(
+                "Creating File Object from string for downloading table resource %s",
+                self.id,
+            )
             with open(local_path, "wb") as file_pointer:
                 return self._download(
                     file_pointer, media_type=media_type, chunk_size=chunk_size

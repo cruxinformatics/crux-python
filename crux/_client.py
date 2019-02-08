@@ -1,5 +1,6 @@
 """Module contains code pertaining to CruxClient."""
 
+import logging
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -36,17 +37,22 @@ from crux.exceptions import (
 )
 
 
+LOG = logging.getLogger(__name__)
+
+
 class CruxClient(object):
     """Crux HTTP REST client."""
 
     def __init__(self, crux_config):
         # type: (CruxConfig) -> None
         if crux_config is None:
+            LOG.debug("crux_config is None, initializing CruxConfig object")
             self.crux_config = CruxConfig()  # type: CruxConfig
         else:
+            LOG.debug("Using the passed crux_config object")
             self.crux_config = crux_config  # type: CruxConfig
 
-    def api_call(  # pylint: disable=too-many-branches
+    def api_call(  # pylint: disable=too-many-branches, too-many-statements
         self,
         method,  # type: str
         path,  # type: List[str]
@@ -166,6 +172,12 @@ class CruxClient(object):
                 with requests.Session() as session:
                     session.mount("http://", adapter)
                     session.mount("https://", adapter)
+                    LOG.info("Performing %s on %s", method, url)
+                    LOG.debug(
+                        "Setting request headers: %s, stream: %s", headers, stream
+                    )
+                    LOG.debug("Setting request data: %s, json: %s", data, json)
+                    LOG.debug("Setting request params: %s", params)
                     response = session.request(
                         method,
                         url,
@@ -177,6 +189,7 @@ class CruxClient(object):
                         proxies=self.crux_config.proxies,
                         timeout=(connect_timeout, read_timeout),
                     )
+                    LOG.debug("Response Text: %s", response.text)
             except (HTTPError, TooManyRedirects) as err:
                 raise CruxClientHTTPError(str(err))
             except (ProxyError, SSLError) as err:
@@ -188,9 +201,11 @@ class CruxClient(object):
 
         if response.status_code in (200, 201, 202, 206):
             if model is None:
+                LOG.info("Model is set to None, returning response dictionary")
                 return response
             else:
                 if isinstance(response.json(), list):
+                    LOG.info("Response is list of type %s", model)
                     serial_list = []
                     for item in response.json():
                         obj = model.from_dict(item)
@@ -198,12 +213,15 @@ class CruxClient(object):
                         obj.raw_response = response.json()
                         serial_list.append(obj)
                     return serial_list
+
                 else:
+                    LOG.info("Response is of type %s", model)
                     obj = model.from_dict(response.json())
                     obj.connection = self
                     obj.raw_response = response.json()
                     return obj
         elif response.status_code == 204:
+            LOG.info("Response code is 204, returning True boolean value")
             return True
         else:
             if response.status_code == 404:

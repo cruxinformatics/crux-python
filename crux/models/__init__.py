@@ -2,6 +2,9 @@
 Module containing models that represent objects returned by the API.
 """
 
+import logging
+from logging import NullHandler
+
 from crux.models.dataset import Dataset
 from crux.models.file import File
 from crux.models.folder import Folder
@@ -28,3 +31,6 @@ __all__ = (
     "Query",
     "Label",
 )
+
+# Set default logging handler to avoid "No handler found" warnings
+logging.getLogger(__name__).addHandler(NullHandler())

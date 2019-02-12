@@ -7,7 +7,7 @@ from crux.models.permission import Permission
 from crux.models.resource import Resource
 
 
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class Folder(Resource):
@@ -52,12 +52,12 @@ class Folder(Resource):
             "resourceIds": [self.id],
         }
         if recursive:
-            LOG.debug("Applying permission in recursive mode to resource %s", self.id)
+            log.debug("Applying permission in recursive mode to resource %s", self.id)
             return self.connection.api_call(
                 "POST", ["permissions", "bulk"], headers=headers, json=body
             )
         else:
-            LOG.debug("Applying permission to resource %s", self.id)
+            log.debug("Applying permission to resource %s", self.id)
             return self.connection.api_call(
                 "PUT",
                 ["permissions", self.id, identity_id, permission],
@@ -89,12 +89,12 @@ class Folder(Resource):
             "resourceIds": [self.id],
         }
         if recursive:
-            LOG.debug("Deleting permission in recursive mode from resource %s", self.id)
+            log.debug("Deleting permission in recursive mode from resource %s", self.id)
             return self.connection.api_call(
                 "POST", ["permissions", "bulk"], headers=headers, json=body
             )
         else:
-            LOG.debug("Deleting permission in from resource %s", self.id)
+            log.debug("Deleting permission in from resource %s", self.id)
             return self.connection.api_call(
                 "DELETE",
                 ["permissions", self.id, identity_id, permission],

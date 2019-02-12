@@ -27,7 +27,7 @@ from crux.models.resource import MediaType, Resource
 from crux.models.table import Table
 
 
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class Dataset(CruxModel):
@@ -248,7 +248,7 @@ class Dataset(CruxModel):
                 "PUT", ["datasets", self.id], headers=headers, json=body, model=Dataset
             )
             self.__dict__.update(dataset_object.__dict__)
-            LOG.debug(
+            log.debug(
                 "Updated dataset %s with content %s", self.id, dataset_object.__dict__
             )
             return True
@@ -535,7 +535,7 @@ class Dataset(CruxModel):
             resource_local_path = os.path.join(local_path, resource.name)
             if resource.type == "folder":
                 os.mkdir(resource_local_path)
-                LOG.info("Created local directory %s", resource_local_path)
+                log.debug("Created local directory %s", resource_local_path)
                 local_file_list += self.download_files(
                     folder=resource_path, local_path=resource_local_path
                 )
@@ -544,7 +544,7 @@ class Dataset(CruxModel):
                 file_resource.connection = self.connection
                 file_resource.download(local_path=resource_local_path)
                 local_file_list.append(resource_local_path)
-                LOG.info("Downloaded file at %s", resource_local_path)
+                log.debug("Downloaded file at %s", resource_local_path)
 
         return local_file_list
 
@@ -592,7 +592,7 @@ class Dataset(CruxModel):
                 self.create_folder(
                     path=content_path, tags=tags, description=description
                 )
-                LOG.info("Created folder %s in dataset %s", content_path, self.id)
+                log.debug("Created folder %s in dataset %s", content_path, self.id)
                 uploaded_file_objects += self.upload_files(
                     media_type=media_type,
                     folder=content_path,
@@ -610,7 +610,7 @@ class Dataset(CruxModel):
                     description=description,
                 )
                 uploaded_file_objects.append(fil_o)
-                LOG.info("Uploaded file %s in dataset %s", content_path, self.id)
+                log.debug("Uploaded file %s in dataset %s", content_path, self.id)
 
         return uploaded_file_objects
 
@@ -908,7 +908,7 @@ class Dataset(CruxModel):
 
         if resource_ids or resource_objects or resource_paths:
             if resource_paths:
-                LOG.info("Add permissions to resource paths")
+                log.debug("Add permissions to resource paths")
                 resource_ids = list()
                 for resource_path in resource_paths:
                     resource_object = self._get_resource(
@@ -918,17 +918,17 @@ class Dataset(CruxModel):
                 body["resourceIds"] = resource_ids
 
             if resource_objects:
-                LOG.info("Add permissions to resource objects")
+                log.debug("Add permissions to resource objects")
                 resource_ids = list()
                 for resource_object in resource_objects:
                     resource_ids.append(resource_object.id)
                 body["resourceIds"] = resource_ids
 
             if resource_ids:
-                LOG.info("Add permissions to resource ids")
+                log.debug("Add permissions to resource ids")
                 body["resourceIds"] = resource_ids
         else:
-            LOG.info("Add permissions to dataset %s", self.id)
+            log.debug("Add permissions to dataset %s", self.id)
             body["datasetId"] = self.id
 
         return self.connection.api_call(
@@ -978,7 +978,7 @@ class Dataset(CruxModel):
 
         if resource_ids or resource_objects or resource_paths:
             if resource_paths:
-                LOG.info("Delete permissions from resource paths")
+                log.debug("Delete permissions from resource paths")
                 resource_ids = list()
                 for resource_path in resource_paths:
                     resource_object = self._get_resource(
@@ -988,17 +988,17 @@ class Dataset(CruxModel):
                 body["resourceIds"] = resource_ids
 
             if resource_objects:
-                LOG.info("Delete permissions from resource objects")
+                log.debug("Delete permissions from resource objects")
                 resource_ids = list()
                 for resource_object in resource_objects:
                     resource_ids.append(resource_object.id)
                 body["resourceIds"] = resource_ids
 
             if resource_ids:
-                LOG.info("Delete permissions from resource ids")
+                log.debug("Delete permissions from resource ids")
                 body["resourceIds"] = resource_ids
         else:
-            LOG.info("Delete permissions from dataset %s", self.id)
+            log.debug("Delete permissions from dataset %s", self.id)
             body["datasetId"] = self.id
 
         return self.connection.api_call(
@@ -1183,10 +1183,10 @@ class Dataset(CruxModel):
         source_resource_ids = list()
         for resource in source_resources:
             if isinstance(resource, File):
-                LOG.info("Stitch source resources are of type crux.models.File")
+                log.debug("Stitch source resources are of type crux.models.File")
                 source_resource_ids.append(resource.id)
             elif isinstance(resource, (str, unicode)):
-                LOG.info("Stitch source resources are of type string")
+                log.debug("Stitch source resources are of type string")
                 resource_object = self._get_resource(path=resource, model=File)
                 source_resource_ids.append(resource_object.id)
             else:
@@ -1195,16 +1195,16 @@ class Dataset(CruxModel):
                 )
 
         if isinstance(destination_resource, File):
-            LOG.info("Stitch destination resources is of type crux.models.File")
+            log.debug("Stitch destination resources is of type crux.models.File")
             destination_file_object = destination_resource
         elif isinstance(destination_resource, str):
-            LOG.info("Stitch destination resources is of type string")
+            log.debug("Stitch destination resources is of type string")
             if self._resource_exists(path=destination_resource):
                 destination_file_object = self._get_resource(
                     path=destination_resource, model=File
                 )
             else:
-                LOG.info("Creating file resource at %s", destination_resource)
+                log.debug("Creating file resource at %s", destination_resource)
                 destination_file_object = self.create_file(
                     path=destination_resource,
                     description=description,

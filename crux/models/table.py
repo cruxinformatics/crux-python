@@ -8,7 +8,7 @@ from crux._utils import DEFAULT_CHUNK_SIZE
 from crux.models.resource import Resource
 
 
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class Table(Resource):
@@ -46,12 +46,12 @@ class Table(Resource):
             TypeError: If local_path is not a file like or string type.
         """
         if hasattr(local_path, "write"):
-            LOG.info("Using File Object for downloading table resource %s", self.id)
+            log.debug("Using File Object for downloading table resource %s", self.id)
             return self._download(
                 local_path, media_type=media_type, chunk_size=chunk_size
             )
         elif isinstance(local_path, (str, unicode)):
-            LOG.info(
+            log.debug(
                 "Creating File Object from string for downloading table resource %s",
                 self.id,
             )

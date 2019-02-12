@@ -218,6 +218,15 @@ class File(Resource):
                 )
             )
 
+        session_id = upload_response_json.get("sessionId")
+
+        if not session_id:
+            raise KeyError(
+                "sessionId Header missing in response for resource {id}".format(
+                    id=self.id
+                )
+            )
+
         upload = ResumableUpload(signed_url, DEFAULT_CHUNK_SIZE)
 
         metadata = {"name": self.name}
@@ -235,7 +244,8 @@ class File(Resource):
                 upload.recover(transport)
             upload.transmit_next_chunk(transport)
 
-        payload = {"sessionId": upload_response_json.get("sessionId")}
+        payload = {"sessionId": session_id}
+
         return self.connection.api_call(
             "POST",
             ["resources", self.id, "upload-session-complete"],
@@ -295,11 +305,12 @@ class File(Resource):
 
         if upload_result:
             # Refresh metadata to reflect actual size after uploading the file.
-            raw_response = self._get_metadata()
-            refreshed_object = File.from_dict(raw_response)
-            refreshed_object.connection = self.connection
-            refreshed_object.raw_response = raw_response
-            return refreshed_object
+            if self.update(refresh=True):
+                return self
+            else:
+                raise CruxClientError(
+                    "Error refreshing metadata for resource {id}".format(id=self.id)
+                )
         else:
             raise CruxClientError(
                 "Unable to upload file {file_name} to path {path}".format(

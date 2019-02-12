@@ -282,8 +282,8 @@ class Resource(CruxModel):
             "DELETE", ["resources", self.id], headers=headers
         )
 
-    def update(self, name=None, description=None, tags=None):
-        # type: (str, str, List[str]) -> bool
+    def update(self, name=None, description=None, tags=None, refresh=False):
+        # type: (str, str, List[str], bool) -> bool
         """Updates the metadata for Resource.
 
         Args:
@@ -325,6 +325,8 @@ class Resource(CruxModel):
             if "description" in response_dict:
                 self._description = response.json().get("description")
             return True
+        elif refresh:
+            return self._refresh_metadata()
         else:
             raise ValueError("Name, Description or Tags should be set")
 
@@ -468,12 +470,13 @@ class Resource(CruxModel):
 
         return True
 
-    def _get_metadata(self):
+    def _refresh_metadata(self):
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        response = self.connection.api_call(
-            "GET", ["resources", self.id], headers=headers
+        resource_object = self.connection.api_call(
+            "GET", ["resources", self.id], headers=headers, model=Resource
         )
-        return response.json()
+        self.__dict__.update(resource_object.__dict__)
+        return True
 
 
 # https://github.com/python/mypy/issues/2477, mypy is performing checking with Python2

@@ -163,6 +163,10 @@ def get_signed_url_session(
     return session
 
 
+# google.resumable_media.requests.ResumableUpload is only compatible with JSON API endpoint.
+# Signed URL uses XML API Endpoint, which requires setting specific headers.
+# ResumableUploadSingedSession is added to make google.resumable_media.requests.ResumableUpload
+# compatible with XML API endpoint by including XML API endpoint specific headers.
 class ResumableUploadSignedSession(Session):
     """Session class to support Resumable Upload."""
 

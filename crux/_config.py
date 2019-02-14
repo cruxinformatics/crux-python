@@ -83,7 +83,6 @@ class CruxConfig(object):
         self.proxies = (
             proxies if proxies else {}
         )  # type: Optional[MutableMapping[Text, Text]]
-        log.debug("Setting proxies to %s", self.proxies)
 
         if only_use_crux_domains is None:
             self.only_use_crux_domains = str_to_bool(

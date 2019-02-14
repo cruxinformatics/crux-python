@@ -37,7 +37,7 @@ from crux.exceptions import (
 )
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class CruxClient(object):

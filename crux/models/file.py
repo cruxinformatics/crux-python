@@ -19,7 +19,7 @@ from crux.exceptions import CruxClientError
 from crux.models.resource import MediaType, Resource
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class File(Resource):
@@ -55,10 +55,21 @@ class File(Resource):
 
         return url
 
-    def _dl_signed_url_resumable(self, file_pointer, chunk_size=DEFAULT_CHUNK_SIZE):
-
+    def _dl_signed_url(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
+        """Download from signed URL using requests directly, not google-resumable-media."""
         signed_url = self._get_signed_url()
+        transport = get_signed_url_session()
 
+        with transport.get(signed_url, stream=True) as response:
+            response.raise_for_status()
+            for chunk in response.iter_content(chunk_size=chunk_size):
+                file_obj.write(chunk)
+
+        return True
+
+    def _dl_signed_url_resumable(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
+        """Download from signed URL using google-resumable-media."""
+        signed_url = self._get_signed_url()
         transport = get_signed_url_session()
 
         # Track how many bytes the client has downloaded since the last time they
@@ -73,8 +84,7 @@ class File(Resource):
         max_url_refreshes_without_progress = 5
         max_url_refreshes = 100
 
-        log.debug("Starting ChunkedDownload with signed_url %s", signed_url)
-        download = ChunkedDownload(signed_url, chunk_size, file_pointer)
+        download = ChunkedDownload(signed_url, chunk_size, file_obj)
 
         while not download.finished:
             try:
@@ -131,7 +141,7 @@ class File(Resource):
                 download = ChunkedDownload(
                     new_signed_url,
                     chunk_size,
-                    file_pointer,
+                    file_obj,
                     start=sum_total_bytes_from_urls,
                 )
         return True
@@ -162,7 +172,7 @@ class File(Resource):
 
         return data.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
-    def _download_file(self, file_pointer, chunk_size=DEFAULT_CHUNK_SIZE):
+    def _download_file(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
         # google-resumable-media has a bug where is expects the 'content-range' even
         # for 200 OK responses, which happens when the range is larger than the size.
         # There isn't much point in using resumable media for small files.
@@ -170,85 +180,83 @@ class File(Resource):
         # to be used.
         small_enough = self.size < (chunk_size * 2)
 
-        if self.connection.crux_config.only_use_crux_domains or small_enough:
+        # If we must use only Crux domains, download via the API.
+        if self.connection.crux_config.only_use_crux_domains:
             log.debug("Using Crux Domain for downloading file resource %s", self.id)
             return self._download(
-                file_pointer=file_pointer, media_type=None, chunk_size=chunk_size
+                file_obj=file_obj, media_type=None, chunk_size=chunk_size
             )
+        # Use requests directly for small files.
+        elif small_enough:
+            return self._dl_signed_url(file_obj=file_obj, chunk_size=chunk_size)
+        # Use google-resumable-media for large files
         else:
             log.debug("Using Signed url for downloading file resource %s", self.id)
             return self._dl_signed_url_resumable(
-                file_pointer=file_pointer, chunk_size=chunk_size
+                file_obj=file_obj, chunk_size=chunk_size
             )
 
-    def download(self, local_path, chunk_size=DEFAULT_CHUNK_SIZE):
+    def download(self, dest, chunk_size=DEFAULT_CHUNK_SIZE):
         # type: (str, int) -> bool
         """Downloads the file resource.
 
         Args:
-            local_path (str or file): Local OS path at which file resource will be downloaded.
+            dest (str or file): Local OS path at which file resource will be downloaded.
             chunk_size (int): Number of bytes to be read in memory.
 
         Returns:
             bool: True if it is downloaded.
 
         Raises:
-            TypeError: If local_path is not a file like or string type.
+            TypeError: If dest is not a file like or string type.
         """
-        if hasattr(local_path, "write"):
-            log.debug("Using File Object for downloading file resource %s", self.id)
-            return self._download_file(local_path, chunk_size=chunk_size)
-        elif isinstance(local_path, (str, unicode)):
-            log.debug(
-                "Creating File Object from string for downloading file resource %s",
-                self.id,
-            )
-            with open(local_path, "wb") as file_pointer:
-                return self._download_file(file_pointer, chunk_size=chunk_size)
-        else:
-            raise TypeError(
-                "Invalid Data Type for local_path: {}".format(type(local_path))
-            )
+        if not valid_chunk_size(chunk_size):
+            raise ValueError("chunk_size should be multiple of 256 KiB")
 
-    def upload(self, local_path, media_type=None):
+        if hasattr(dest, "write"):
+            return self._download_file(dest, chunk_size=chunk_size)
+        elif isinstance(dest, (str, unicode)):
+            with open(dest, "wb") as file_obj:
+                return self._download_file(file_obj, chunk_size=chunk_size)
+        else:
+            raise TypeError("Invalid Data Type for dest: {}".format(type(dest)))
+
+    def upload(self, src, media_type=None):
         # type: (Union[IO, str], str) -> bool
         """Uploads the content to empty file resource.
 
         Args:
-            local_path (str or file): Local OS path whose content is to be uploaded.
+            src (str or file): Local OS path whose content is to be uploaded.
             media_type (str): Content type of the file. Defaults to None.
 
         Returns
             bool: True if it is uploaded.
 
         Raises:
-            TypeError: If local_path type is invalid.
+            TypeError: If src type is invalid.
         """
 
-        if hasattr(local_path, "read"):
+        if hasattr(src, "read"):
 
             if media_type is None:
-                media_type = MediaType.detect(getattr(local_path, "name"))
+                media_type = MediaType.detect(getattr(src, "name"))
 
             headers = {"Content-Type": media_type, "Accept": "application/json"}
 
             resp = self.connection.api_call(
-                "PUT",
-                ["resources", self.id, "content"],
-                data=local_path,
-                headers=headers,
+                "PUT", ["resources", self.id, "content"], data=src, headers=headers
             )
 
             return resp.status_code == 200
 
-        elif isinstance(local_path, str):
+        elif isinstance(src, str):
 
             if media_type is None:
-                media_type = MediaType.detect(local_path)
+                media_type = MediaType.detect(src)
 
             headers = {"Content-Type": media_type, "Accept": "application/json"}
 
-            with open(local_path, mode="rb") as data:
+            with open(src, mode="rb") as data:
                 resp = self.connection.api_call(
                     "PUT", ["resources", self.id, "content"], data=data, headers=headers
                 )
@@ -256,4 +264,4 @@ class File(Resource):
             return resp.status_code == 200
 
         else:
-            raise TypeError("Invalid Data Type for local_path")
+            raise TypeError("Invalid Data Type for src")

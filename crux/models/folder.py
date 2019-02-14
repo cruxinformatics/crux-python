@@ -7,7 +7,7 @@ from crux.models.permission import Permission
 from crux.models.resource import Resource
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class Folder(Resource):

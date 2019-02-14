@@ -9,7 +9,7 @@ from crux import Crux
 
 conn = Crux()
 
-dataset = conn.get_dataset(id="A_DATASET_ID")
+dataset = conn.get_dataset("A_DATASET_ID")
 
 predicates=[
     {"op":"eq", "key":"SOME_KEY", "val":"SOME_VALUE"}
@@ -18,6 +18,6 @@ predicates=[
 resources = dataset.find_resources_by_label(predicates=predicates)
 
 for resource in resources:
-    resource.download(local_path="/tmp/{file_name}".format(resource.name))
+    resource.download("/tmp/{file_name}".format(resource.name))
 
 ```

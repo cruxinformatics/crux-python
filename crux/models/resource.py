@@ -452,7 +452,7 @@ class Resource(CruxModel):
 
         return response.json().get("path")
 
-    def _download(self, file_pointer, media_type, chunk_size=DEFAULT_CHUNK_SIZE):
+    def _download(self, file_obj, media_type, chunk_size=DEFAULT_CHUNK_SIZE):
 
         if media_type is not None:
             headers = {"Accept": media_type}
@@ -464,7 +464,7 @@ class Resource(CruxModel):
         )
 
         for chunk in data.iter_content(chunk_size=chunk_size):
-            file_pointer.write(chunk)
+            file_obj.write(chunk)
 
         return True
 

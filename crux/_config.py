@@ -17,7 +17,7 @@ import requests
 from crux.__version__ import __version__
 from crux._utils import str_to_bool
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class CruxConfig(object):

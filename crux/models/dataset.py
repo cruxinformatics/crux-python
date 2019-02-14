@@ -27,7 +27,7 @@ from crux.models.resource import MediaType, Resource
 from crux.models.table import Table
 
 
-log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+log = logging.getLogger(__name__)
 
 
 class Dataset(CruxModel):
@@ -542,7 +542,7 @@ class Dataset(CruxModel):
             elif resource.type == "file":
                 file_resource = File.from_dict(resource.to_dict())
                 file_resource.connection = self.connection
-                file_resource.download(local_path=resource_local_path)
+                file_resource.download(resource_local_path)
                 local_file_list.append(resource_local_path)
                 log.debug("Downloaded file at %s", resource_local_path)
 
@@ -603,9 +603,9 @@ class Dataset(CruxModel):
 
             elif os.path.isfile(content_local_path):
                 fil_o = self.upload_file(
+                    content_local_path,
+                    content_path,
                     media_type=media_type,
-                    path=content_path,
-                    local_path=content_local_path,
                     tags=tags,
                     description=description,
                 )
@@ -728,16 +728,14 @@ class Dataset(CruxModel):
             headers=headers,
         )
 
-    def upload_file(
-        self, local_path, path, media_type=None, description=None, tags=None
-    ):
+    def upload_file(self, src, dest, media_type=None, description=None, tags=None):
         # type: (Union[IO, str], str, str, str, List[str]) -> File
         """Uploads the File.
 
         Args:
-            local_path (str or file): Local OS path whose content
+            src (str or file): Local OS path whose content
                 is to be uploaded to file resource.
-            path (str): File resource path.
+            dest (str): File resource path.
             media_type (str): Content type of the file. Defaults to None.
             description (str): Description of the file. Defaults to None.
             tags (:obj:`list` of :obj:`str`): Tags to be attached to the file resource.
@@ -746,20 +744,20 @@ class Dataset(CruxModel):
             crux.models.File: File Object.
 
         Raises:
-            TypeError: If local_path is not file or string object.
+            TypeError: If src is not file or string object.
             LookupError: If media type is not a valid type.
             CruxClientError: If error occurs in api or in client.
         """
 
         tags = tags if tags else []
 
-        file_resource = self.create_file(tags=tags, description=description, path=path)
+        file_resource = self.create_file(tags=tags, description=description, path=dest)
 
-        if hasattr(local_path, "write"):
+        if hasattr(src, "write"):
 
             if media_type is None:
                 try:
-                    media_type = MediaType.detect(getattr(local_path, "name"))
+                    media_type = MediaType.detect(getattr(src, "name"))
                 except LookupError as err:
                     file_resource.delete()
                     raise LookupError(err)
@@ -770,7 +768,7 @@ class Dataset(CruxModel):
                 return self.connection.api_call(
                     "PUT",
                     ["resources", file_resource.id, "content"],
-                    data=local_path,
+                    data=src,
                     headers=headers,
                     model=File,
                 )
@@ -778,11 +776,11 @@ class Dataset(CruxModel):
                 file_resource.delete()
                 raise CruxClientError(err.message)
 
-        elif isinstance(local_path, (str, unicode)):
+        elif isinstance(src, str):
 
             if media_type is None:
                 try:
-                    media_type = MediaType.detect(local_path)
+                    media_type = MediaType.detect(src)
                 except LookupError as err:
                     file_resource.delete()
                     raise LookupError(err)
@@ -790,7 +788,7 @@ class Dataset(CruxModel):
             headers = {"Content-Type": media_type, "Accept": "application/json"}
 
             try:
-                with open(local_path, mode="rb") as data:
+                with open(src, mode="rb") as data:
                     return self.connection.api_call(
                         "PUT",
                         ["resources", file_resource.id, "content"],
@@ -803,7 +801,7 @@ class Dataset(CruxModel):
                 raise CruxClientError(str(err))
 
         else:
-            raise TypeError("Invalid Data Type for local_path")
+            raise TypeError("Invalid Data Type for src")
 
     def create_query(self, path, config, tags=None, description=None):
         # type: (str, Dict[str, Any], List[str], str) -> Query

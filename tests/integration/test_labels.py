@@ -4,7 +4,7 @@ import pytest
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_add_get_label(dataset, helpers):
     file_1 = dataset.create_file(
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv"
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
     label_result = file_1.add_label("label1", "value1")
     assert label_result is True
@@ -15,10 +15,10 @@ def test_add_get_label(dataset, helpers):
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_search_label(dataset, helpers):
     file_1 = dataset.create_file(
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv"
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
     file_2 = dataset.create_file(
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv"
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
     label_result_1 = file_1.add_label("label1", "value1")
     label_result_2 = file_2.add_label("label1", "value1")
@@ -34,10 +34,10 @@ def test_search_label(dataset, helpers):
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_search_label_page(dataset, helpers):
     file_1 = dataset.create_file(
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv"
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
     file_2 = dataset.create_file(
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv"
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
     label_result_1 = file_1.add_label("label2", "value2")
     label_result_2 = file_2.add_label("label2", "value2")
@@ -52,10 +52,10 @@ def test_search_label_page(dataset, helpers):
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_delete_label(dataset, helpers):
     file_1 = dataset.create_file(
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv"
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
     file_2 = dataset.create_file(
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv"
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
 
     file_1.add_label("label1", "value1")

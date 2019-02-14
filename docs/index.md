@@ -63,4 +63,5 @@ Details on specific topics:
 - [Tables](tables.md)
 - [Resource Permissions](resource_permissions.md)
 - [Exception Handling](exception_handling.md)
+- [Logging](logging.md)
 - [API Reference](modules.rst)

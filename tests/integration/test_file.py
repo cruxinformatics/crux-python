@@ -48,9 +48,9 @@ def test_stream_file(dataset, helpers):
         "data",
         "test_file.csv",
     )
-    file_name = "test_file_" + helpers.generate_random_string(4) + ".csv"
+    file_name = "test_file_" + helpers.generate_random_string(16) + ".csv"
 
-    file_1 = dataset.upload_file(local_path=upload_path, path="/" + file_name)
+    file_1 = dataset.upload_file(upload_path, "/" + file_name)
 
     assert file_1.name == file_name
 
@@ -73,9 +73,9 @@ def test_delete_file(dataset, helpers):
         "test_file.csv",
     )
 
-    file_name = "test_file_" + helpers.generate_random_string(4) + ".csv"
+    file_name = "test_file_" + helpers.generate_random_string(16) + ".csv"
 
-    file_1 = dataset.upload_file(local_path=upload_path, path="/" + file_name)
+    file_1 = dataset.upload_file(upload_path, "/" + file_name)
 
     assert file_1.name == file_name
 
@@ -96,7 +96,7 @@ def test_upload_file_string(dataset, helpers):
     )
 
     file_1 = dataset.create_file(
-        "/test_file_" + helpers.generate_random_string(4) + ".csv"
+        "/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
 
     uploaded_object = file_1.upload(upload_file_string)
@@ -115,7 +115,7 @@ def test_upload_file_object(dataset, helpers):
     file_os_object = open(upload_file_string, "rb")
 
     file_1 = dataset.create_file(
-        "/test_file_" + helpers.generate_random_string(4) + ".csv"
+        "/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
 
     uploaded_object = file_1.upload(file_os_object)

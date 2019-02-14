@@ -17,8 +17,8 @@ dataset = conn.create_dataset(
 )
 
 file = dataset.upload_file(
-    path="/path/to/remote/file.csv",
-    local_path="/tmp/local_file.csv"
+    src="/tmp/local_file.csv",
+    dest="/path/to/remote/file.csv",
 )
 
 table_config = {
@@ -95,7 +95,7 @@ query = dataset.upload_query(
     sql_file="/tmp/query.sql"
 )
 
-downloaded = query.download(local_path="/tmp/downloaded_query.csv")
+downloaded = query.download("/tmp/downloaded_query.csv")
 
 if downloaded:
     print("Query output downloaded successfully")

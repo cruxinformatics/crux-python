@@ -1,199 +1,95 @@
 # Labels
 
-## Add Label to Existing Dataset
+## Resources
+
+### View labels
+
+Resources have a `dict` for labels set as the `labels` property.
 
 ```python
 from crux import Crux
-from crux.exceptions import CruxAPIException, CruxClientException
 
 conn = Crux()
+dataset = conn.get_dataset("A_DATASET_ID")
+file = dataset.get_file("/test_folder1/test_folder2/test_file.csv")
 
-try:
-    dataset_object = conn.get_dataset(id="567890")
-
-    if dataset_object.add_label("test_label1", "test_value1"):
-        print("Label added to Dataset")
-
-except CruxAPIException as err:
-    print(err.status_code, err.error_message)
-except CruxClientException as err:
-    print(err.message)
+print(file.labels)
 ```
 
-## Get Label from Dataset
+### Search resources in dataset by label
 
 ```python
 from crux import Crux
-from crux.exceptions import CruxAPIException, CruxClientException
 
 conn = Crux()
+dataset = conn.get_dataset("A_DATASET_ID")
 
-try:
-    dataset_object = conn.get_dataset(id="567890")
+predicates= [
+    {"op":"eq", "key":"label_key1", "val":"label_value1"}
+]
+resource_list = dataset.find_resources_by_label(predicates=predicates)
 
-    label = dataset_object.get_label("test_label1")
-
-    print(label.label_key, label.label_value)
-
-except CruxAPIException as err:
-    print(err.status_code, err.error_message)
-except CruxClientException as err:
-    print(err.message)
+for resource in resource_list:
+    resource.download("/tmp/{file_name}".format(resource.name))
 ```
 
-## Delete Label from Dataset
+### Add label to resource
 
 ```python
 from crux import Crux
-from crux.exceptions import CruxAPIException, CruxClientException
 
 conn = Crux()
+dataset = conn.get_dataset("A_DATASET_ID")
 
-try:
-    dataset_object = conn.get_dataset(id="567890")
+file = dataset.upload_file(
+    src="/tmp/test_file.csv",
+    dest="/test_folder1/test_folder2/test_file.csv",
+)
 
-    if dataset_object.delete_label("test_label1"):
-        print("Label Deleted from Dataset")
-
-except CruxAPIException as err:
-    print(err.status_code, err.error_message)
-except CruxClientException as err:
-    print(err.message)
+file.add_label("label_key1", "label_value1")
 ```
 
-## Search Resources in Dataset by Label
+### Delete label from resource
 
 ```python
 from crux import Crux
-from crux.exceptions import CruxAPIException, CruxClientException
 
 conn = Crux()
+dataset = conn.get_dataset("A_DATASET_ID")
 
-try:
-    dataset_object = conn.get_dataset(id="567890")
+file = dataset.get_file(path="/test_folder1/test_folder2/test_file.csv")
 
-    predicates=[
-        {"op":"eq","key":"test_label1","val":"test_value1"}
-    ]
-
-    resource_list = dataset_object.find_resources_by_label(predicates=predicates)
-
-    for resource in resource_list:
-        resource.download(local_path="/tmp/{file_name}".format(resource.name))
-
-except CruxAPIException as err:
-    print(err.status_code, err.error_message)
-except CruxClientException as err:
-    print(err.message)
+file.delete_label("label_key1")
 ```
 
-## Add Label to Resource
+## Datasets
+
+### Add label to existing dataset
 
 ```python
 from crux import Crux
-from crux.exceptions import CruxAPIException, CruxClientException
 
 conn = Crux()
-
-try:
-    dataset_object = conn.get_dataset(id="567890")
-
-    file_object = dataset_object.upload_file(
-            tags=["test_tag1"],
-            description="test_description",
-            path="/test_folder1/test_folder2/test_file.csv",
-            local_path="/tmp/test_file.csv"
-            )
-
-    file_object2 = dataset_object.upload_file(
-        tags=["test_tag1"],
-        description="test_description",
-        path="/test_folder1/test_folder2/test_file2.csv",
-        local_path="/tmp/test_file.csv"
-        )
-
-    if file_object.add_label("test_label1", "test_value1"):
-        print("Label added to resource")
-    if file_object2.add_label("test_label1", "test_value1"):
-        print("Label added to resource")
-
-except CruxAPIException as err:
-    print(err.status_code, err.error_message)
-except CruxClientException as err:
-    print(err.message)
+dataset = conn.get_dataset("A_DATASET_ID")
+dataset.add_label("label_key1", "label_value1")
 ```
 
-## Get Label from Resource
+### Get label from dataset
 
 ```python
 from crux import Crux
-from crux.exceptions import CruxAPIException, CruxClientException
 
 conn = Crux()
-
-try:
-    dataset_object = conn.get_dataset(id="567890")
-
-    file_object = dataset_object.get_file(path="/test_folder1/test_folder2/test_file.csv")
-    file_object2 = dataset_object.get_file(path="/test_folder1/test_folder2/test_file2.csv")
-
-    print(file_object.labels.get("test_label1"))
-    print(file_object2.labels.get("test_label1))
-
-except CruxAPIException as err:
-    print(err.status_code, err.error_message)
-except CruxClientException as err:
-    print(err.message)
+dataset= conn.get_dataset("A_DATASET_ID")
+label = dataset.get_label("label_key1")
 ```
 
-## Delete Label from Resource
+### Delete label from dataset
 
 ```python
 from crux import Crux
-from crux.exceptions import CruxAPIException, CruxClientException
 
 conn = Crux()
-
-try:
-    dataset_object = conn.get_dataset(id="567890")
-
-    file_object = dataset_object.get_file(path="/test_folder1/test_folder2/test_file.csv")
-    file_object2 = dataset_object.get_file(path="/test_folder1/test_folder2/test_file2.csv")
-
-    if file_object.delete_label("test_label1"):
-        print("Label Deleted from Resource")
-    if file_object2.delete_label("test_label1"):
-        print("Label Deleted from Resource")
-
-except CruxAPIException as err:
-    print(err.status_code, err.error_message)
-except CruxClientException as err:
-    print(err.message)
+dataset = conn.get_dataset("A_DATASET_ID")
+dataset.delete_label("label_key1")
 ```
-
-## Fetch All Labels of Resource
-
-```python
-from crux import Crux
-from crux.exceptions import CruxAPIException, CruxClientException
-
-conn = Crux()
-
-try:
-    dataset_object = conn.get_dataset(id="567890")
-
-    file_object = dataset_object.get_file(path="/test_folder1/test_folder2/test_file.csv")
-
-
-    if file_object.add_label("test_label1","test_value1"):
-        print("Label Added to the Resource")
-    if file_object.add_label("test_label2","test_value2"):
-        print("Label Added to the Resource")
-
-    for label in file_object.labels:
-        print(label, file_object.labels.get(label))
-
-except CruxAPIException as err:
-    print(err.status_code, err.error_message)
-except CruxClientException as err:
-    print(err.message)

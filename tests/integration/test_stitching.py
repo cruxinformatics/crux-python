@@ -12,17 +12,17 @@ def test_stitch_with_file_object(dataset, helpers):
     )
 
     file_1 = dataset.upload_file(
+        stitch_file,
+        "/twitter_" + helpers.generate_random_string(16) + ".avro",
         tags=["test_tag1"],
         description="test_description",
-        path="/twitter_" + helpers.generate_random_string(4) + ".avro",
-        local_path=stitch_file,
     )
 
     file_2 = dataset.upload_file(
+        stitch_file,
+        "/twitter_" + helpers.generate_random_string(16) + ".avro",
         tags=["test_tag1"],
         description="test_description",
-        path="/twitter_" + helpers.generate_random_string(4) + ".avro",
-        local_path=stitch_file,
     )
 
     file_obj, job_id = dataset.stitch(
@@ -42,22 +42,16 @@ def test_stitch(dataset, helpers):
         "twitter.avro",
     )
 
-    file_1_name = "/twitter_str_" + helpers.generate_random_string(4) + ".avro"
+    file_1_name = "/twitter_str_" + helpers.generate_random_string(16) + ".avro"
 
     dataset.upload_file(
-        tags=["test_tag1"],
-        description="test_description",
-        path=file_1_name,
-        local_path=stitch_file,
+        stitch_file, file_1_name, tags=["test_tag1"], description="test_description"
     )
 
-    file_2_name = "/twitter_str_" + helpers.generate_random_string(4) + ".avro"
+    file_2_name = "/twitter_str_" + helpers.generate_random_string(16) + ".avro"
 
     dataset.upload_file(
-        tags=["test_tag1"],
-        description="test_description",
-        path=file_2_name,
-        local_path=stitch_file,
+        stitch_file, file_2_name, tags=["test_tag1"], description="test_description"
     )
 
     file_obj, job_id = dataset.stitch(

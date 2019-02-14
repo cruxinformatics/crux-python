@@ -290,6 +290,8 @@ class Resource(CruxModel):
             name (str): Name of resource. Defaults to None.
             description (str): Description of the resource. Defaults to None.
             tags (:obj:`list` of :obj:`str`): List of tags. Defaults to None.
+            refresh (bool): True if object refresh is required, False otherwise,
+                It is ignored if name, description or tags are set.
 
         Returns:
             bool: True, if resource is updated.

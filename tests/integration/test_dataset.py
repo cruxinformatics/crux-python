@@ -26,6 +26,7 @@ def test_whoami(connection):
     assert identity.type == "user"
 
 
+@pytest.mark.skip(reason="Test is flaky")
 @pytest.mark.usefixtures("connection", "dataset")
 def test_set_datasets_provenance(connection, dataset):
     provenance = {

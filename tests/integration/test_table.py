@@ -6,15 +6,15 @@ import pytest
 
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_load_file_into_table(dataset, helpers):
-    upload_path = os.path.join(
+    file_path = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "data",
         "test_file.csv",
     )
 
-    file_name = "test_file_" + helpers.generate_random_string(4) + ".csv"
+    file_name = "test_file_" + helpers.generate_random_string(16) + ".csv"
 
-    file = dataset.upload_file(path="/" + file_name, local_path=upload_path)
+    file = dataset.upload_file(file_path, "/" + file_name)
 
     assert file.name == file_name
 
@@ -25,7 +25,7 @@ def test_load_file_into_table(dataset, helpers):
         ]
     }
 
-    table_name = "bank_table_" + helpers.generate_random_string(4)
+    table_name = "bank_table_" + helpers.generate_random_string(16)
 
     table = dataset.create_table(path="/" + table_name, config=table_config)
 
@@ -39,14 +39,14 @@ def test_load_file_into_table(dataset, helpers):
 
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_create_run_query(dataset, helpers):
-    upload_path = os.path.join(
+    file_path = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "data",
         "test_file.csv",
     )
-    file_name = "test_file_" + helpers.generate_random_string(4) + ".csv"
+    file_name = "test_file_" + helpers.generate_random_string(16) + ".csv"
 
-    dataset.upload_file(path="/" + file_name, local_path=upload_path)
+    dataset.upload_file(file_path, "/" + file_name)
 
     table_config = {
         "schema": [
@@ -55,13 +55,13 @@ def test_create_run_query(dataset, helpers):
         ]
     }
 
-    table_name = "bank_table_" + helpers.generate_random_string(4)
+    table_name = "bank_table_" + helpers.generate_random_string(16)
 
     dataset.create_table(path="/" + table_name, config=table_config)
 
     query_config = {"query": "SELECT * FROM " + table_name}
 
-    query_name = "bank_query" + helpers.generate_random_string(4)
+    query_name = "bank_query" + helpers.generate_random_string(16)
 
     query = dataset.create_query(path="/" + query_name, config=query_config)
 
@@ -93,12 +93,12 @@ def test_upload_download_query(dataset, helpers):
     sql_path = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "data", "query.sql"
     )
-    query_name = "bank_query" + helpers.generate_random_string(4)
+    query_name = "bank_query" + helpers.generate_random_string(16)
 
     query = dataset.upload_query(path="/" + query_name, sql_file=sql_path)
 
     assert query.name == query_name
 
     with NamedTemporaryFile() as temp_query_file:
-        download_result = query.download(local_path=temp_query_file.name)
+        download_result = query.download(temp_query_file.name)
         assert download_result is True

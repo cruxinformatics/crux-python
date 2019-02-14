@@ -178,6 +178,11 @@ class ResumableUploadSignedSession(Session):
         request_headers = headers.copy() if headers is not None else {}
 
         if self.headers:
+            # Lowercasing the headers so that it can overwrite JSON API specific hardcoded
+            # headers. For Eg: ResumableUpload hardcodes content-type to application/json.
+            # and header received by API is Content-Type, due to this both Content-Type,
+            # and content-type headers were passed previously.
+            self.headers = {k.lower(): v for k, v in self.headers.items()}
             request_headers.update(self.headers)
 
         response = super(ResumableUploadSignedSession, self).request(

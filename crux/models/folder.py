@@ -1,9 +1,13 @@
 """Module contains File model."""
 
+import logging
 from typing import Any, Dict, Union  # noqa: F401 pylint: disable=unused-import
 
 from crux.models.permission import Permission
 from crux.models.resource import Resource
+
+
+log = logging.getLogger(__name__)
 
 
 class Folder(Resource):
@@ -48,10 +52,12 @@ class Folder(Resource):
             "resourceIds": [self.id],
         }
         if recursive:
+            log.debug("Applying permission in recursive mode to resource %s", self.id)
             return self.connection.api_call(
                 "POST", ["permissions", "bulk"], headers=headers, json=body
             )
         else:
+            log.debug("Applying permission to resource %s", self.id)
             return self.connection.api_call(
                 "PUT",
                 ["permissions", self.id, identity_id, permission],
@@ -83,10 +89,12 @@ class Folder(Resource):
             "resourceIds": [self.id],
         }
         if recursive:
+            log.debug("Deleting permission in recursive mode from resource %s", self.id)
             return self.connection.api_call(
                 "POST", ["permissions", "bulk"], headers=headers, json=body
             )
         else:
+            log.debug("Deleting permission in from resource %s", self.id)
             return self.connection.api_call(
                 "DELETE",
                 ["permissions", self.id, identity_id, permission],

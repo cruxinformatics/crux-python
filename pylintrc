@@ -27,4 +27,4 @@ output-format=colorized
 reports=no
 
 [BASIC]
-good-names=fh,id,type,_
+good-names=fh,id,type,_,log

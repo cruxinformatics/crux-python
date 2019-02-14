@@ -1,5 +1,6 @@
 """Module contains File model."""
 
+import logging
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -16,6 +17,9 @@ from crux._compat import unicode
 from crux._utils import DEFAULT_CHUNK_SIZE, get_signed_url_session, valid_chunk_size
 from crux.exceptions import CruxClientError
 from crux.models.resource import MediaType, Resource
+
+
+log = logging.getLogger(__name__)
 
 
 class File(Resource):
@@ -99,8 +103,16 @@ class File(Resource):
                     if refreshes_without_progress <= max_url_refreshes_without_progress:
                         new_signed_url = self._get_signed_url()
                         fetched_signed_urls += 1
+                        log.debug(
+                            "fetched_signed_urls count for download is %s",
+                            fetched_signed_urls,
+                        )
                         total_bytes_from_urls.append(0)
                         refreshes_without_progress += 1
+                        log.debug(
+                            "refreshes_without_progress count for download is %s",
+                            refreshes_without_progress,
+                        )
                         bytes_at_last_refresh = sum_total_bytes_from_urls
                     else:
                         # Exceeded max new signed URLs without progress
@@ -109,13 +121,23 @@ class File(Resource):
                         )
                 else:
                     refreshes_without_progress = 0
+                    log.debug("Fetching new singed url")
                     new_signed_url = self._get_signed_url()
                     fetched_signed_urls += 1
+                    log.debug(
+                        "fetched_signed_urls count for download is %s",
+                        fetched_signed_urls,
+                    )
                     total_bytes_from_urls.append(0)
                     bytes_at_last_refresh = sum_total_bytes_from_urls
 
                 # Replace the download object with a new one, using a new signed URL,
                 # but start where the last download object left off.
+                log.debug(
+                    "Resuming download with new_signed_url %s starting at %s bytes",
+                    new_signed_url,
+                    sum_total_bytes_from_urls,
+                )
                 download = ChunkedDownload(
                     new_signed_url,
                     chunk_size,
@@ -160,6 +182,7 @@ class File(Resource):
 
         # If we must use only Crux domains, download via the API.
         if self.connection.crux_config.only_use_crux_domains:
+            log.debug("Using Crux Domain for downloading file resource %s", self.id)
             return self._download(
                 file_obj=file_obj, media_type=None, chunk_size=chunk_size
             )
@@ -168,6 +191,7 @@ class File(Resource):
             return self._dl_signed_url(file_obj=file_obj, chunk_size=chunk_size)
         # Use google-resumable-media for large files
         else:
+            log.debug("Using Signed url for downloading file resource %s", self.id)
             return self._dl_signed_url_resumable(
                 file_obj=file_obj, chunk_size=chunk_size
             )

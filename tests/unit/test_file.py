@@ -74,5 +74,5 @@ def monkeypatch_download(local_path):
 
 def test_download(monkeypatch, file):
     monkeypatch.setattr(file, "download", monkeypatch_download)
-    result = file.download(local_path="/tmp/test.csv")
+    result = file.download("/tmp/test.csv")
     assert result is True

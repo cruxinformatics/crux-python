@@ -26,12 +26,12 @@ class Table(Resource):
             "folder": self.folder,
         }
 
-    def download(self, local_path, media_type, chunk_size=DEFAULT_CHUNK_SIZE):
+    def download(self, dest, media_type, chunk_size=DEFAULT_CHUNK_SIZE):
         # type: (str, str, int) -> bool
         """Downloads the table resource.
 
         Args:
-            local_path (str or file): Local OS path at which file resource will be downloaded.
+            dest (str or file): Local OS path at which file resource will be downloaded.
             media_type (str): Content Type for download.
             chunk_size (int): Number of bytes to be read in memory.
 
@@ -39,18 +39,14 @@ class Table(Resource):
             bool: True if it is downloaded.
 
         Raises:
-            TypeError: If local_path is not a file like or string type.
+            TypeError: If dest is not a file like or string type.
         """
-        if hasattr(local_path, "write"):
-            return self._download(
-                local_path, media_type=media_type, chunk_size=chunk_size
-            )
-        elif isinstance(local_path, (str, unicode)):
-            with open(local_path, "wb") as file_pointer:
+        if hasattr(dest, "write"):
+            return self._download(dest, media_type=media_type, chunk_size=chunk_size)
+        elif isinstance(dest, (str, unicode)):
+            with open(dest, "wb") as file_obj:
                 return self._download(
-                    file_pointer, media_type=media_type, chunk_size=chunk_size
+                    file_obj, media_type=media_type, chunk_size=chunk_size
                 )
         else:
-            raise TypeError(
-                "Invalid Data Type for local_path: {}".format(type(local_path))
-            )
+            raise TypeError("Invalid Data Type for dest: {}".format(type(dest)))

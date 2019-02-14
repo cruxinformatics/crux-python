@@ -7,7 +7,6 @@ from crux import Crux
 
 conn = Crux()
 
-
 dataset_object = conn.get_dataset(id="567890")
 
 destination_file = dataset_object.create_file(
@@ -55,7 +54,7 @@ file_obj, job_id = dataset_object.stitch(
     }
 )
 
-if file_obj.download(local_path="/tmp/stitched_twitter.avro", media_type="avro/binary"):
+if file_obj.download("/tmp/stitched_twitter.avro", media_type="avro/binary"):
     print("Downloaded the file")
 
 job = datast_object.get_stitch_job(job_id)

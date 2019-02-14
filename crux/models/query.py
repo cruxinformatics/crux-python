@@ -70,14 +70,14 @@ class Query(Resource):
         return data.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     def download(
-        self, local_path, format="csv", params=None
+        self, dest, format="csv", params=None
     ):  # It is by design pylint: disable=redefined-builtin
         # type: (str, str, Dict[Any, Any]) -> bool
         """Method which streams the Query
 
         Args:
-            local_path (str): Local OS path at which resource will be downloaded.
-            format (str): Output format of the query. Defaults to csv.
+            dest (str): Local OS path at which resource will be downloaded.
+            media_type (str): Output format of the query. Defaults to csv.
             params (dict): Run parameters. Defaults to None.
 
         Returns:
@@ -95,7 +95,7 @@ class Query(Resource):
             headers=headers,
         )
 
-        with open(local_path, "w") as local_file:
+        with open(dest, "w") as local_file:
             for line in data.iter_lines():
                 if line:
                     dcd_line = line.decode("utf-8")

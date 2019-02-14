@@ -5,15 +5,14 @@ import pytest
 
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_file_add_delete_permission(dataset, helpers):
-    upload_path = os.path.join(
+    file_path = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "data",
         "test_file.csv",
     )
 
     file_1 = dataset.upload_file(
-        local_path=upload_path,
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv",
+        file_path, "/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
 
     permission = file_1.add_permission()
@@ -33,21 +32,22 @@ def test_file_add_delete_permission(dataset, helpers):
     file_1.delete()
 
 
+@pytest.mark.skip(reason="Test is too slow")
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_folder_add_delete_permission(dataset, helpers):
-    upload_path = os.path.join(
+    file_path = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "data",
         "test_file.csv",
     )
 
     file_1 = dataset.upload_file(
-        local_path=upload_path,
-        path="/test_folder/test_file_" + helpers.generate_random_string(4) + ".csv",
+        file_path,
+        "/test_folder/test_file_" + helpers.generate_random_string(16) + ".csv",
     )
     file_2 = dataset.upload_file(
-        local_path=upload_path,
-        path="/test_folder/test_file_" + helpers.generate_random_string(4) + ".csv",
+        file_path,
+        "/test_folder/test_file_" + helpers.generate_random_string(16) + ".csv",
     )
 
     folder_1 = dataset.get_folder(path="/test_folder")
@@ -88,25 +88,24 @@ def test_folder_add_delete_permission(dataset, helpers):
 
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_dataset_add_permission(dataset, helpers):
-    upload_path = os.path.join(
+    file_path = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "data",
         "test_file.csv",
     )
 
     file_1 = dataset.upload_file(
-        local_path=upload_path,
-        path="/test_file_" + helpers.generate_random_string(4) + ".csv",
+        file_path, "/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
 
     file_2 = dataset.upload_file(
-        local_path=upload_path,
-        path="/test_folder/test_file_" + helpers.generate_random_string(4) + ".csv",
+        file_path,
+        "/test_folder/test_file_" + helpers.generate_random_string(16) + ".csv",
     )
 
     file_3 = dataset.upload_file(
-        local_path=upload_path,
-        path="/test_folder/test_file_" + helpers.generate_random_string(4) + ".csv",
+        file_path,
+        "/test_folder/test_file_" + helpers.generate_random_string(16) + ".csv",
     )
 
     dataset_perm_result = dataset.add_permission()

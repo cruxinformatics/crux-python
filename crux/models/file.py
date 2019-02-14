@@ -232,7 +232,7 @@ class File(Resource):
         else:
             raise TypeError("Invalid Data Type for dest: {}".format(type(dest)))
 
-    def _ul_signed_url(self, fil_obj, media_type):
+    def _ul_signed_url_resumable(self, fil_obj, media_type):
 
         headers = {
             "Content-Type": "application/json",
@@ -321,7 +321,7 @@ class File(Resource):
 
         else:
             log.debug("Using Signed url for uploading file resource %s", self.id)
-            return self._ul_signed_url(fil_obj, media_type)
+            return self._ul_signed_url_resumable(fil_obj, media_type)
 
     def upload(self, src, media_type=None):
         # type: (Union[IO, str], str) -> File

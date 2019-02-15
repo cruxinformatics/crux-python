@@ -14,7 +14,12 @@ from google.resumable_media.common import InvalidResponse  # type: ignore
 from google.resumable_media.requests import ChunkedDownload  # type: ignore
 
 from crux._compat import unicode
-from crux._utils import DEFAULT_CHUNK_SIZE, get_signed_url_session, valid_chunk_size
+from crux._utils import (
+    DEFAULT_CHUNK_SIZE,
+    get_signed_url_session,
+    Headers,
+    valid_chunk_size,
+)
 from crux.exceptions import CruxClientError
 from crux.models.resource import MediaType, Resource
 
@@ -41,7 +46,9 @@ class File(Resource):
         }
 
     def _get_signed_url(self):
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         response = self.connection.api_call(
             "POST", ["resources", self.id, "content-url"], headers=headers, json={}
         )
@@ -161,7 +168,8 @@ class File(Resource):
         Raises:
             ValueError: If chunk_size is not multiple of 256 KiB.
         """
-        headers = {"Accept": "*/*"}
+
+        headers = Headers({"Accept": "*/*"})
 
         if not valid_chunk_size(chunk_size):
             raise ValueError("chunk_size should be multiple of 256 KiB")
@@ -241,7 +249,9 @@ class File(Resource):
             if media_type is None:
                 media_type = MediaType.detect(getattr(src, "name"))
 
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
+            headers = Headers(
+                {"Content-Type": media_type, "Accept": "application/json"}
+            )
 
             resp = self.connection.api_call(
                 "PUT", ["resources", self.id, "content"], data=src, headers=headers
@@ -254,7 +264,9 @@ class File(Resource):
             if media_type is None:
                 media_type = MediaType.detect(src)
 
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
+            headers = Headers(
+                {"Content-Type": media_type, "Accept": "application/json"}
+            )
 
             with open(src, mode="rb") as data:
                 resp = self.connection.api_call(

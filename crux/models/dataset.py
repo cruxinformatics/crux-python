@@ -14,7 +14,7 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 )
 
 from crux._compat import unicode
-from crux._utils import split_posixpath_filename_dirpath
+from crux._utils import Headers, split_posixpath_filename_dirpath
 from crux.exceptions import CruxAPIError, CruxClientError, CruxResourceNotFoundError
 from crux.models._factory import get_resource_object
 from crux.models.file import File
@@ -196,7 +196,9 @@ class Dataset(CruxModel):
             list: List of provenance dictionaries containing DatasetID, WorkFlowID,
                 systemOfRecord, cronSpec, createdAt and modifiedAt keys.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         response = self.connection.api_call(
             "GET", ["datasets", self.id, "provenance"], headers=headers
         )
@@ -210,7 +212,9 @@ class Dataset(CruxModel):
         Returns:
             bool: True if dataset is deleted.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         return self.connection.api_call(
             "DELETE", ["datasets", self.id], headers=headers
         )
@@ -231,7 +235,9 @@ class Dataset(CruxModel):
             ValueError: It is raised if name, description or tags are unset.
             TypeError: It is raised if tags is not of type list.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         body = {}  # type: Dict[str, Union[str, List]]
         if name is not None:
             body["name"] = name
@@ -270,7 +276,9 @@ class Dataset(CruxModel):
             crux.models.File: File Object.
         """
 
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
 
         tags = tags if tags else []
 
@@ -308,7 +316,9 @@ class Dataset(CruxModel):
             crux.models.Table: Table Object
         """
 
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
 
         table_name, folder = split_posixpath_filename_dirpath(path)
 
@@ -348,7 +358,9 @@ class Dataset(CruxModel):
             crux.models.Folder: Folder Object.
         """
 
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
 
         tags = tags if tags else []
 
@@ -655,7 +667,10 @@ class Dataset(CruxModel):
         sort=None,
     ):
 
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
+
         params = {"folder": folder, "offset": offset, "limit": limit}
 
         if sort:
@@ -694,7 +709,9 @@ class Dataset(CruxModel):
             TypeError: If source_file or dest_table is not file or string object.
         """
 
-        headers = {"Content-Type": "text/csv", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
 
         if isinstance(source_file, File):
             src_file = source_file
@@ -762,7 +779,9 @@ class Dataset(CruxModel):
                     file_resource.delete()
                     raise LookupError(err)
 
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
+            headers = Headers(
+                {"Content-Type": "application/json", "Accept": "application/json"}
+            )
 
             try:
                 return self.connection.api_call(
@@ -785,7 +804,9 @@ class Dataset(CruxModel):
                     file_resource.delete()
                     raise LookupError(err)
 
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
+            headers = Headers(
+                {"Content-Type": "application/json", "Accept": "application/json"}
+            )
 
             try:
                 with open(src, mode="rb") as data:
@@ -821,7 +842,9 @@ class Dataset(CruxModel):
 
         query_name, folder = split_posixpath_filename_dirpath(path)
 
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
 
         tags = tags if tags else []
 
@@ -897,7 +920,9 @@ class Dataset(CruxModel):
         Returns:
             bool: True if permission is applied.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         body = {
             "identityId": identity_id,
             "permission": permission,
@@ -967,7 +992,9 @@ class Dataset(CruxModel):
         Returns:
             bool: True if it is able to delete the permission.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         body = {
             "identityId": identity_id,
             "permission": permission,
@@ -1014,7 +1041,9 @@ class Dataset(CruxModel):
         Returns:
             bool: True if labels are added.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         return self.connection.api_call(
             "PUT",
             ["datasets", self.id, "labels", label_key, label_value],
@@ -1031,7 +1060,9 @@ class Dataset(CruxModel):
         Returns:
             bool: True if labels are deleted.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         return self.connection.api_call(
             "DELETE", ["datasets", self.id, "labels", label_key], headers=headers
         )
@@ -1046,7 +1077,9 @@ class Dataset(CruxModel):
         Returns:
             crux.models.Label: Label Object.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         return self.connection.api_call(
             "GET",
             ["datasets", self.id, "labels", label_key],
@@ -1123,7 +1156,9 @@ class Dataset(CruxModel):
         }  # type: Dict[str, List[Dict[str,str]]]
 
         after = None
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
 
         while True:
 
@@ -1177,7 +1212,9 @@ class Dataset(CruxModel):
             tuple (:obj:`crux.models.File`, :obj:`str`): File object of destination resource.
                     Job ID for background running job.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         source_resource_ids = list()
         for resource in source_resources:
             if isinstance(resource, File):
@@ -1244,7 +1281,9 @@ class Dataset(CruxModel):
         Returns:
             crux.models.StitchJob: StitchJob object.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         return self.connection.api_call(
             "GET", ["datasets", "stitch", job_id], headers=headers, model=StitchJob
         )

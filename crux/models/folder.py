@@ -3,6 +3,7 @@
 import logging
 from typing import Any, Dict, Union  # noqa: F401 pylint: disable=unused-import
 
+from crux._utils import Headers
 from crux.models.permission import Permission
 from crux.models.resource import Resource
 
@@ -44,7 +45,11 @@ class Folder(Resource):
             bool or crux.models.Permission: If recursive is set then it returns True.
                 If recursive is unset then it returns Permission object.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
+
         body = {
             "identityId": identity_id,
             "permission": permission,
@@ -81,7 +86,10 @@ class Folder(Resource):
         Returns:
             bool: True if it is able to delete it.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
+
         body = {
             "identityId": identity_id,
             "permission": permission,

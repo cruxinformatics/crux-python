@@ -27,7 +27,7 @@ from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disab
 )
 
 from crux._config import CruxConfig
-from crux._utils import url_builder
+from crux._utils import Headers, url_builder
 from crux.exceptions import (
     CruxAPIError,
     CruxClientConnectionError,
@@ -141,7 +141,7 @@ class CruxClient(object):
         )
 
         if headers is None:
-            headers = {}
+            headers = Headers({})
 
         if params is None:
             params = {}
@@ -153,7 +153,8 @@ class CruxClient(object):
 
         user_agent = self.crux_config.user_agent  # type: Text
 
-        headers.update({"Authorization": bearer_token, "User-Agent": user_agent})
+        headers["Authorization"] = bearer_token
+        headers["User-Agent"] = user_agent
 
         retry = Retry(
             total=max_total_retries,

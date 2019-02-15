@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Union  # noqa: F401 pylint: disable=unused-i
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
 from crux._compat import Enum
-from crux._utils import DEFAULT_CHUNK_SIZE
+from crux._utils import DEFAULT_CHUNK_SIZE, Headers
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
 
@@ -277,7 +277,9 @@ class Resource(CruxModel):
         Returns:
             bool: True if it is deleted.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         return self.connection.api_call(
             "DELETE", ["resources", self.id], headers=headers
         )
@@ -298,7 +300,9 @@ class Resource(CruxModel):
             ValueError: It is raised if name, description or tags are unset.
             TypeError: It is raised if tags are not of type List.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         body = {}  # type: Dict[str, Union[str, List, Dict]]
 
         if name is not None:
@@ -339,7 +343,9 @@ class Resource(CruxModel):
         Returns:
             crux.models.Permission: Permission Object.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         return self.connection.api_call(
             "PUT",
             ["permissions", self.id, identity_id, permission],
@@ -360,7 +366,9 @@ class Resource(CruxModel):
         Returns:
             bool: True if it is able to delete it.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         return self.connection.api_call(
             "DELETE", ["permissions", self.id, identity_id, permission], headers=headers
         )
@@ -372,7 +380,7 @@ class Resource(CruxModel):
         Returns:
             list (:obj:`crux.models.Permission`): List of Permission Objects.
         """
-        headers = {"Accept": "application/json"}
+        headers = Headers({"Accept": "application/json"})
         return self.connection.api_call(
             "GET",
             ["resources", self.id, "permissions"],
@@ -391,7 +399,9 @@ class Resource(CruxModel):
         Returns:
             bool: True if label is added, False otherwise.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         response_result = self.connection.api_call(
             "PUT",
             [
@@ -422,7 +432,9 @@ class Resource(CruxModel):
         Returns:
             bool: True if label is deleted, False otherwise.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         response_result = self.connection.api_call(
             "DELETE",
             ["datasets", self.dataset_id, "resources", self.id, "labels", label_key],
@@ -445,7 +457,9 @@ class Resource(CruxModel):
         Returns:
             str: Folder name of the resource.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
         response = self.connection.api_call(
             "GET", ["resources", self.id, "folderpath"], headers=headers
         )
@@ -455,7 +469,7 @@ class Resource(CruxModel):
     def _download(self, file_obj, media_type, chunk_size=DEFAULT_CHUNK_SIZE):
 
         if media_type is not None:
-            headers = {"Accept": media_type}
+            headers = Headers({"Accept": media_type})
         else:
             headers = None
 

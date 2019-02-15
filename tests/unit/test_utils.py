@@ -1,6 +1,7 @@
 import pytest
 
 from crux._utils import (
+    Headers,
     quote,
     split_posixpath_filename_dirpath,
     str_to_bool,
@@ -55,3 +56,22 @@ def test_str_to_bool():
 
     with pytest.raises(ValueError):
         assert str_to_bool("crux")
+
+
+def test_headers():
+    header = Headers({"Header-Key": "HeaderValue"})
+    assert header == {"header-key": "HeaderValue"}
+    header["Header-Key-2"] = "HeaderValue2"
+    assert header == {"header-key": "HeaderValue", "header-key-2": "HeaderValue2"}
+    header.update({"Header-Key-3": "HeaderValue3"})
+    assert header == {
+        "header-key": "HeaderValue",
+        "header-key-2": "HeaderValue2",
+        "header-key-3": "HeaderValue3",
+    }
+    header.update({"Header-Key": "ChangedHeaderValue"})
+    assert header == {
+        "header-key": "ChangedHeaderValue",
+        "header-key-2": "HeaderValue2",
+        "header-key-3": "HeaderValue3",
+    }

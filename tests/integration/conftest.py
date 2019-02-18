@@ -31,3 +31,13 @@ def dataset():
     dataset = conn.create_dataset(name=dataset_name, description="test_description")
     yield dataset
     dataset.delete()
+
+
+@pytest.fixture(scope="session")
+def dataset_with_crux_domain():
+    conn = Crux(only_use_crux_domains=True)
+    char_set = string.ascii_uppercase + string.digits
+    dataset_name = "crux_py_dataset_" + "".join(random.sample(char_set * 6, 6))
+    dataset = conn.create_dataset(name=dataset_name, description="test_description")
+    yield dataset
+    dataset.delete()

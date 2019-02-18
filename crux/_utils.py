@@ -114,7 +114,9 @@ def str_to_bool(string):
         raise ValueError("Cannot convert {} to bool".format(string))
 
 
-def get_signed_url_session(max_connect=6, max_read=3, max_total=10, backoff_factor=1):
+def get_signed_url_session(
+    session_class=Session, max_connect=6, max_read=3, max_total=10, backoff_factor=1
+):
     # type (int, int, int, float) -> Session
     """Gets the session object.
 
@@ -125,8 +127,14 @@ def get_signed_url_session(max_connect=6, max_read=3, max_total=10, backoff_fact
         backoff_factor (float): Backoff factor. Defaults to 1.
     Returns:
         requests.Session: Session Object.
+    Raises:
+        TypeError: If session_class is not subclass of requests.Session.
     """
-    session = Session()
+    if not issubclass(session_class, Session):
+        raise TypeError("session_class should be subclass of requests.Session")
+
+    session = session_class()
+
     retries = Retry(
         total=max_total,
         connect=max_connect,
@@ -172,3 +180,27 @@ class Headers(dict):
         # type(dict) -> None
         for key, value in input_dict.items():
             self[key.lower()] = value
+
+
+# google.resumable_media.requests.ResumableUpload is only compatible with JSON API endpoint.
+# Signed URL uses XML API Endpoint, which requires setting specific headers.
+# ResumableUploadSingedSession is added to make google.resumable_media.requests.ResumableUpload
+# compatible with XML API endpoint by including XML API endpoint specific headers.
+class ResumableUploadSignedSession(Session):
+    """Session class to support Resumable Upload."""
+
+    def request(  # pylint: disable=arguments-differ
+        self, method, url, data=None, headers=None, **kwargs
+    ):
+        """Implementation of Requests' request."""
+
+        request_headers = Headers(headers.copy() if headers is not None else {})
+
+        if self.headers:
+            request_headers.update(self.headers)
+
+        response = super(ResumableUploadSignedSession, self).request(
+            method, url, data=data, headers=request_headers, **kwargs
+        )
+
+        return response

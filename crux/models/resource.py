@@ -70,7 +70,7 @@ class Resource(CruxModel):
         self._folder_id = folder_id
         self._description = description
         self._name = name
-        self._size = size
+        self._size = size if size else 0
         self._type = type
         self._config = config
         self._provenance = provenance
@@ -480,6 +480,23 @@ class Resource(CruxModel):
         for chunk in data.iter_content(chunk_size=chunk_size):
             file_obj.write(chunk)
 
+        return True
+
+    def refresh(self):
+        """Refresh Resource model from API backend.
+
+        Returns:
+            bool: True, if it is able to refresh the model,
+                False otherwise.
+        """
+        # type () -> bool
+        headers = Headers(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
+        resource_object = self.connection.api_call(
+            "GET", ["resources", self.id], headers=headers, model=Resource
+        )
+        self.__dict__.update(resource_object.__dict__)
         return True
 
 

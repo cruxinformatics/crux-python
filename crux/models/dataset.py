@@ -23,7 +23,7 @@ from crux.models.job import LoadJob, StitchJob
 from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.query import Query
-from crux.models.resource import MediaType, Resource
+from crux.models.resource import Resource
 from crux.models.table import Table
 
 
@@ -759,70 +759,16 @@ class Dataset(CruxModel):
 
         Returns:
             crux.models.File: File Object.
-
-        Raises:
-            TypeError: If src is not file or string object.
-            LookupError: If media type is not a valid type.
-            CruxClientError: If error occurs in api or in client.
         """
-
         tags = tags if tags else []
 
         file_resource = self.create_file(tags=tags, description=description, path=dest)
 
-        if hasattr(src, "write"):
-
-            if media_type is None:
-                try:
-                    media_type = MediaType.detect(getattr(src, "name"))
-                except LookupError as err:
-                    file_resource.delete()
-                    raise LookupError(err)
-
-            headers = Headers(
-                {"Content-Type": "application/json", "Accept": "application/json"}
-            )
-
-            try:
-                return self.connection.api_call(
-                    "PUT",
-                    ["resources", file_resource.id, "content"],
-                    data=src,
-                    headers=headers,
-                    model=File,
-                )
-            except (CruxClientError, CruxAPIError) as err:
-                file_resource.delete()
-                raise CruxClientError(err.message)
-
-        elif isinstance(src, str):
-
-            if media_type is None:
-                try:
-                    media_type = MediaType.detect(src)
-                except LookupError as err:
-                    file_resource.delete()
-                    raise LookupError(err)
-
-            headers = Headers(
-                {"Content-Type": "application/json", "Accept": "application/json"}
-            )
-
-            try:
-                with open(src, mode="rb") as data:
-                    return self.connection.api_call(
-                        "PUT",
-                        ["resources", file_resource.id, "content"],
-                        data=data,
-                        headers=headers,
-                        model=File,
-                    )
-            except (CruxClientError, CruxAPIError, IOError, OSError) as err:
-                file_resource.delete()
-                raise CruxClientError(str(err))
-
-        else:
-            raise TypeError("Invalid Data Type for src")
+        try:
+            return file_resource.upload(src, media_type=media_type)
+        except (CruxClientError, CruxAPIError):
+            file_resource.delete()
+            raise
 
     def create_query(self, path, config, tags=None, description=None):
         # type: (str, Dict[str, Any], List[str], str) -> Query
@@ -1230,10 +1176,10 @@ class Dataset(CruxModel):
                 )
 
         if isinstance(destination_resource, File):
-            log.debug("Stitch destination resources is of type crux.models.File")
+            log.debug("Stitch destination resource is of type crux.models.File")
             destination_file_object = destination_resource
         elif isinstance(destination_resource, str):
-            log.debug("Stitch destination resources is of type string")
+            log.debug("Stitch destination resource is of type string")
             if self._resource_exists(path=destination_resource):
                 destination_file_object = self._get_resource(
                     path=destination_resource, model=File

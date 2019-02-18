@@ -30,7 +30,7 @@ def dataset():
     dataset_name = "crux_py_dataset_" + "".join(random.sample(char_set * 6, 6))
     dataset = conn.create_dataset(name=dataset_name, description="test_description")
     yield dataset
-    dataset.delete()
+    # dataset.delete()
 
 
 @pytest.fixture(scope="session")
@@ -40,4 +40,4 @@ def dataset_with_crux_domain():
     dataset_name = "crux_py_dataset_" + "".join(random.sample(char_set * 6, 6))
     dataset = conn.create_dataset(name=dataset_name, description="test_description")
     yield dataset
-    dataset.delete()
+    # dataset.delete()

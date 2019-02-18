@@ -81,7 +81,7 @@ class File(Resource):
     def _dl_signed_url_resumable(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
         """Download from signed URL using google-resumable-media."""
         signed_url = self._get_signed_url()
-        transport = get_signed_url_session()
+        transport = self.connection.crux_config.session
 
         # Track how many bytes the client has downloaded since the last time they
         # got a new signed URL, and how many times that got a new URL without
@@ -286,7 +286,11 @@ class File(Resource):
 
         metadata = {"name": self.name}
 
-        transport = get_signed_url_session(session_class=ResumableUploadSignedSession)
+        normal_session = self.connection.crux_config.session
+
+        self.connection.crux_config.session = ResumableUploadSignedSession()
+
+        transport = self.connection.crux_config.session
 
         transport.headers = signed_url_headers
 
@@ -306,6 +310,8 @@ class File(Resource):
         log.debug("Upload completed using signed url for resource %s", self.id)
 
         payload = {"sessionId": session_id}
+
+        self.connection.crux_config.session = normal_session
 
         return self.connection.api_call(
             "POST",

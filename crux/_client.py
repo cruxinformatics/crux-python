@@ -12,7 +12,6 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     Union,
 )
 
-import requests
 from requests.adapters import HTTPAdapter
 from requests.exceptions import (
     ConnectTimeout,
@@ -168,9 +167,11 @@ class CruxClient(object):
 
         adapter = HTTPAdapter(max_retries=retry)
 
+        self.crux_config.session.proxies = self.crux_config.proxies
+
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
-                with requests.Session() as session:
+                with self.crux_config.session as session:
                     session.mount("http://", adapter)
                     session.mount("https://", adapter)
                     log.debug("Setting request stream: %s", stream)
@@ -184,7 +185,6 @@ class CruxClient(object):
                         json=json,
                         stream=stream,
                         params=params,
-                        proxies=self.crux_config.proxies,
                         timeout=(connect_timeout, read_timeout),
                     )
             except (HTTPError, TooManyRedirects) as err:

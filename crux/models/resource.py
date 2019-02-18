@@ -282,16 +282,14 @@ class Resource(CruxModel):
             "DELETE", ["resources", self.id], headers=headers
         )
 
-    def update(self, name=None, description=None, tags=None, refresh=False):
-        # type: (str, str, List[str], bool) -> bool
+    def update(self, name=None, description=None, tags=None):
+        # type: (str, str, List[str]) -> bool
         """Updates the metadata for Resource.
 
         Args:
             name (str): Name of resource. Defaults to None.
             description (str): Description of the resource. Defaults to None.
             tags (:obj:`list` of :obj:`str`): List of tags. Defaults to None.
-            refresh (bool): True if object refresh is required, False otherwise,
-                It is ignored if name, description or tags are set.
 
         Returns:
             bool: True, if resource is updated.
@@ -327,8 +325,6 @@ class Resource(CruxModel):
             if "description" in response_dict:
                 self._description = response.json().get("description")
             return True
-        elif refresh:
-            return self._refresh_metadata()
         else:
             raise ValueError("Name, Description or Tags should be set")
 
@@ -472,7 +468,14 @@ class Resource(CruxModel):
 
         return True
 
-    def _refresh_metadata(self):
+    def refresh(self):
+        """Refresh Resource model from API backend.
+
+        Returns:
+            bool: True, if it is able to refresh the model,
+                False otherwise.
+        """
+        # type () -> bool
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
         resource_object = self.connection.api_call(
             "GET", ["resources", self.id], headers=headers, model=Resource

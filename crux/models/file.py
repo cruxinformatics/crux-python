@@ -232,7 +232,7 @@ class File(Resource):
         else:
             raise TypeError("Invalid Data Type for dest: {}".format(type(dest)))
 
-    def _ul_signed_url_resumable(self, fil_obj, media_type):
+    def _ul_signed_url_resumable(self, file_obj, media_type):
 
         headers = {
             "Content-Type": "application/json",
@@ -285,7 +285,7 @@ class File(Resource):
         log.debug("Initiating upload for resource %s", self.id)
 
         upload.initiate(
-            transport, fil_obj, metadata, signed_url_headers["Content-Type"]
+            transport, file_obj, metadata, signed_url_headers["Content-Type"]
         )
 
         log.debug("Starting upload using signed url for resource %s", self.id)
@@ -306,7 +306,7 @@ class File(Resource):
             json=payload,
         )
 
-    def _upload(self, fil_obj, media_type):
+    def _upload(self, file_obj, media_type):
 
         if self.connection.crux_config.only_use_crux_domains:
             log.debug("Using Crux Domain for uploading file resource %s", self.id)
@@ -314,14 +314,14 @@ class File(Resource):
             return self.connection.api_call(
                 "PUT",
                 ["resources", self.id, "content"],
-                data=fil_obj,
+                data=file_obj,
                 headers=headers,
                 model=File,
             )
 
         else:
             log.debug("Using Signed url for uploading file resource %s", self.id)
-            return self._ul_signed_url_resumable(fil_obj, media_type)
+            return self._ul_signed_url_resumable(file_obj, media_type)
 
     def upload(self, src, media_type=None):
         # type: (Union[IO, str], str) -> File
@@ -350,15 +350,15 @@ class File(Resource):
             if media_type is None:
                 media_type = MediaType.detect(src)
 
-            with open(src, "rb") as fil_obj:
-                upload_result = self._upload(fil_obj, media_type=media_type)
+            with open(src, "rb") as file_obj:
+                upload_result = self._upload(file_obj, media_type=media_type)
 
         else:
             raise TypeError("Invalid Data Type for source path: {}".format(type(src)))
 
         if upload_result:
             # Refresh metadata to reflect actual size after uploading the file.
-            if self.update(refresh=True):
+            if self.refresh():
                 return self
             else:
                 raise CruxClientError(

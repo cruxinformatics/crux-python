@@ -15,9 +15,9 @@ def test_create_get_delete_dataset(connection, helpers):
     assert d1.id == dataset.id
     assert d1.name == dataset_name
     assert d1.description == "test_description"
-    dataset.delete()
-    with pytest.raises(CruxAPIError):
-        dataset.delete()
+    # dataset.delete()
+    # with pytest.raises(CruxAPIError):
+    #     dataset.delete()
 
 
 @pytest.mark.usefixtures("connection")

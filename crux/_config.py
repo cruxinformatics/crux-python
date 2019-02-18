@@ -13,6 +13,7 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 )
 
 import requests
+from requests import Session
 
 from crux.__version__ import __version__
 from crux._utils import str_to_bool
@@ -33,6 +34,7 @@ class CruxConfig(object):
         proxies=None,  # type: Optional[MutableMapping[Text, Text]]
         user_agent=None,  # type: str
         only_use_crux_domains=None,  # type: bool
+        session=Session(),  # type: Session
     ):
         # type: (...) -> None
         """
@@ -91,6 +93,16 @@ class CruxConfig(object):
             log.debug("Setting only_use_crux_domain to %s", self.only_use_crux_domains)
         else:
             self.only_use_crux_domains = only_use_crux_domains  # type: bool
+
+        self._session = session
+
+    @property
+    def session(self):
+        return self._session
+
+    @session.setter
+    def session(self, session):
+        self._session = session
 
     def _default_user_agent(self):
         # type: () -> str

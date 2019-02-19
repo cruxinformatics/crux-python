@@ -10,21 +10,36 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     Union,
 )
 
-from google.resumable_media.common import InvalidResponse  # type: ignore
+from google.resumable_media.common import (  # type: ignore
+    DataCorruption,
+    InvalidResponse,
+)
 from google.resumable_media.requests import (  # type: ignore
     ChunkedDownload,
     ResumableUpload,
+)
+from requests.exceptions import (
+    ConnectTimeout,
+    HTTPError,
+    ProxyError,
+    ReadTimeout,
+    SSLError,
+    TooManyRedirects,
 )
 
 from crux._compat import unicode
 from crux._utils import (
     DEFAULT_CHUNK_SIZE,
-    get_signed_url_session,
     Headers,
     ResumableUploadSignedSession,
     valid_chunk_size,
 )
-from crux.exceptions import CruxClientError
+from crux.exceptions import (
+    CruxClientConnectionError,
+    CruxClientError,
+    CruxClientHTTPError,
+    CruxClientTimeout,
+)
 from crux.models.resource import MediaType, Resource
 
 
@@ -69,12 +84,21 @@ class File(Resource):
     def _dl_signed_url(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
         """Download from signed URL using requests directly, not google-resumable-media."""
         signed_url = self._get_signed_url()
-        transport = get_signed_url_session()
+        transport = self.connection.crux_config.session
 
-        with transport.get(signed_url, stream=True) as response:
-            response.raise_for_status()
-            for chunk in response.iter_content(chunk_size=chunk_size):
-                file_obj.write(chunk)
+        log.debug("Using Proxies %s for downloading", transport.proxies)
+
+        try:
+            with transport as session:
+                response = session.get(signed_url, stream=True)
+                for chunk in response.iter_content(chunk_size=chunk_size):
+                    file_obj.write(chunk)
+        except (HTTPError, TooManyRedirects) as err:
+            raise CruxClientHTTPError(str(err))
+        except (ProxyError, SSLError) as err:
+            raise CruxClientConnectionError(str(err))
+        except (ConnectTimeout, ReadTimeout) as err:
+            raise CruxClientTimeout(str(err))
 
         return True
 
@@ -82,6 +106,8 @@ class File(Resource):
         """Download from signed URL using google-resumable-media."""
         signed_url = self._get_signed_url()
         transport = self.connection.crux_config.session
+
+        log.debug("Using Proxies %s for downloading", transport.proxies)
 
         # Track how many bytes the client has downloaded since the last time they
         # got a new signed URL, and how many times that got a new URL without
@@ -157,7 +183,11 @@ class File(Resource):
                     file_obj,
                     start=sum_total_bytes_from_urls,
                 )
+            except DataCorruption as err:
+                raise CruxClientError(err)
 
+        # Closing the session as it is not close by Resumable Media Lib.
+        transport.close()
         log.debug("Download completed using signed url for resource %s", self.id)
 
         return True
@@ -286,6 +316,7 @@ class File(Resource):
 
         metadata = {"name": self.name}
 
+        # Storing the previous session so that later it can be reassigned.
         normal_session = self.connection.crux_config.session
 
         self.connection.crux_config.session = ResumableUploadSignedSession()
@@ -293,6 +324,8 @@ class File(Resource):
         transport = self.connection.crux_config.session
 
         transport.headers = signed_url_headers
+
+        log.debug("Using Proxies %s for uploading", transport.proxies)
 
         log.debug("Initiating upload for resource %s", self.id)
 
@@ -302,15 +335,19 @@ class File(Resource):
 
         log.debug("Starting upload using signed url for resource %s", self.id)
 
-        while not upload.finished:
-            if upload.invalid:
-                upload.recover(transport)
-            upload.transmit_next_chunk(transport)
+        try:
+            while not upload.finished:
+                if upload.invalid:
+                    upload.recover(transport)
+                upload.transmit_next_chunk(transport)
+        except InvalidResponse as err:
+            raise CruxClientError(err)
 
         log.debug("Upload completed using signed url for resource %s", self.id)
 
         payload = {"sessionId": session_id}
 
+        # Reassigning the original session from ResumableUploadSession.
         self.connection.crux_config.session = normal_session
 
         return self.connection.api_call(

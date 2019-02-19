@@ -98,11 +98,16 @@ class CruxConfig(object):
 
     @property
     def session(self):
+        """Session: Gets and Sets the Client Session."""
+        self._session.proxies = self.proxies
         return self._session
 
     @session.setter
     def session(self, session):
+        if not isinstance(session, Session):
+            raise TypeError("session should be an instance of requests.Session")
         self._session = session
+        self._session.proxies = self.proxies
 
     def _default_user_agent(self):
         # type: () -> str

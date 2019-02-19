@@ -183,7 +183,7 @@ class File(Resource):
             except DataCorruption as err:
                 raise CruxClientError(err)
 
-        # Closing the session as it is not close by Resumable Media Lib.
+        # Closing the session as it is not closed by Resumable Media Lib.
         transport.close()
         log.debug("Download completed using signed url for resource %s", self.id)
 

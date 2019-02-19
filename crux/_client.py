@@ -166,8 +166,6 @@ class CruxClient(object):
 
         adapter = HTTPAdapter(max_retries=retry)
 
-        self.crux_config.session.proxies = self.crux_config.proxies
-
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
                 with self.crux_config.session as session:

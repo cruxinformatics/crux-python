@@ -4,10 +4,6 @@ import posixpath
 from typing import List, Tuple  # noqa: F401 pylint: disable=unused-import
 
 from requests import Session
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disable=import-error
-    Retry,
-)
 
 from crux._compat import urllib_quote
 

@@ -114,55 +114,6 @@ def str_to_bool(string):
         raise ValueError("Cannot convert {} to bool".format(string))
 
 
-def get_signed_url_session(
-    session_class=Session, max_connect=6, max_read=3, max_total=10, backoff_factor=1
-):
-    # type (int, int, int, float) -> Session
-    """Gets the session object.
-
-    Args:
-        max_connect (int): Max connect errors. Defaults to 6.
-        max_read (int): Max read errors. Defaults to 3.
-        max_total (int): Max total errors. Defaults to 10.
-        backoff_factor (float): Backoff factor. Defaults to 1.
-    Returns:
-        requests.Session: Session Object.
-    Raises:
-        TypeError: If session_class is not subclass of requests.Session.
-    """
-    if not issubclass(session_class, Session):
-        raise TypeError("session_class should be subclass of requests.Session")
-
-    session = session_class()
-
-    retries = Retry(
-        total=max_total,
-        connect=max_connect,
-        read=max_read,
-        backoff_factor=backoff_factor,
-        method_whitelist=False,
-        status_forcelist=[
-            429,
-            500,
-            502,
-            503,
-            504,
-            520,
-            521,
-            522,
-            523,
-            524,
-            525,
-            527,
-            530,
-        ],
-    )
-    session.mount("http://", HTTPAdapter(max_retries=retries))
-    session.mount("https://", HTTPAdapter(max_retries=retries))
-
-    return session
-
-
 # google.resumable_media.requests.ResumableUpload is only compatible with JSON API endpoint.
 # Signed URL uses XML API Endpoint, which requires setting specific headers.
 # ResumableUploadSingedSession is added to make google.resumable_media.requests.ResumableUpload

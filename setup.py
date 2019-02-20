@@ -2,6 +2,7 @@
 Setup file for Python packaging.
 """
 
+import io
 import os
 
 from setuptools import find_packages, setup
@@ -11,10 +12,10 @@ requirements = ["google-resumable-media[requests]", "typing;python_version<'3.5'
 packages = [pkg for pkg in find_packages() if pkg.startswith("crux")]
 
 version = {}
-with open(os.path.join(here, "crux", "__version__.py"), "r", encoding="utf-8") as fh:
+with io.open(os.path.join(here, "crux", "__version__.py"), "r", encoding="utf-8") as fh:
     exec(fh.read(), version)
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with io.open("README.md", "r", encoding="utf-8") as fh:
     readme = fh.read()
 
 setup(

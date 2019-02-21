@@ -114,7 +114,7 @@ file2 = dataset.get_file(path="/path/to/another/file2.csv")
 deleted = dataset.delete_permission_from_resources(
     identity_id="_subscribed_",
     permission="Read",
-    resource_ids=[filet.id, file2.id]
+    resource_ids=[file.id, file2.id]
 )
 
 if deleted:

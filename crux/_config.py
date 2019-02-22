@@ -26,7 +26,7 @@ class CruxConfig(object):
     Crux Configuration Class.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-branches
         self,
         api_key=None,  # type: Optional[str]
         api_host=None,  # type: str
@@ -34,7 +34,7 @@ class CruxConfig(object):
         proxies=None,  # type: Optional[MutableMapping[Text, Text]]
         user_agent=None,  # type: str
         only_use_crux_domains=None,  # type: bool
-        session=Session(),  # type: Session
+        session=None,  # type: Session
     ):
         # type: (...) -> None
         """
@@ -47,6 +47,7 @@ class CruxConfig(object):
             only_use_crux_domains (bool): True if Crux domain should be
                 use for upload and download, False otherwise.
                 Defaults to False.
+            session (requests.Session): Session object.
 
         Raises:
             ValueError: If CRUX_AP_KEY is not set.
@@ -94,7 +95,10 @@ class CruxConfig(object):
         else:
             self.only_use_crux_domains = only_use_crux_domains  # type: bool
 
-        self._session = session
+        if session is None:
+            self._session = Session()
+        else:
+            self._session = session
 
     @property
     def session(self):

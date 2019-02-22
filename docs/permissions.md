@@ -11,8 +11,8 @@ conn = Crux()
 dataset = conn.get_dataset(id="A_DATASET_ID")
 
 added = dataset.add_permission(
-    identity_id="_subscribed_",
-    permission="Read"
+    "_subscribed_",
+    "Read"
 )
 
 print(permission.target_id, permission.identity_id, permission.permission_name)
@@ -44,7 +44,10 @@ from crux import Crux
 conn = Crux()
 
 dataset = conn.get_dataset(id="A_DATASET_ID")
-deleted = dataset.delete_permission()
+deleted = dataset.delete_permission(
+    "_subscribed_", 
+    "Read"
+)
 
 if deleted:
     print("Permission deleted")
@@ -67,8 +70,8 @@ conn = Crux()
 dataset = conn.get_dataset(id="A_DATASET_ID"))
 
 added = dataset.add_permission_to_resources(
-    identity_id="_subscribed_",
-    permission="Read",
+    "_subscribed_",
+    "Read",
     resource_paths=[
         "/path/to/file/in/folder/file1.csv",
         "/path/to/another/file2.csv",
@@ -91,8 +94,8 @@ file = dataset.get_file(path="/path/to/file/in/folder/file1.csv")
 file2 = dataset.get_file(path="/path/to/another/file2.csv")
 
 added = dataset.add_permission_to_resources(
-    identity_id="_subscribed_",
-    permission="Read",
+    "_subscribed_",
+    "Read",
     resource_objects=[file, file2]
 )
 
@@ -111,9 +114,9 @@ dataset = conn.get_dataset(id="A_DATASET_ID")
 file = dataset.get_file(path="/path/to/file/in/folder/file1.csv")
 file2 = dataset.get_file(path="/path/to/another/file2.csv")
 
-deleted = dataset.delete_permission_from_resources(
-    identity_id="_subscribed_",
-    permission="Read",
+added = dataset.add_permission_to_resources(
+    "_subscribed_",
+    "Read",
     resource_ids=[file.id, file2.id]
 )
 
@@ -133,8 +136,8 @@ conn = Crux()
 dataset = conn.get_dataset(id="A_DATASET_ID"))
 
 deleted = dataset.delete_permission_from_resources(
-    identity_id="_subscribed_",
-    permission="Read",
+    "_subscribed_",
+    "Read",
     resource_paths=[
         "/path/to/file/in/folder/file1.csv",
         "/path/to/another/file2.csv",
@@ -157,8 +160,8 @@ file = dataset.get_file(path="/path/to/file/in/folder/file1.csv")
 file2 = dataset.get_file(path="/path/to/another/file2.csv")
 
 deleted = dataset.delete_permissions_from_resource(
-    identity_id="_subscribed_",
-    permission="Read",
+    "_subscribed_",
+    "Read",
     resource_objects=[file, file2]
 )
 
@@ -178,8 +181,8 @@ file = dataset.get_file(path="/path/to/file/in/folder/file1.csv")
 file2 = dataset.get_file(path="/path/to/another/file2.csv")
 
 deleted = dataset.delete_permission_from_resources(
-    identity_id="_subscribed_",
-    permission="Read",
+    "_subscribed_",
+    "Read",
     resource_ids=[filet.id, file2.id]
 )
 
@@ -200,13 +203,33 @@ dataset = conn.get_dataset(id="A_DATASET_ID")
 folder = dataset.get_folder(path="/some/folder")
 
 added = folder.add_permission(
-    identity_id="_subscribed_",
-    permission="Read",
+    "_subscribed_",
+    "Read",
     recursive=True
 )
 
 if added:
     print("Permission recursively applied to the folder")
+```
+
+## Remove permissions from folder recursively
+
+```python
+from crux import Crux
+
+conn = Crux()
+
+dataset = conn.get_dataset(id="A_DATASET_ID")
+folder = dataset.get_folder(path="/some/folder")
+
+deleted = folder.delete_permission(
+    "_subscribed_",
+    "Read",
+    recursive=True
+)
+
+if deleted:
+    print("Permission recursively deleted from the folder")
 ```
 
 ## Apply permissions to single resource
@@ -222,8 +245,8 @@ dataset = conn.get_dataset(id="A_DATASET_ID")
 file = dataset.get_file(path="/path/to/file.csv")
 
 permission = file.add_permission(
-    identity_id="_subscribed_",
-    permission="Read"
+    "_subscribed_",
+    "Read"
 )
 
 print(permission.target_id, permission.identity_id, permission.permission_name)
@@ -257,7 +280,10 @@ conn = Crux()
 
 dataset = conn.get_dataset(id="A_DATASET_ID")
 file = dataset.get_file(path="/path/to/file.csv")
-deleted = file.delete_permission()
+deleted = file.delete_permission(
+    "_subscribed_", 
+    "Read"
+)
 
 if deleted:
     print("Permission deleted")

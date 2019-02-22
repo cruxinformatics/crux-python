@@ -817,8 +817,8 @@ class Dataset(CruxModel):
 
     def add_permission_to_resources(
         self,
-        identity_id="_subscribed_",
-        permission="Read",
+        identity_id,
+        permission,
         resource_paths=None,
         resource_objects=None,
         resource_ids=None,
@@ -827,8 +827,8 @@ class Dataset(CruxModel):
         """Adds permission to all or specific Dataset resources.
 
         Args:
-            identity_id (str): Identity Id to be set. Defaults to _subscribed_.
-            permission (str): Permission to be set. Defaults to Read.
+            identity_id (str): Identity Id to be set.
+            permission (str): Permission to be set.
             resource_paths (:obj:`list` of :obj:`str`): List of resource paths on which the
                 permission should be applied. If none of resource_paths,
                 resource_objects or resource_ids parameter is set,
@@ -886,8 +886,8 @@ class Dataset(CruxModel):
 
     def delete_permission_from_resources(
         self,
-        identity_id="_subscribed_",
-        permission="Read",
+        identity_id,
+        permission,
         resource_paths=None,
         resource_objects=None,
         resource_ids=None,
@@ -896,8 +896,8 @@ class Dataset(CruxModel):
         """Method which deletes permission from all or specific Dataset resources.
 
         Args:
-            identity_id (str): Identity Id for the deletion. Defaults to _subscribed_
-            permission (str): Permission for the deletion. Defaults to Read
+            identity_id (str): Identity Id for the deletion.
+            permission (str): Permission for the deletion.
             resource_paths (:obj:`list` of :obj:`crux.models.Resource`): List of
                 resource path from which the permission should be deleted.
                 If none of resource_paths,
@@ -954,13 +954,13 @@ class Dataset(CruxModel):
             "POST", ["permissions", "bulk"], headers=headers, json=body
         )
 
-    def add_permission(self, identity_id="_subscribed_", permission="Read"):
+    def add_permission(self, identity_id, permission):
         # type: (str, str) -> Union[bool, Permission]
         """Adds permission to the Dataset.
 
         Args:
-            identity_id: Identity Id to be set. Defaults to _subscribed_.
-            permission: Permission to be set. Defaults to Read.
+            identity_id: Identity Id to be set.
+            permission: Permission to be set.
 
         Returns:
             crux.models.Permission: Permission Object.
@@ -973,15 +973,13 @@ class Dataset(CruxModel):
             headers=headers,
         )
 
-    def delete_permission(self, identity_id="_subscribed_", permission="Read"):
+    def delete_permission(self, identity_id, permission):
         # type: (str, str) -> bool
         """Deletes permission from the Dataset.
 
         Args:
             identity_id (str): Identity Id for the deletion.
-                Defaults to _subscribed_.
             permission (str): Permission for the deletion.
-                Defaults to Read.
 
         Returns:
             bool: True if it is able to delete it.

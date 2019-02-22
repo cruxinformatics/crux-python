@@ -332,13 +332,13 @@ class Resource(CruxModel):
         else:
             raise ValueError("Name, Description or Tags should be set")
 
-    def add_permission(self, identity_id="_subscribed_", permission="Read"):
+    def add_permission(self, identity_id, permission):
         # type: (str, str) -> Union[bool, Permission]
         """Adds permission to the resource.
 
         Args:
-            identity_id: Identity Id to be set. Defaults to _subscribed_.
-            permission: Permission to be set. Defaults to Read.
+            identity_id: Identity Id to be set.
+            permission: Permission to be set.
 
         Returns:
             crux.models.Permission: Permission Object.
@@ -353,15 +353,13 @@ class Resource(CruxModel):
             headers=headers,
         )
 
-    def delete_permission(self, identity_id="_subscribed_", permission="Read"):
+    def delete_permission(self, identity_id, permission):
         # type: (str, str) -> bool
         """Deletes permission from the resource.
 
         Args:
             identity_id (str): Identity Id for the deletion.
-                Defaults to _subscribed_.
             permission (str): Permission for the deletion.
-                Defaults to Read.
 
         Returns:
             bool: True if it is able to delete it.

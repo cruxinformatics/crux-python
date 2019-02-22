@@ -22,6 +22,7 @@ from crux.models.folder import Folder
 from crux.models.job import LoadJob, StitchJob
 from crux.models.label import Label
 from crux.models.model import CruxModel
+from crux.models.permission import Permission
 from crux.models.query import Query
 from crux.models.resource import Resource
 from crux.models.table import Table
@@ -833,10 +834,10 @@ class Dataset(CruxModel):
                 path=path, tags=tags, description=description, config=query_config
             )
 
-    def add_permission(
+    def add_permission_to_resources(
         self,
-        identity_id="_subscribed_",
-        permission="Read",
+        identity_id,
+        permission,
         resource_paths=None,
         resource_objects=None,
         resource_ids=None,
@@ -845,8 +846,8 @@ class Dataset(CruxModel):
         """Adds permission to all or specific Dataset resources.
 
         Args:
-            identity_id (str): Identity Id to be set. Defaults to _subscribed_.
-            permission (str): Permission to be set. Defaults to Read.
+            identity_id (str): Identity Id to be set.
+            permission (str): Permission to be set.
             resource_paths (:obj:`list` of :obj:`str`): List of resource paths on which the
                 permission should be applied. If none of resource_paths,
                 resource_objects or resource_ids parameter is set,
@@ -904,10 +905,10 @@ class Dataset(CruxModel):
             "POST", ["permissions", "bulk"], headers=headers, json=body
         )
 
-    def delete_permission(
+    def delete_permission_from_resources(
         self,
-        identity_id="_subscribed_",
-        permission="Read",
+        identity_id,
+        permission,
         resource_paths=None,
         resource_objects=None,
         resource_ids=None,
@@ -916,8 +917,8 @@ class Dataset(CruxModel):
         """Method which deletes permission from all or specific Dataset resources.
 
         Args:
-            identity_id (str): Identity Id for the deletion. Defaults to _subscribed_
-            permission (str): Permission for the deletion. Defaults to Read
+            identity_id (str): Identity Id for the deletion.
+            permission (str): Permission for the deletion.
             resource_paths (:obj:`list` of :obj:`crux.models.Resource`): List of
                 resource path from which the permission should be deleted.
                 If none of resource_paths,
@@ -974,6 +975,56 @@ class Dataset(CruxModel):
 
         return self.connection.api_call(
             "POST", ["permissions", "bulk"], headers=headers, json=body
+        )
+
+    def add_permission(self, identity_id, permission):
+        # type: (str, str) -> Union[bool, Permission]
+        """Adds permission to the Dataset.
+
+        Args:
+            identity_id: Identity Id to be set.
+            permission: Permission to be set.
+
+        Returns:
+            crux.models.Permission: Permission Object.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        return self.connection.api_call(
+            "PUT",
+            ["permissions", self.id, identity_id, permission],
+            model=Permission,
+            headers=headers,
+        )
+
+    def delete_permission(self, identity_id, permission):
+        # type: (str, str) -> bool
+        """Deletes permission from the Dataset.
+
+        Args:
+            identity_id (str): Identity Id for the deletion.
+            permission (str): Permission for the deletion.
+
+        Returns:
+            bool: True if it is able to delete it.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        return self.connection.api_call(
+            "DELETE", ["permissions", self.id, identity_id, permission], headers=headers
+        )
+
+    def list_permissions(self):
+        # type: () -> List[Permission]
+        """Lists the permission on the Dataset.
+
+        Returns:
+            list (:obj:`crux.models.Permission`): List of Permission Objects.
+        """
+        headers = {"Accept": "application/json"}
+        return self.connection.api_call(
+            "GET",
+            ["datasets", self.id, "permissions"],
+            model=Permission,
+            headers=headers,
         )
 
     def add_label(self, label_key, label_value):

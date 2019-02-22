@@ -24,7 +24,7 @@ Install `crux` [from PyPI](https://pypi.org/project/crux/) in a virtual environm
 ```bash
 mkdir -p crux_example
 cd crux_example
-pipenv install "crux==0.0.3"
+pipenv install "crux==0.0.5"
 pipenv shell
 ```
 ## Getting Started
@@ -61,7 +61,7 @@ Details on specific topics:
 - [Stitching](stitching.md)
 - [Labels](labels.md)
 - [Tables](tables.md)
-- [Resource Permissions](resource_permissions.md)
+- [Resource Permissions](permissions.md)
 - [Exception Handling](exception_handling.md)
 - [Logging](logging.md)
 - [API Reference](modules.rst)

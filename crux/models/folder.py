@@ -30,14 +30,14 @@ class Folder(Resource):
         }
 
     def add_permission(  # It is by design pylint: disable=arguments-differ
-        self, identity_id="_subscribed_", permission="Read", recursive=False
+        self, identity_id, permission, recursive=False
     ):
         # type: (str, str, bool) -> Union[bool, Permission]
         """Adds permission to the Folder resource.
 
         Args:
-            identity_id (str): Identity Id to be set. Defaults to _subscribed_.
-            permission (str): Permission to be set. Defaults to Read.
+            identity_id (str): Identity Id to be set.
+            permission (str): Permission to be set.
             recursive (bool): If recursive is set to True, it will recursive apply
                 permission to all resources under the folder resource.
 
@@ -71,14 +71,14 @@ class Folder(Resource):
             )
 
     def delete_permission(  # It is by design pylint: disable=arguments-differ
-        self, identity_id="_subscribed_", permission="Read", recursive=False
+        self, identity_id, permission, recursive=False
     ):
         # type: (str, str, bool) -> bool
         """Deletes permission from Folder resource.
 
         Args:
-            identity_id (str): Identity Id for the deletion. Defaults to _subscribed_.
-            permission (str): Permission for deletion. Defaults to Read.
+            identity_id (str): Identity Id for the deletion.
+            permission (str): Permission for deletion.
             recursive (bool): If recursive is set to True, it will recursively delete
                 permission from all resources under the folder resource.
                 Defaults to False.

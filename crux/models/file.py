@@ -51,7 +51,7 @@ class File(Resource):
 
     def _get_signed_url(self):
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         response = self.connection.api_call(
             "POST", ["resources", self.id, "content-url"], headers=headers, json={}
@@ -176,7 +176,7 @@ class File(Resource):
             ValueError: If chunk_size is not multiple of 256 KiB.
         """
 
-        headers = Headers({"Accept": "*/*"})
+        headers = Headers({"accept": "*/*"})
 
         if not valid_chunk_size(chunk_size):
             raise ValueError("chunk_size should be multiple of 256 KiB")
@@ -240,9 +240,9 @@ class File(Resource):
 
         headers = Headers(
             {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "X-Upload-Content-Type": media_type,
+                "content-type": "application/json",
+                "accept": "application/json",
+                "x-upload-content-type": media_type,
             }
         )
 
@@ -319,7 +319,7 @@ class File(Resource):
         if self.connection.crux_config.only_use_crux_domains:
             log.debug("Using Crux Domain for uploading file resource %s", self.id)
             headers = Headers(
-                {"Content-Type": media_type, "Accept": "application/json"}
+                {"content-type": media_type, "accept": "application/json"}
             )
             return self.connection.api_call(
                 "PUT",

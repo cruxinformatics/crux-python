@@ -75,3 +75,13 @@ def test_headers():
         "header-key-2": "HeaderValue2",
         "header-key-3": "HeaderValue3",
     }
+
+    assert header.get("Header-Key") == "ChangedHeaderValue"
+    assert header.get("HeAdEr-KeY") == "ChangedHeaderValue"
+    assert header.get("header-key") == "ChangedHeaderValue"
+    assert header.get("HEADER-KEY") == "ChangedHeaderValue"
+
+    assert header["Header-Key"] == "ChangedHeaderValue"
+    assert header["HeAdEr-KeY"] == "ChangedHeaderValue"
+    assert header["header-key"] == "ChangedHeaderValue"
+    assert header["HEADER-KEY"] == "ChangedHeaderValue"

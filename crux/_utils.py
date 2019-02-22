@@ -176,10 +176,18 @@ class Headers(dict):
         lower_key = key.lower()
         super(Headers, self).__setitem__(lower_key, value)
 
+    def __getitem__(self, key):
+        # type(str) -> Any
+        return self.get(key)
+
     def update(self, input_dict):
         # type(dict) -> None
         for key, value in input_dict.items():
             self[key.lower()] = value
+
+    def get(self, key):
+        # type(str) -> Any
+        return super(Headers, self).get(key.lower())
 
 
 # google.resumable_media.requests.ResumableUpload is only compatible with JSON API endpoint.

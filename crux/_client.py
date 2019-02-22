@@ -153,8 +153,8 @@ class CruxClient(object):
 
         user_agent = self.crux_config.user_agent  # type: Text
 
-        headers["Authorization"] = bearer_token
-        headers["User-Agent"] = user_agent
+        headers["authorization"] = bearer_token
+        headers["user-agent"] = user_agent
 
         retry = Retry(
             total=max_total_retries,

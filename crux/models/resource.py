@@ -278,7 +278,7 @@ class Resource(CruxModel):
             bool: True if it is deleted.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         return self.connection.api_call(
             "DELETE", ["resources", self.id], headers=headers
@@ -301,7 +301,7 @@ class Resource(CruxModel):
             TypeError: It is raised if tags are not of type List.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         body = {}  # type: Dict[str, Union[str, List, Dict]]
 
@@ -344,7 +344,7 @@ class Resource(CruxModel):
             crux.models.Permission: Permission Object.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         return self.connection.api_call(
             "PUT",
@@ -365,7 +365,7 @@ class Resource(CruxModel):
             bool: True if it is able to delete it.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         return self.connection.api_call(
             "DELETE", ["permissions", self.id, identity_id, permission], headers=headers
@@ -378,7 +378,7 @@ class Resource(CruxModel):
         Returns:
             list (:obj:`crux.models.Permission`): List of Permission Objects.
         """
-        headers = Headers({"Accept": "application/json"})
+        headers = Headers({"accept": "application/json"})
         return self.connection.api_call(
             "GET",
             ["resources", self.id, "permissions"],
@@ -398,7 +398,7 @@ class Resource(CruxModel):
             bool: True if label is added, False otherwise.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         response_result = self.connection.api_call(
             "PUT",
@@ -431,7 +431,7 @@ class Resource(CruxModel):
             bool: True if label is deleted, False otherwise.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         response_result = self.connection.api_call(
             "DELETE",
@@ -456,7 +456,7 @@ class Resource(CruxModel):
             str: Folder name of the resource.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         response = self.connection.api_call(
             "GET", ["resources", self.id, "folderpath"], headers=headers
@@ -467,7 +467,7 @@ class Resource(CruxModel):
     def _download(self, file_obj, media_type, chunk_size=DEFAULT_CHUNK_SIZE):
 
         if media_type is not None:
-            headers = Headers({"Accept": media_type})
+            headers = Headers({"accept": media_type})
         else:
             headers = None
 
@@ -489,7 +489,7 @@ class Resource(CruxModel):
         """
         # type () -> bool
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         resource_object = self.connection.api_call(
             "GET", ["resources", self.id], headers=headers, model=Resource

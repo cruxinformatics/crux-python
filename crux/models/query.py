@@ -52,7 +52,7 @@ class Query(Resource):
 
         params = params if params else {}
 
-        headers = Headers({"Content-Type": "application/json", "Accept": "*/*"})
+        headers = Headers({"content-type": "application/json", "accept": "*/*"})
 
         params["format"] = format
 
@@ -86,7 +86,7 @@ class Query(Resource):
 
         params = params if params else {}
         params["format"] = format
-        headers = Headers({"Content-Type": "application/json", "Accept": "*/*"})
+        headers = Headers({"content-type": "application/json", "accept": "*/*"})
         data = self.connection.api_call(
             "GET",
             ["resources", self.id, "content"],

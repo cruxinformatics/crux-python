@@ -46,7 +46,7 @@ class Crux(object):
             crux.models.Identity: Identity object.
         """
         headers = Headers(
-            {"Accept": "application/json"}
+            {"accept": "application/json"}
         )  # type: Optional[MutableMapping[Text, Text]]
         return self.api_client.api_call(
             "GET", ["identities", "whoami"], model=Identity, headers=headers
@@ -68,7 +68,7 @@ class Crux(object):
         tags = tags if tags else []
 
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )  # type: MutableMapping[Text, Text]
         dataset = Dataset(name=name, description=description, tags=tags)
         return self.api_client.api_call(
@@ -86,7 +86,7 @@ class Crux(object):
             crux.models.Dataset: Dataset object
         """
         headers = Headers(
-            {"Accept": "application/json"}
+            {"accept": "application/json"}
         )  # type: MutableMapping[Text, Text]
         return self.api_client.api_call(
             "GET", ["datasets", id], model=Dataset, headers=headers
@@ -94,7 +94,7 @@ class Crux(object):
 
     def _call_drives_my(self):
         headers = Headers(
-            {"Accept": "application/json"}
+            {"accept": "application/json"}
         )  # type: MutableMapping[Text, Text]
 
         response = self.api_client.api_call(
@@ -137,7 +137,7 @@ class Crux(object):
             list (:obj:`crux.models.Dataset`): List of Dataset objects.
         """
         headers = Headers(
-            {"Accept": "application/json"}
+            {"accept": "application/json"}
         )  # type: MutableMapping[Text, Text]
         return self.api_client.api_call(
             "GET", ["datasets", "public"], model=Dataset, headers=headers
@@ -154,7 +154,7 @@ class Crux(object):
             crux.models.Job: Job object.
         """
         headers = Headers(
-            {"Accept": "application/json"}
+            {"accept": "application/json"}
         )  # type: MutableMapping[Text, Text]
         return self.api_client.api_call(
             "GET", ["jobs", job_id], model=Job, headers=headers
@@ -188,7 +188,7 @@ class Crux(object):
                     }
                 response = conn.set_datasets_provenance(provenance=provenance)
         """
-        headers = Headers({"Accept": "application/json"})
+        headers = Headers({"accept": "application/json"})
 
         response = self.api_client.api_call(
             "POST", ["datasets", "provenance"], headers=headers, json=provenance

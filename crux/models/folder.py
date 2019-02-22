@@ -47,7 +47,7 @@ class Folder(Resource):
         """
 
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         body = {
@@ -87,7 +87,7 @@ class Folder(Resource):
             bool: True if it is able to delete it.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         body = {

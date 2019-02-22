@@ -198,7 +198,7 @@ class Dataset(CruxModel):
                 systemOfRecord, cronSpec, createdAt and modifiedAt keys.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         response = self.connection.api_call(
             "GET", ["datasets", self.id, "provenance"], headers=headers
@@ -214,7 +214,7 @@ class Dataset(CruxModel):
             bool: True if dataset is deleted.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         return self.connection.api_call(
             "DELETE", ["datasets", self.id], headers=headers
@@ -237,7 +237,7 @@ class Dataset(CruxModel):
             TypeError: It is raised if tags is not of type list.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         body = {}  # type: Dict[str, Union[str, List]]
         if name is not None:
@@ -278,7 +278,7 @@ class Dataset(CruxModel):
         """
 
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         tags = tags if tags else []
@@ -318,7 +318,7 @@ class Dataset(CruxModel):
         """
 
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         table_name, folder = split_posixpath_filename_dirpath(path)
@@ -360,7 +360,7 @@ class Dataset(CruxModel):
         """
 
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         tags = tags if tags else []
@@ -669,7 +669,7 @@ class Dataset(CruxModel):
     ):
 
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         params = {"folder": folder, "offset": offset, "limit": limit}
@@ -711,7 +711,7 @@ class Dataset(CruxModel):
         """
 
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         if isinstance(source_file, File):
@@ -790,7 +790,7 @@ class Dataset(CruxModel):
         query_name, folder = split_posixpath_filename_dirpath(path)
 
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         tags = tags if tags else []
@@ -868,7 +868,7 @@ class Dataset(CruxModel):
             bool: True if permission is applied.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         body = {
             "identityId": identity_id,
@@ -940,7 +940,7 @@ class Dataset(CruxModel):
             bool: True if it is able to delete the permission.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         body = {
             "identityId": identity_id,
@@ -1039,7 +1039,7 @@ class Dataset(CruxModel):
             bool: True if labels are added.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         return self.connection.api_call(
             "PUT",
@@ -1058,7 +1058,7 @@ class Dataset(CruxModel):
             bool: True if labels are deleted.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         return self.connection.api_call(
             "DELETE", ["datasets", self.id, "labels", label_key], headers=headers
@@ -1075,7 +1075,7 @@ class Dataset(CruxModel):
             crux.models.Label: Label Object.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         return self.connection.api_call(
             "GET",
@@ -1154,7 +1154,7 @@ class Dataset(CruxModel):
 
         after = None
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
 
         while True:
@@ -1210,7 +1210,7 @@ class Dataset(CruxModel):
                     Job ID for background running job.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         source_resource_ids = list()
         for resource in source_resources:
@@ -1279,7 +1279,7 @@ class Dataset(CruxModel):
             crux.models.StitchJob: StitchJob object.
         """
         headers = Headers(
-            {"Content-Type": "application/json", "Accept": "application/json"}
+            {"content-type": "application/json", "accept": "application/json"}
         )
         return self.connection.api_call(
             "GET", ["datasets", "stitch", job_id], headers=headers, model=StitchJob

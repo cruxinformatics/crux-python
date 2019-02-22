@@ -15,12 +15,12 @@ def test_file_add_delete_permission(dataset, helpers):
         file_path, "/test_file_" + helpers.generate_random_string(16) + ".csv"
     )
 
-    permission = file_1.add_permission()
+    permission = file_1.add_permission("_subscribed_", "Read")
 
     assert permission.identity_id == "_subscribed_"
     assert permission.permission_name == "Read"
 
-    delete_permission_result = file_1.delete_permission()
+    delete_permission_result = file_1.delete_permission("_subscribed_", "Read")
 
     file_perms = file_1.list_permissions()
 
@@ -28,6 +28,8 @@ def test_file_add_delete_permission(dataset, helpers):
 
     for perm in file_perms:
         assert perm.permission_name in ["Admin"]
+
+    assert len(file_perms) == 1
 
     file_1.delete()
 
@@ -52,7 +54,7 @@ def test_folder_add_delete_permission(dataset, helpers):
 
     folder_1 = dataset.get_folder(path="/test_folder")
 
-    permission_result = folder_1.add_permission(recursive=True)
+    permission_result = folder_1.add_permission("_subscribed_", "Read", recursive=True)
 
     assert permission_result is True
 
@@ -68,7 +70,9 @@ def test_folder_add_delete_permission(dataset, helpers):
     for perm in file_2_perms:
         assert perm.permission_name in ["Read", "Admin"]
 
-    delete_permission_result = folder_1.delete_permission(recursive=True)
+    delete_permission_result = folder_1.delete_permission(
+        "_subscribed_", "Read", recursive=True
+    )
 
     assert delete_permission_result is True
 
@@ -87,7 +91,7 @@ def test_folder_add_delete_permission(dataset, helpers):
 
 
 @pytest.mark.usefixtures("dataset", "helpers")
-def test_dataset_add_permission(dataset, helpers):
+def test_dataset_add_to_delete_from_resources_permission(dataset, helpers):
     file_path = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "data",
@@ -108,7 +112,7 @@ def test_dataset_add_permission(dataset, helpers):
         "/test_folder/test_file_" + helpers.generate_random_string(16) + ".csv",
     )
 
-    dataset_perm_result = dataset.add_permission()
+    dataset_perm_result = dataset.add_permission_to_resources("_subscribed_", "Read")
 
     assert dataset_perm_result is True
 
@@ -118,7 +122,9 @@ def test_dataset_add_permission(dataset, helpers):
         for perm_object in perm_list:
             assert perm_object.permission_name in ["Admin", "Read"]
 
-    dataset_perm_result = dataset.delete_permission()
+    dataset_perm_result = dataset.delete_permission_from_resources(
+        "_subscribed_", "Read"
+    )
 
     assert dataset_perm_result is True
 
@@ -127,3 +133,23 @@ def test_dataset_add_permission(dataset, helpers):
         assert len(perm_list) == 1
         for perm_object in perm_list:
             assert perm_object.permission_name in ["Admin"]
+
+
+@pytest.mark.usefixtures("dataset", "helpers")
+def test_dataset_add_delete_list_permission(dataset, helpers):
+
+    permission = dataset.add_permission("_subscribed_", "Read")
+
+    assert permission.identity_id == "_subscribed_"
+    assert permission.permission_name == "Read"
+
+    delete_permission_result = dataset.delete_permission("_subscribed_", "Read")
+
+    assert delete_permission_result is True
+
+    dataset_perms = dataset.list_permissions()
+
+    for perm in dataset_perms:
+        assert perm.permission_name in ["Admin"]
+
+    assert len(dataset_perms) == 1

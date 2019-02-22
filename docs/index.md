@@ -61,7 +61,7 @@ Details on specific topics:
 - [Stitching](stitching.md)
 - [Labels](labels.md)
 - [Tables](tables.md)
-- [Resource Permissions](resource_permissions.md)
+- [Resource Permissions](permissions.md)
 - [Exception Handling](exception_handling.md)
 - [Logging](logging.md)
 - [API Reference](modules.rst)

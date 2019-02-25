@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, Iterable  # noqa: F401 pylint: disable=unused-import
 
-from crux._utils import DEFAULT_CHUNK_SIZE, valid_chunk_size
+from crux._utils import DEFAULT_CHUNK_SIZE, Headers, valid_chunk_size
 from crux.models.resource import Resource
 
 
@@ -52,7 +52,7 @@ class Query(Resource):
 
         params = params if params else {}
 
-        headers = {"Content-Type": "application/json", "Accept": "*/*"}
+        headers = Headers({"content-type": "application/json", "accept": "*/*"})
 
         params["format"] = format
 
@@ -86,7 +86,7 @@ class Query(Resource):
 
         params = params if params else {}
         params["format"] = format
-        headers = {"Content-Type": "application/json", "Accept": "*/*"}
+        headers = Headers({"content-type": "application/json", "accept": "*/*"})
         data = self.connection.api_call(
             "GET",
             ["resources", self.id, "content"],

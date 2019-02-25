@@ -163,6 +163,33 @@ def get_signed_url_session(
     return session
 
 
+class Headers(dict):
+    """Headers Dictionary to convert Dictionary keys to lower case."""
+
+    def __init__(self, input_dict):
+        # type(dict) -> None
+        super(Headers, self).__init__()
+        self.update(input_dict)
+
+    def __setitem__(self, key, value):
+        # type(str, str) -> None
+        lower_key = key.lower()
+        super(Headers, self).__setitem__(lower_key, value)
+
+    def __getitem__(self, key):
+        # type(str) -> Any
+        return self.get(key)
+
+    def update(self, input_dict):
+        # type(dict) -> None
+        for key, value in input_dict.items():
+            self[key.lower()] = value
+
+    def get(self, key):
+        # type(str) -> Any
+        return super(Headers, self).get(key.lower())
+
+
 # google.resumable_media.requests.ResumableUpload is only compatible with JSON API endpoint.
 # Signed URL uses XML API Endpoint, which requires setting specific headers.
 # ResumableUploadSingedSession is added to make google.resumable_media.requests.ResumableUpload
@@ -175,14 +202,9 @@ class ResumableUploadSignedSession(Session):
     ):
         """Implementation of Requests' request."""
 
-        request_headers = headers.copy() if headers is not None else {}
+        request_headers = Headers(headers.copy() if headers is not None else {})
 
         if self.headers:
-            # Lowercasing the headers so that it can overwrite JSON API specific hardcoded
-            # headers. For Eg: ResumableUpload hardcodes content-type to application/json.
-            # and header received by API is Content-Type, due to this both Content-Type,
-            # and content-type headers were passed previously.
-            self.headers = {k.lower(): v for k, v in self.headers.items()}
             request_headers.update(self.headers)
 
         response = super(ResumableUploadSignedSession, self).request(

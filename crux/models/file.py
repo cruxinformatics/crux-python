@@ -20,6 +20,7 @@ from crux._compat import unicode
 from crux._utils import (
     DEFAULT_CHUNK_SIZE,
     get_signed_url_session,
+    Headers,
     ResumableUploadSignedSession,
     valid_chunk_size,
 )
@@ -49,7 +50,9 @@ class File(Resource):
         }
 
     def _get_signed_url(self):
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = Headers(
+            {"content-type": "application/json", "accept": "application/json"}
+        )
         response = self.connection.api_call(
             "POST", ["resources", self.id, "content-url"], headers=headers, json={}
         )
@@ -172,7 +175,8 @@ class File(Resource):
         Raises:
             ValueError: If chunk_size is not multiple of 256 KiB.
         """
-        headers = {"Accept": "*/*"}
+
+        headers = Headers({"accept": "*/*"})
 
         if not valid_chunk_size(chunk_size):
             raise ValueError("chunk_size should be multiple of 256 KiB")
@@ -234,11 +238,13 @@ class File(Resource):
 
     def _ul_signed_url_resumable(self, file_obj, media_type):
 
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "X-Upload-Content-Type": media_type,
-        }
+        headers = Headers(
+            {
+                "content-type": "application/json",
+                "accept": "application/json",
+                "x-upload-content-type": media_type,
+            }
+        )
 
         upload_session_response = self.connection.api_call(
             "POST",
@@ -256,7 +262,9 @@ class File(Resource):
                 "Signed URL missing in response for resource {id}".format(id=self.id)
             )
 
-        signed_url_headers = upload_response_json.get("signedURL").get("headers")
+        signed_url_headers = Headers(
+            upload_response_json.get("signedURL").get("headers")
+        )
 
         if not signed_url_headers:
             raise KeyError(
@@ -285,7 +293,7 @@ class File(Resource):
         log.debug("Initiating upload for resource %s", self.id)
 
         upload.initiate(
-            transport, file_obj, metadata, signed_url_headers["Content-Type"]
+            transport, file_obj, metadata, signed_url_headers["content-type"]
         )
 
         log.debug("Starting upload using signed url for resource %s", self.id)
@@ -310,7 +318,9 @@ class File(Resource):
 
         if self.connection.crux_config.only_use_crux_domains:
             log.debug("Using Crux Domain for uploading file resource %s", self.id)
-            headers = {"Content-Type": media_type, "Accept": "application/json"}
+            headers = Headers(
+                {"content-type": media_type, "accept": "application/json"}
+            )
             return self.connection.api_call(
                 "PUT",
                 ["resources", self.id, "content"],

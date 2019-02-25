@@ -109,6 +109,7 @@ def str_to_bool(string):
     else:
         raise ValueError("Cannot convert {} to bool".format(string))
 
+
 class Headers(dict):
     """Headers Dictionary to convert Dictionary keys to lower case."""
 

@@ -26,10 +26,14 @@ from requests.exceptions import (
     SSLError,
     TooManyRedirects,
 )
+from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disable=import-error
+    Retry,
+)
 
 from crux._compat import unicode
 from crux._utils import (
     DEFAULT_CHUNK_SIZE,
+    get_session,
     Headers,
     ResumableUploadSignedSession,
     valid_chunk_size,
@@ -84,7 +88,7 @@ class File(Resource):
     def _dl_signed_url(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
         """Download from signed URL using requests directly, not google-resumable-media."""
         signed_url = self._get_signed_url()
-        transport = self.connection.crux_config.session
+        transport = get_session(proxies=self.connection.crux_config.proxies)
 
         log.debug("Using Proxies %s for downloading", transport.proxies)
 
@@ -105,7 +109,7 @@ class File(Resource):
     def _dl_signed_url_resumable(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
         """Download from signed URL using google-resumable-media."""
         signed_url = self._get_signed_url()
-        transport = self.connection.crux_config.session
+        transport = get_session(proxies=self.connection.crux_config.proxies)
 
         log.debug("Using Proxies %s for downloading", transport.proxies)
 
@@ -316,12 +320,34 @@ class File(Resource):
 
         metadata = {"name": self.name}
 
-        # Storing the previous session so that later it can be reassigned.
-        normal_session = self.connection.crux_config.session
+        retries = Retry(
+            total=10,
+            backoff_factor=1,
+            connect=6,
+            read=3,
+            status_forcelist=[
+                429,
+                500,
+                502,
+                503,
+                504,
+                520,
+                521,
+                522,
+                523,
+                524,
+                525,
+                527,
+                530,
+            ],
+            method_whitelist=False,
+        )
 
-        self.connection.crux_config.session = ResumableUploadSignedSession()
-
-        transport = self.connection.crux_config.session
+        transport = get_session(
+            session_class=ResumableUploadSignedSession,
+            retries=retries,
+            proxies=self.connection.crux_config.proxies,
+        )
 
         transport.headers = signed_url_headers
 
@@ -346,10 +372,6 @@ class File(Resource):
         log.debug("Upload completed using signed url for resource %s", self.id)
 
         payload = {"sessionId": session_id}
-
-        # Reassigning the original session from ResumableUploadSession.
-        self.connection.crux_config.session = normal_session
-
         return self.connection.api_call(
             "POST",
             ["resources", self.id, "upload-session-complete"],

@@ -767,7 +767,7 @@ class Dataset(CruxModel):
 
         try:
             return file_resource.upload(src, media_type=media_type)
-        except (CruxClientError, CruxAPIError):
+        except (CruxClientError, CruxAPIError, IOError):
             file_resource.delete()
             raise
 

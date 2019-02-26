@@ -12,7 +12,6 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     Union,
 )
 
-from requests.adapters import HTTPAdapter
 from requests.exceptions import (
     ConnectTimeout,
     HTTPError,
@@ -26,7 +25,7 @@ from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disab
 )
 
 from crux._config import CruxConfig
-from crux._utils import Headers, url_builder
+from crux._utils import get_session, Headers, url_builder
 from crux.exceptions import (
     CruxAPIError,
     CruxClientConnectionError,
@@ -155,7 +154,7 @@ class CruxClient(object):
         headers["authorization"] = bearer_token
         headers["user-agent"] = user_agent
 
-        retry = Retry(
+        retries = Retry(
             total=max_total_retries,
             backoff_factor=backoff,
             status_forcelist=status_forcelist,
@@ -165,13 +164,11 @@ class CruxClient(object):
             read=max_read_errors,
         )
 
-        adapter = HTTPAdapter(max_retries=retry)
+        session = get_session(retries=retries, proxies=self.crux_config.proxies)
 
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
-                with self.crux_config.session as session:
-                    session.mount("http://", adapter)
-                    session.mount("https://", adapter)
+                with session:
                     log.debug("Setting request stream: %s", stream)
                     log.debug("Setting request data: %s, json: %s", data, json)
                     log.debug("Setting request params: %s", params)

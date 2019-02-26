@@ -13,7 +13,6 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 )
 
 import requests
-from requests import Session
 
 from crux.__version__ import __version__
 from crux._utils import str_to_bool
@@ -26,7 +25,7 @@ class CruxConfig(object):
     Crux Configuration Class.
     """
 
-    def __init__(  # pylint: disable=too-many-branches
+    def __init__(
         self,
         api_key=None,  # type: Optional[str]
         api_host=None,  # type: str
@@ -34,7 +33,6 @@ class CruxConfig(object):
         proxies=None,  # type: Optional[MutableMapping[Text, Text]]
         user_agent=None,  # type: str
         only_use_crux_domains=None,  # type: bool
-        session=None,  # type: Session
     ):
         # type: (...) -> None
         """
@@ -47,7 +45,6 @@ class CruxConfig(object):
             only_use_crux_domains (bool): True if Crux domain should be
                 use for upload and download, False otherwise.
                 Defaults to False.
-            session (requests.Session): Session object.
 
         Raises:
             ValueError: If CRUX_AP_KEY is not set.
@@ -94,24 +91,6 @@ class CruxConfig(object):
             log.debug("Setting only_use_crux_domain to %s", self.only_use_crux_domains)
         else:
             self.only_use_crux_domains = only_use_crux_domains  # type: bool
-
-        if session is None:
-            self._session = Session()
-        else:
-            self._session = session
-
-    @property
-    def session(self):
-        """Session: Gets and Sets the Client Session."""
-        self._session.proxies = self.proxies
-        return self._session
-
-    @session.setter
-    def session(self, session):
-        if not isinstance(session, Session):
-            raise TypeError("session should be an instance of requests.Session")
-        self._session = session
-        self._session.proxies = self.proxies
 
     def _default_user_agent(self):
         # type: () -> str

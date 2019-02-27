@@ -26,9 +26,6 @@ from requests.exceptions import (
     SSLError,
     TooManyRedirects,
 )
-from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disable=import-error
-    Retry,
-)
 
 from crux._compat import unicode
 from crux._utils import (
@@ -89,32 +86,7 @@ class File(Resource):
         """Download from signed URL using requests directly, not google-resumable-media."""
         signed_url = self._get_signed_url()
 
-        retries = Retry(
-            total=10,
-            backoff_factor=1,
-            connect=6,
-            read=3,
-            status_forcelist=[
-                429,
-                500,
-                502,
-                503,
-                504,
-                520,
-                521,
-                522,
-                523,
-                524,
-                525,
-                527,
-                530,
-            ],
-            method_whitelist=False,
-        )
-
-        transport = get_session(
-            retries=retries, proxies=self.connection.crux_config.proxies
-        )
+        transport = get_session(proxies=self.connection.crux_config.proxies)
 
         log.debug("Using Proxies %s for downloading", transport.proxies)
 
@@ -136,32 +108,7 @@ class File(Resource):
         """Download from signed URL using google-resumable-media."""
         signed_url = self._get_signed_url()
 
-        retries = Retry(
-            total=10,
-            backoff_factor=1,
-            connect=6,
-            read=3,
-            status_forcelist=[
-                429,
-                500,
-                502,
-                503,
-                504,
-                520,
-                521,
-                522,
-                523,
-                524,
-                525,
-                527,
-                530,
-            ],
-            method_whitelist=False,
-        )
-
-        transport = get_session(
-            retries=retries, proxies=self.connection.crux_config.proxies
-        )
+        transport = get_session(proxies=self.connection.crux_config.proxies)
 
         log.debug("Using Proxies %s for downloading", transport.proxies)
 
@@ -372,32 +319,8 @@ class File(Resource):
 
         metadata = {"name": self.name}
 
-        retries = Retry(
-            total=10,
-            backoff_factor=1,
-            connect=6,
-            read=3,
-            status_forcelist=[
-                429,
-                500,
-                502,
-                503,
-                504,
-                520,
-                521,
-                522,
-                523,
-                524,
-                525,
-                527,
-                530,
-            ],
-            method_whitelist=False,
-        )
-
         transport = get_session(
             session_class=ResumableUploadSignedSession,
-            retries=retries,
             proxies=self.connection.crux_config.proxies,
         )
 

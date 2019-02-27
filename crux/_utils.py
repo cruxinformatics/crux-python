@@ -5,6 +5,9 @@ from typing import List, Tuple  # noqa: F401 pylint: disable=unused-import
 
 from requests import Session
 from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disable=import-error
+    Retry,
+)
 
 from crux._compat import urllib_quote
 
@@ -148,6 +151,7 @@ def get_session(session_class=Session, retries=None, proxies=None):
 
     Returns:
         requests.Session: Session Object.
+
     Raises:
         TypeError: If session_class is not subclass of requests.Session.
     """
@@ -156,9 +160,32 @@ def get_session(session_class=Session, retries=None, proxies=None):
 
     session = session_class()
 
-    if retries:
-        session.mount("http://", HTTPAdapter(max_retries=retries))
-        session.mount("https://", HTTPAdapter(max_retries=retries))
+    if retries is None:
+        retries = Retry(
+            total=10,
+            backoff_factor=1,
+            connect=6,
+            read=3,
+            status_forcelist=[
+                429,
+                500,
+                502,
+                503,
+                504,
+                520,
+                521,
+                522,
+                523,
+                524,
+                525,
+                527,
+                530,
+            ],
+            method_whitelist=False,
+        )
+
+    session.mount("http://", HTTPAdapter(max_retries=retries))
+    session.mount("https://", HTTPAdapter(max_retries=retries))
 
     session.proxies = proxies if proxies else {}
 

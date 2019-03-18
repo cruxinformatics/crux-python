@@ -59,4 +59,5 @@ if file_obj.download("/tmp/stitched_twitter.avro", media_type="avro/binary"):
 
 job = datast_object.get_stitch_job(job_id)
 print(job.status)
+conn.close()
 ```

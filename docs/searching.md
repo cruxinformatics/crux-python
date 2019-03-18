@@ -19,5 +19,5 @@ resources = dataset.find_resources_by_label(predicates=predicates)
 
 for resource in resources:
     resource.download("/tmp/{file_name}".format(resource.name))
-
+conn.close()
 ```

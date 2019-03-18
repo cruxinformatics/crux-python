@@ -17,4 +17,5 @@ logging.getLogger().setLevel(logging.DEBUG)
 conn = Crux()
 
 identity_object = conn.whoami()
+conn.close()
 ```

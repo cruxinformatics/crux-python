@@ -35,6 +35,7 @@ try:
             fh.write(chunk)
 finally:
     stream.close()
+conn.close()
 ```
 
 ## Download all files in a folder
@@ -55,4 +56,5 @@ downloaded_file_list = dataset.download_files(
 
 for file_path in downloaded_file_list:
     print(file_path)
+conn.close()
 ```

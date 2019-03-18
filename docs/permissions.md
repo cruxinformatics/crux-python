@@ -16,6 +16,7 @@ added = dataset.add_permission(
 )
 
 print(permission.target_id, permission.identity_id, permission.permission_name)
+conn.close()
 ```
 
 ## List dataset permissions
@@ -32,6 +33,7 @@ permission_list = dataset.list_permissions()
 
 for permission in permission_list:
     print(permission.target_id, permission.identity_id, permission.permission_name)
+conn.close()
 ```
 
 ## Delete permission on dataset
@@ -51,6 +53,7 @@ deleted = dataset.delete_permission(
 
 if deleted:
     print("Permission deleted")
+conn.close()
 ```
 
 
@@ -80,6 +83,7 @@ added = dataset.add_permission_to_resources(
 
 if added:
     print("Permission applied")
+conn.close()
 ```
 
 Using `Resource`/`File` objects:
@@ -101,6 +105,7 @@ added = dataset.add_permission_to_resources(
 
 if added:
     print("Permission applied")
+conn.close()
 ```
 
 Using resource IDs:
@@ -122,6 +127,7 @@ added = dataset.add_permission_to_resources(
 
 if deleted:
     print("Permission deleted")
+conn.close()
 ```
 
 ## Delete permissions from a list of resources
@@ -146,6 +152,7 @@ deleted = dataset.delete_permission_from_resources(
 
 if deleted:
     print("Permission deleted")
+conn.close()
 ```
 
 Using `Resource`/`File` objects:
@@ -167,6 +174,7 @@ deleted = dataset.delete_permissions_from_resource(
 
 if deleted:
     print("Permission deleted")
+conn.close()
 ```
 
 Using resource IDs:
@@ -188,6 +196,7 @@ deleted = dataset.delete_permission_from_resources(
 
 if deleted:
     print("Permission deleted")
+conn.close()
 ```
 
 ## Add permissions to folder recursively
@@ -210,6 +219,7 @@ added = folder.add_permission(
 
 if added:
     print("Permission recursively applied to the folder")
+conn.close()
 ```
 
 ## Remove permissions from folder recursively
@@ -230,6 +240,7 @@ deleted = folder.delete_permission(
 
 if deleted:
     print("Permission recursively deleted from the folder")
+conn.close()
 ```
 
 ## Apply permissions to single resource
@@ -250,6 +261,7 @@ permission = file.add_permission(
 )
 
 print(permission.target_id, permission.identity_id, permission.permission_name)
+conn.close()
 ```
 
 ## List resource permissions
@@ -267,6 +279,7 @@ permission_list = file.list_permissions()
 
 for permission in permission_list:
     print(permission.target_id, permission.identity_id, permission.permission_name)
+conn.close()
 ```
 
 ## Delete permission on resource
@@ -287,4 +300,5 @@ deleted = file.delete_permission(
 
 if deleted:
     print("Permission deleted")
+conn.close()
 ```

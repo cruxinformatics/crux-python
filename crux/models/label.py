@@ -1,6 +1,6 @@
 """Module contains Label model."""
 
-from typing import Any, Dict, Optional  # noqa: F401 pylint: disable=unused-import
+from typing import Any, Dict, Optional  # noqa: F401
 
 from crux.models.model import CruxModel
 

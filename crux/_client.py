@@ -20,12 +20,9 @@ from requests.exceptions import (
     SSLError,
     TooManyRedirects,
 )
-from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disable=import-error
-    Retry,
-)
 
 from crux._config import CruxConfig
-from crux._utils import get_session, Headers, url_builder
+from crux._utils import Headers, url_builder
 from crux.exceptions import (
     CruxAPIError,
     CruxClientConnectionError,
@@ -60,28 +57,8 @@ class CruxClient(object):
         json=None,  # type: Dict[Any,Any]
         data=None,  # type: Dict[Any,Any]
         stream=False,  # type: bool
-        max_total_retries=20,  # type: int
-        backoff=0.3,  # type: float
-        status_forcelist=(
-            500,
-            502,
-            503,
-            504,
-            520,
-            521,
-            522,
-            523,
-            524,
-            525,
-            527,
-            530,
-        ),  # type: Tuple
-        retry_on_methods=("GET", "PUT", "DELETE", "POST"),  # type: Tuple
-        max_http_redirects=10,  # type: int
         connect_timeout=9.5,  # type: float
-        max_conn_errors=10,  # type: int
         read_timeout=60,  # type: float
-        max_read_errors=10,  # type: int
     ):
         # type:(...) -> Any
         """
@@ -97,25 +74,10 @@ class CruxClient(object):
             data (dict): Should be used while passing form encoded data. Defaults to None.
             stream (bool): Should be set to True, when response is required to be streamed.
                 Defaults to False.
-            max_total_retries (int): Total Retries to be performed. Defaults to 20.
-            backoff (float): Backoff factor to be applied. Defaults to 0.3.
-                {backoff factor} * (2 ^ ({number of total retries} - 1))
-            status_forcelist (tuple): A set of integer HTTP status codes
-                that should be retried on.
-                Defaults to (500, 502, 503, 504, 520, 521, 522, 523, 524, 525, 527, 530).
-            retry_on_methods (tuple): A set of uppercased HTTP method verbs
-                that we should retry on.
-                Defaults to ("GET", "PUT", "DELETE", "POST").
-            max_http_redirects (int): Max HTTP sredirects to perform on API calls.
-                Defaults to 10.
             connect_timeout (float): Request connect timeout configuration in seconds.
                 Defaults to 60.5.
-            max_conn_errors (int): Max connection-related errors to retry on.
-                Defaults to 10.
             read_timeout (float): Request read timeout configuration in seconds.
                 Defaults to 60.
-            max_read_errors (int): Max read-related errors to retry on.
-                Defaults to 10.
 
         Returns:
             crux.models.Model or bool: Serialized response from API backend.
@@ -154,34 +116,25 @@ class CruxClient(object):
         headers["authorization"] = bearer_token
         headers["user-agent"] = user_agent
 
-        retries = Retry(
-            total=max_total_retries,
-            backoff_factor=backoff,
-            status_forcelist=status_forcelist,
-            method_whitelist=retry_on_methods,
-            redirect=max_http_redirects,
-            connect=max_conn_errors,
-            read=max_read_errors,
-        )
+        session = self.crux_config.session
 
-        session = get_session(retries=retries, proxies=self.crux_config.proxies)
+        log.debug("Using Session object: %s with object id: %s", session, id(session))
 
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
-                with session:
-                    log.debug("Setting request stream: %s", stream)
-                    log.debug("Setting request data: %s, json: %s", data, json)
-                    log.debug("Setting request params: %s", params)
-                    response = session.request(
-                        method,
-                        url,
-                        headers=headers,
-                        data=data,
-                        json=json,
-                        stream=stream,
-                        params=params,
-                        timeout=(connect_timeout, read_timeout),
-                    )
+                log.debug("Setting request stream: %s", stream)
+                log.debug("Setting request data: %s, json: %s", data, json)
+                log.debug("Setting request params: %s", params)
+                response = session.request(
+                    method,
+                    url,
+                    headers=headers,
+                    data=data,
+                    json=json,
+                    stream=stream,
+                    params=params,
+                    timeout=(connect_timeout, read_timeout),
+                )
             except (HTTPError, TooManyRedirects) as err:
                 raise CruxClientHTTPError(str(err))
             except (ProxyError, SSLError) as err:
@@ -218,5 +171,4 @@ class CruxClient(object):
         else:
             if response.status_code == 404:
                 raise CruxResourceNotFoundError(response.json())
-            else:
-                raise CruxAPIError(response.json())
+            raise CruxAPIError(response.json())

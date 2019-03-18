@@ -100,4 +100,5 @@ class Query(Resource):
                 if line:
                     dcd_line = line.decode("utf-8")
                     local_file.write(dcd_line + "\n")
+        data.close()
         return True

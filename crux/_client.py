@@ -118,8 +118,6 @@ class CruxClient(object):
 
         session = self.crux_config.session
 
-        log.debug("Using Session object: %s with object id: %s", session, id(session))
-
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
                 log.debug("Setting request stream: %s", stream)
@@ -172,3 +170,7 @@ class CruxClient(object):
             if response.status_code == 404:
                 raise CruxResourceNotFoundError(response.json())
             raise CruxAPIError(response.json())
+
+    def close(self):
+        """Closes the Session."""
+        self.crux_config.session.close()

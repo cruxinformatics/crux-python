@@ -477,7 +477,7 @@ class Resource(CruxModel):
 
         for chunk in data.iter_content(chunk_size=chunk_size):
             file_obj.write(chunk)
-
+        data.close()
         return True
 
     def refresh(self):

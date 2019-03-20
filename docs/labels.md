@@ -31,7 +31,6 @@ resource_list = dataset.find_resources_by_label(predicates=predicates)
 
 for resource in resource_list:
     resource.download("/tmp/{file_name}".format(resource.name))
-conn.close()
 ```
 
 ### Add label to resource
@@ -48,7 +47,6 @@ file = dataset.upload_file(
 )
 
 file.add_label("label_key1", "label_value1")
-conn.close()
 ```
 
 ### Delete label from resource
@@ -62,7 +60,6 @@ dataset = conn.get_dataset("A_DATASET_ID")
 file = dataset.get_file(path="/test_folder1/test_folder2/test_file.csv")
 
 file.delete_label("label_key1")
-conn.close()
 ```
 
 ## Datasets
@@ -75,7 +72,6 @@ from crux import Crux
 conn = Crux()
 dataset = conn.get_dataset("A_DATASET_ID")
 dataset.add_label("label_key1", "label_value1")
-conn.close()
 ```
 
 ### Get label from dataset
@@ -86,7 +82,6 @@ from crux import Crux
 conn = Crux()
 dataset= conn.get_dataset("A_DATASET_ID")
 label = dataset.get_label("label_key1")
-conn.close()
 ```
 
 ### Delete label from dataset
@@ -97,5 +92,4 @@ from crux import Crux
 conn = Crux()
 dataset = conn.get_dataset("A_DATASET_ID")
 dataset.delete_label("label_key1")
-conn.close()
 ```

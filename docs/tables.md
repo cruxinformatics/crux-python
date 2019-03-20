@@ -60,7 +60,6 @@ data = query.run(format="csv", chunk_size=1024, decode_unicode=True)
 
 for chunk in data:
     print(chunk)
-conn.close()
 ```
 
 ## Run an existing query
@@ -78,7 +77,6 @@ data = query.run(format="csv", chunk_size=1024, decode_unicode=True)
 
 for chunk in data:
     print(chunk)
-conn.close()
 ```
 
 ## Upload query and download results
@@ -101,5 +99,4 @@ downloaded = query.download("/tmp/downloaded_query.csv")
 
 if downloaded:
     print("Query output downloaded successfully")
-conn.close()
 ```

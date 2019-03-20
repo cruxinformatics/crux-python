@@ -55,6 +55,7 @@ Details on specific topics:
 
 - [Installation](installation.md)
 - [Authentication](authentication.md)
+- [Client](client.md)
 - [Searching](searching.md)
 - [Downloading](downloading.md)
 - [Uploading](uploading.md)

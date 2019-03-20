@@ -16,7 +16,6 @@ file = dataset.upload_file(
     "/tmp/local/file.avro",
     "/crux/path/file.avro",
 )
-conn.close()
 ```
 
 ## Upload files in a directory
@@ -37,5 +36,4 @@ uploaded_file_objects = dataset.upload_files(
 
 for file_object in uploaded_file_objects:
     print(file_object.name)
-conn.close()
 ```

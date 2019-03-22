@@ -1,6 +1,6 @@
 """Module contains Permission model."""
 
-from typing import Dict  # noqa: F401 pylint: disable=unused-import
+from typing import Dict  # noqa: F401
 
 from crux.models.model import CruxModel
 

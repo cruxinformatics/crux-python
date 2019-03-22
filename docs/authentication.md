@@ -58,24 +58,3 @@ from crux import Crux
 conn = Crux()
 print(conn.whoami())
 ```
-
-## Proxies
-
-The Crux Python Client supports using HTTP(S) and SOCKS proxies.
-
-The environment variables `HTTP_PROXY` and/or `HTTPS_PROXY` can be used to set HTTP/HTTPS proxies.
-
-```bash
-export HTTP_PROXY="http://10.10.1.10:3128"
-export HTTPS_PROXY="http://10.10.1.10:1080"
-```
-
-The `proxies` argument can be used for more complex proxy scenarios or for SOCKS proxies.
-
-```python
-proxies = {'http': 'http://user:pass@10.10.1.10:3128/'}
-conn = Crux(proxies=proxies)
-print(conn.whoami())
-```
-
-See the [requests proxy documentation](http://docs.python-requests.org/en/master/user/advanced/#proxies) for full usage.

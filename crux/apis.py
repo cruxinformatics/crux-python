@@ -38,6 +38,10 @@ class Crux(object):
 
         self.api_client = CruxClient(crux_config=crux_config)
 
+    def close(self):
+        """Closes the Connection."""
+        self.api_client.close()
+
     def whoami(self):
         # type: () -> Identity
         """Returns the Identity of Current User.

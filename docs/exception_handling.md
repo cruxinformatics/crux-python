@@ -41,6 +41,8 @@ try:
 except CruxClientError as e:
     print("Error creating client:", e.message)
     raise
+finally:
+    conn.close()
 
 try:
     dataset = conn.get_dataset(id="A_DATASET_ID")
@@ -49,5 +51,7 @@ except CruxAPIError as e:
 except CruxClientError  as e:
     print("Client error getting dataset:", e.message)
     raise
+finally:
+    conn.close()
 ```
 

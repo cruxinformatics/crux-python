@@ -1,7 +1,7 @@
 """Module contains Table model."""
 
 import logging
-from typing import Any, Dict  # noqa: F401 pylint: disable=unused-import
+from typing import Any, Dict  # noqa: F401
 
 from crux._compat import unicode
 from crux._utils import DEFAULT_CHUNK_SIZE

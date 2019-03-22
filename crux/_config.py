@@ -4,18 +4,15 @@ import logging
 import os
 import platform
 import re
-from typing import (  # noqa: F401 pylint: disable=unused-import
-    Dict,
-    MutableMapping,
-    Optional,
-    Text,
-    Union,
-)
+from typing import Dict, MutableMapping, Optional, Text, Union  # noqa: F401
 
 import requests
+from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disable=import-error
+    Retry,
+)
 
 from crux.__version__ import __version__
-from crux._utils import str_to_bool
+from crux._utils import get_session, str_to_bool
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +22,7 @@ class CruxConfig(object):
     Crux Configuration Class.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-branches
         self,
         api_key=None,  # type: Optional[str]
         api_host=None,  # type: str
@@ -33,6 +30,7 @@ class CruxConfig(object):
         proxies=None,  # type: Optional[MutableMapping[Text, Text]]
         user_agent=None,  # type: str
         only_use_crux_domains=None,  # type: bool
+        session=None,  # type: requests.Session
     ):
         # type: (...) -> None
         """
@@ -45,6 +43,7 @@ class CruxConfig(object):
             only_use_crux_domains (bool): True if Crux domain should be
                 use for upload and download, False otherwise.
                 Defaults to False.
+            session(requests.Session): Session to be used with connection.
 
         Raises:
             ValueError: If CRUX_AP_KEY is not set.
@@ -91,6 +90,33 @@ class CruxConfig(object):
             log.debug("Setting only_use_crux_domain to %s", self.only_use_crux_domains)
         else:
             self.only_use_crux_domains = only_use_crux_domains  # type: bool
+
+        if session is None:
+            retries = Retry(
+                total=20,
+                backoff_factor=0.3,
+                status_forcelist=(
+                    500,
+                    502,
+                    503,
+                    504,
+                    520,
+                    521,
+                    522,
+                    523,
+                    524,
+                    525,
+                    527,
+                    530,
+                ),
+                method_whitelist=("GET", "PUT", "DELETE", "POST"),
+                redirect=10,
+                connect=10,
+                read=10,
+            )
+            self.session = get_session(retries=retries, proxies=self.proxies)
+        else:
+            self.session = session
 
     def _default_user_agent(self):
         # type: () -> str

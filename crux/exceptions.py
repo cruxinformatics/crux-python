@@ -1,6 +1,6 @@
 """Module contains the set of crux-python's exceptions."""
 
-from typing import Dict, Union  # noqa: F401 pylint: disable=unused-import
+from typing import Dict, Union  # noqa: F401
 
 
 class CruxAPIError(Exception):

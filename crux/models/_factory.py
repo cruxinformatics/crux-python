@@ -1,6 +1,6 @@
 """Module contains functions to create Resource objects."""
 
-from typing import Any, Dict, Union  # noqa: F401 pylint: disable=unused-import
+from typing import Any, Dict, Union  # noqa: F401
 
 from crux.models.file import File
 from crux.models.folder import Folder

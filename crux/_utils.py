@@ -1,7 +1,7 @@
 """Modules contains set of utility functions."""
 
 import posixpath
-from typing import List, Tuple  # noqa: F401 pylint: disable=unused-import
+from typing import List, Tuple  # noqa: F401
 
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -184,8 +184,9 @@ def get_session(session_class=Session, retries=None, proxies=None):
             method_whitelist=False,
         )
 
-    session.mount("http://", HTTPAdapter(max_retries=retries))
-    session.mount("https://", HTTPAdapter(max_retries=retries))
+    if retries:
+        session.mount("http://", HTTPAdapter(max_retries=retries))
+        session.mount("https://", HTTPAdapter(max_retries=retries))
 
     session.proxies = proxies if proxies else {}
 

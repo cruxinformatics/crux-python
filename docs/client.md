@@ -27,8 +27,8 @@ The Crux Python Client support raw reponse dictionary to provide forward compati
 
 ```python
 conn = Crux()
-do = conn.create_dataset("dataset_1")
-print(do.raw_response)
+dataset_object = conn.create_dataset("dataset_1")
+print(dataset_object.raw_response)
 
 {
     'datasetId': '1234567',

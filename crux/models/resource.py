@@ -2,7 +2,7 @@
 
 import os
 import posixpath
-from typing import Any, Dict, List, Union  # noqa: F401 pylint: disable=unused-import
+from typing import Any, Dict, List, Union  # noqa: F401
 
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
@@ -477,7 +477,7 @@ class Resource(CruxModel):
 
         for chunk in data.iter_content(chunk_size=chunk_size):
             file_obj.write(chunk)
-
+        data.close()
         return True
 
     def refresh(self):

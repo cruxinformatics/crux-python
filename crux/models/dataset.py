@@ -3,15 +3,7 @@
 import logging
 import os
 import posixpath
-from typing import (  # noqa: F401 pylint: disable=unused-import
-    Any,
-    Dict,
-    IO,
-    Iterator,
-    List,
-    Tuple,
-    Union,
-)
+from typing import Any, Dict, IO, Iterator, List, Tuple, Union  # noqa: F401
 
 from crux._compat import unicode
 from crux._utils import Headers, split_posixpath_filename_dirpath

@@ -1,7 +1,7 @@
 """Module contains File model."""
 
 import logging
-from typing import Any, Dict, Union  # noqa: F401 pylint: disable=unused-import
+from typing import Any, Dict, Union  # noqa: F401
 
 from crux._utils import Headers
 from crux.models.permission import Permission

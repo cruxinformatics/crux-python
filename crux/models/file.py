@@ -1,14 +1,7 @@
 """Module contains File model."""
 
 import logging
-from typing import (  # noqa: F401 pylint: disable=unused-import
-    Any,
-    Dict,
-    IO,
-    Iterable,
-    List,
-    Union,
-)
+from typing import Any, Dict, IO, Iterable, List, Union  # noqa: F401
 
 from google.resumable_media.common import (  # type: ignore
     DataCorruption,

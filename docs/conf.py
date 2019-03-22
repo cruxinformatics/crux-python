@@ -67,9 +67,6 @@ apidoc_module_dir = "../crux"
 # Add the path which will store the generated api documentation.
 apidoc_output_dir = "./"
 
-# Add extra arguments which will be passed to sphinx-apidoc.
-apidoc_extra_args = ["-P"]
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 

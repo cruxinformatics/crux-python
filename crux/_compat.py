@@ -10,6 +10,4 @@ except ImportError:
     from __builtin__ import unicode  # type: ignore
     from urllib import quote as urllib_quote
 
-from enum import Enum
-
-__all__ = ("Enum", "unicode", "urllib_quote")
+__all__ = ("unicode", "urllib_quote")

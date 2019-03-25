@@ -1,12 +1,12 @@
 """Module contains Resource model."""
 
+from enum import Enum
 import os
 import posixpath
 from typing import Any, Dict, List, Union  # noqa: F401
 
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
-from crux._compat import Enum
 from crux._utils import DEFAULT_CHUNK_SIZE, Headers
 from crux.models.model import CruxModel
 from crux.models.permission import Permission

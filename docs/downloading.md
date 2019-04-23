@@ -16,6 +16,19 @@ file = dataset.get_file("/path/to/file.csv")
 file.download("/tmp/file.csv")
 ```
 
+## Use resource ID to download file
+
+Crux files have a resource ID (accessible with `File.id`). That resource ID can be used to get a `File` object. Getting files by resource ID is more efficient than getting them by path.
+
+```python
+from crux import Crux
+
+conn = Crux()
+
+file = conn.get_resource("A_CRUX_FILE_RESOURCE_ID)
+file.download("/tmp/file.csv")
+```
+
 ## Download streaming chunks
 
 Download a file in chunks of bytes, for example to stream out while downloading.

@@ -3,6 +3,7 @@ import os
 import pytest
 
 from crux.exceptions import CruxResourceNotFoundError
+from crux.models import File
 
 
 @pytest.mark.usefixtures("dataset_with_crux_domain", "helpers")
@@ -104,8 +105,8 @@ def test_upload_file_string(dataset, helpers):
     assert uploaded_object.name == file_1.name
 
 
-@pytest.mark.usefixtures("dataset", "helpers")
-def test_upload_file_object(dataset, helpers):
+@pytest.mark.usefixtures("connection", "dataset", "helpers")
+def test_upload_file_object(connection, dataset, helpers):
     upload_file_string = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "data",
@@ -120,4 +121,10 @@ def test_upload_file_object(dataset, helpers):
 
     uploaded_object = file_1.upload(file_os_object)
 
+    # Test that resources can be fetched by ID
+    file_from_id = connection.get_resource(file_1.id)
+
     assert uploaded_object.name == file_1.name
+    assert isinstance(file_from_id, File)
+    assert file_from_id.id == file_1.id
+    assert file_from_id.size == file_1.size

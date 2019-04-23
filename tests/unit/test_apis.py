@@ -3,7 +3,7 @@ import os
 import pytest
 
 from crux import Crux
-from crux.models import Dataset, Identity, Job
+from crux.models import Dataset, File, Identity, Job
 from crux.models.job import Load, Statistics, Status
 
 
@@ -105,6 +105,40 @@ def monkeypatch_get_job(job_id=None):
     return Job(job_id=job_id, status=status, statistics=stats)
 
 
+def monkeypatch_get_resource_dict(method, path, model=None, headers=None):
+    """Return a fake requests.Response object with a mock .json() method."""
+
+    class MockResponse:
+        def json(self):
+            resource = {
+                "resourceId": path[1],
+                "datasetId": "UNIT_TEST_DATASET_ID",
+                "description": "UNIT_TEST_DESC",
+                "folderId": "UNIT_TEST_FOLDER_ID",
+                "folder": "UNIT_TEST_FOLDER",
+                "mediaType": "avro/binary",
+                "name": "test.avro",
+                "size": 512,
+                "type": "file",
+                "config": {},
+                "provenance": {},
+                "asOf": "2019-04-23",
+                "storageId": "UNIT_TEST_STORAGE_ID",
+                "createdAt": "2019-04-23",
+                "modifiedAt": "2019-04-23",
+                "labels": [
+                    {
+                        "labelKey": "UNIT_TEST_LABEL_KEY",
+                        "labelValue": "UNIT_TEST_LABEL_VALUE",
+                    }
+                ],
+            }
+            return resource
+
+    response = MockResponse()
+    return response
+
+
 @pytest.fixture
 def monkey_conn():
     os.environ["CRUX_API_KEY"] = "12345"
@@ -153,3 +187,12 @@ def test_get_job(monkeypatch, monkey_conn):
     monkeypatch.setattr(monkey_conn, "get_job", monkeypatch_get_job)
     monkey_job = monkey_conn.get_job(job_id="1234")
     assert monkey_job.job_id == "1234"
+
+
+def test_get_resource(monkeypatch, monkey_conn):
+    monkeypatch.setattr(
+        monkey_conn.api_client, "api_call", monkeypatch_get_resource_dict
+    )
+    resource = monkey_conn.get_resource("UNIT_TEST_RESOURCE_ID")
+    assert isinstance(resource, File)
+    assert resource.id == "UNIT_TEST_RESOURCE_ID"

@@ -25,7 +25,7 @@ from crux import Crux
 
 conn = Crux()
 
-file = conn.get_resource("A_CRUX_FILE_RESOURCE_ID)
+file = conn.get_resource("A_CRUX_FILE_RESOURCE_ID")
 file.download("/tmp/file.csv")
 ```
 

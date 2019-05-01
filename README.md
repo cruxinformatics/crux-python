@@ -24,7 +24,7 @@ Install `crux` [from PyPI](https://pypi.org/project/crux/) in a virtual environm
 ```bash
 mkdir -p crux_example
 cd crux_example
-pipenv install "crux==0.0.6"
+pipenv install "crux==0.0.7"
 pipenv shell
 ```
 ## Getting Started

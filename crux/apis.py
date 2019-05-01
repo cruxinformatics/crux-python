@@ -6,12 +6,14 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
     MutableMapping,
     Optional,
     Text,
+    Union,
 )
 
 from crux._client import CruxClient
 from crux._config import CruxConfig
 from crux._utils import Headers
-from crux.models import Dataset, Identity, Job
+from crux.models import Dataset, File, Folder, Identity, Job, Query, Table
+from crux.models._factory import get_resource_object
 
 
 class Crux(object):
@@ -95,6 +97,34 @@ class Crux(object):
         return self.api_client.api_call(
             "GET", ["datasets", id], model=Dataset, headers=headers
         )
+
+    def get_resource(self, id):  # id is by design pylint: disable=redefined-builtin
+        # type: (str) -> Union[File, Folder, Query, Table]
+        """Fetches the Resource by ID.
+
+        Any supported resource can be fetched. The object returned will be an instance
+        of the correct subclass, for example a ``crux.models.File`` instance will be
+        returned for file resources.
+
+        Args:
+            id (str): Resource ID which is to be fetched.
+
+        Returns:
+            crux.models.Resource: Resource or its Child Object.
+        """
+        headers = Headers(
+            {"accept": "application/json"}
+        )  # type: MutableMapping[Text, Text]
+
+        response = self.api_client.api_call("GET", ["resources", id], headers=headers)
+        raw_resource = response.json()
+
+        resource = get_resource_object(
+            resource_type=raw_resource.get("type"), data=raw_resource
+        )
+        resource.connection = self.api_client
+        resource.raw_response = raw_resource
+        return resource
 
     def _call_drives_my(self):
         headers = Headers(

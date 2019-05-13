@@ -448,7 +448,7 @@ class Resource(CruxModel):
         else:
             return False
 
-    def add_multiple_labels(self, labels_dict):
+    def add_labels(self, labels_dict):
         # type: (dict) -> bool
         """Adds multiple labels to Resource.
 
@@ -466,7 +466,7 @@ class Resource(CruxModel):
         for label_key, label_value in labels_dict.items():
             if label_key is not None and label_value is not None:
                 label_key = label_key.value if isinstance(label_key, Enum) else label_key
-                label_lists.append(
+                labels_list.append(
                     {
                         "labelKey": str(label_key),
                         "labelValue": str(label_value)

@@ -82,14 +82,24 @@ def test_add_label(resource, monkeypatch):
     assert resp == {}
 
 
-def monkeypatch_add_multiple_labels(labels_dict):
-    return {}
+def monkeypatch_add_labels_true(*args, **kwargs):
+    return True  # api_call returns an object or bool
 
 
-def test_add_multiple_labels(resource, monkeypatch):
-    monkeypatch.setattr(resource, "add_multiple_labels", monkeypatch_add_multiple_labels)
-    resp = resource.add_label(labels_dict={"test_label1":"test_value1"})
-    assert resp == {}
+def test_add_labels_true(resource, monkeypatch):
+    monkeypatch.setattr(resource.connection, "api_call", monkeypatch_add_labels_true)
+    resp = resource.add_labels(labels_dict={"test_label1": "test_value1"})
+    assert resp is True
+
+
+def monkeypatch_add_labels_false(*args, **kwargs):
+    return False  # api_call returns an object or bool
+
+
+def test_add_labels_false(resource, monkeypatch):
+    monkeypatch.setattr(resource.connection, "api_call", monkeypatch_add_labels_false)
+    resp = resource.add_labels(labels_dict={"test_label1": "test_value1"})
+    assert resp is False
 
 
 def monkeypatch_delete_label(label_key=None):

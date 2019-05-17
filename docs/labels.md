@@ -49,6 +49,22 @@ file = dataset.upload_file(
 file.add_label("label_key1", "label_value1")
 ```
 
+### Add multiple labels to resource
+
+```python
+from crux import Crux
+
+conn = Crux()
+dataset = conn.get_dataset("A_DATASET_ID")
+
+file = dataset.upload_file(
+    src="/tmp/test_file.csv",
+    dest="/test_folder1/test_folder2/test_file.csv",
+)
+
+file.add_labels({"label_key1": "label_value1", "label_key2": "label_value2"})
+```
+
 ### Delete label from resource
 
 ```python

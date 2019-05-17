@@ -46,7 +46,7 @@ class CruxConfig(object):
             session(requests.Session): Session to be used with connection.
 
         Raises:
-            ValueError: If CRUX_AP_KEY is not set.
+            ValueError: If CRUX_API_KEY is not set.
         """
         self.re_user_agent_banned_chars = re.compile(r"[^a-zA-Z0-9._+~-]")
         self.re_whitespace_runs = re.compile(r"\s+")

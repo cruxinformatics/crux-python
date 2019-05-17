@@ -11,6 +11,17 @@ def test_add_get_label(dataset, helpers):
     assert file_1.labels.get("label1") == "value1"
 
 
+@pytest.mark.usefixtures("dataset", "helpers")
+def test_add_labels_set_labels(dataset, helpers):
+    file_1 = dataset.create_file(
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
+    )
+    labels = {"label1": "value1", "label2": "value2"}
+    labels_result = file_1.add_labels(labels)
+    assert labels_result is True
+    assert file_1.labels == labels
+
+
 # Negative Test case which verifies label search by searching unset labels without pagination.
 @pytest.mark.usefixtures("dataset", "helpers")
 def test_search_label(dataset, helpers):

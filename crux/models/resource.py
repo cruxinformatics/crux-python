@@ -448,6 +448,55 @@ class Resource(CruxModel):
         else:
             return False
 
+    def add_labels(self, labels_dict):
+        # type: (dict) -> bool
+        """Adds multiple labels to Resource.
+
+        Args:
+            label_dict (dict): Labels (key/value pairs) to add to the Resource.
+
+        Returns:
+            bool: True if the labels were added, False otherwise.
+        """
+        headers = Headers(
+            {"content-type": "application/json", "accept": "application/json"}
+        )
+
+        labels_list = []
+        for label_key, label_value in labels_dict.items():
+            if label_key is not None and label_value is not None:
+                label_key = label_key.value if isinstance(label_key, Enum) else label_key
+                labels_list.append(
+                    {
+                        "labelKey": str(label_key),
+                        "labelValue": str(label_value)
+                    }
+                )
+
+        data = {
+            "labels": labels_list
+        }
+
+        response_result = self.connection.api_call(
+            "PUT",
+            [
+                "datasets",
+                self.dataset_id,
+                "resources",
+                self.id,
+                "labels",
+            ],
+            headers=headers,
+            json=data,
+        )
+
+        if response_result:
+            for label_key, label_value in labels_dict.items():
+                self._labels[label_key] = label_value
+            return True
+        else:
+            return False
+
     def _get_folder(self):
         # type: () -> str
         """Fetches the folder of the resource.

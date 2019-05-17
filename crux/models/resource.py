@@ -1,6 +1,7 @@
 """Module contains Resource model."""
 
 from enum import Enum
+import json
 import os
 import posixpath
 from typing import Any, Dict, List, Union  # noqa: F401
@@ -487,7 +488,7 @@ class Resource(CruxModel):
                 "labels",
             ],
             headers=headers,
-            data=data,
+            data=json.dumps(data),
         )
 
         if response_result:

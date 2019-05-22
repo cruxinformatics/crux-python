@@ -120,9 +120,6 @@ class CruxClient(object):
 
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
-                log.debug("Setting request stream: %s", stream)
-                log.debug("Setting request data: %s, json: %s", data, json)
-                log.debug("Setting request params: %s", params)
                 response = session.request(
                     method,
                     url,

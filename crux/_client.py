@@ -47,7 +47,7 @@ class CruxClient(object):
             log.debug("Using the passed crux_config object")
             self.crux_config = crux_config  # type: CruxConfig
 
-    def api_call(  # pylint: disable=too-many-branches, too-many-statements
+    def api_call(  # pylint: disable=too-many-branches
         self,
         method,  # type: str
         path,  # type: List[str]

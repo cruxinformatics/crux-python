@@ -465,27 +465,18 @@ class Resource(CruxModel):
         labels_list = []
         for label_key, label_value in labels_dict.items():
             if label_key is not None and label_value is not None:
-                label_key = label_key.value if isinstance(label_key, Enum) else label_key
+                label_key = (
+                    label_key.value if isinstance(label_key, Enum) else label_key
+                )
                 labels_list.append(
-                    {
-                        "labelKey": str(label_key),
-                        "labelValue": str(label_value)
-                    }
+                    {"labelKey": str(label_key), "labelValue": str(label_value)}
                 )
 
-        data = {
-            "labels": labels_list
-        }
+        data = {"labels": labels_list}
 
         response_result = self.connection.api_call(
             "PUT",
-            [
-                "datasets",
-                self.dataset_id,
-                "resources",
-                self.id,
-                "labels",
-            ],
+            ["datasets", self.dataset_id, "resources", self.id, "labels"],
             headers=headers,
             json=data,
         )

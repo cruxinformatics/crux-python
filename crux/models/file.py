@@ -1,6 +1,5 @@
 """Module contains File model."""
 
-import logging
 from typing import Any, Dict, IO, Iterable, List, Union  # noqa: F401
 
 from google.resumable_media.common import (  # type: ignore
@@ -22,6 +21,7 @@ from requests.exceptions import (
 
 from crux._compat import unicode
 from crux._utils import (
+    create_logger,
     DEFAULT_CHUNK_SIZE,
     get_session,
     Headers,
@@ -37,7 +37,7 @@ from crux.exceptions import (
 from crux.models.resource import MediaType, Resource
 
 
-log = logging.getLogger(__name__)
+log = create_logger(__name__)
 
 
 class File(Resource):
@@ -79,6 +79,8 @@ class File(Resource):
         """Download from signed URL using requests directly, not google-resumable-media."""
         signed_url = self._get_signed_url()
 
+        log.trace("Using direct signed url: %s", signed_url)
+
         transport = get_session(proxies=self.connection.crux_config.proxies)
 
         log.debug("Using Proxies %s for downloading", transport.proxies)
@@ -100,6 +102,8 @@ class File(Resource):
     def _dl_signed_url_resumable(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
         """Download from signed URL using google-resumable-media."""
         signed_url = self._get_signed_url()
+
+        log.trace("Using resumable signed url: %s", signed_url)
 
         transport = get_session(proxies=self.connection.crux_config.proxies)
 
@@ -158,6 +162,7 @@ class File(Resource):
                     refreshes_without_progress = 0
                     log.debug("Fetching new singed url")
                     new_signed_url = self._get_signed_url()
+                    log.trace("New signed url: %s", new_signed_url)
                     fetched_signed_urls += 1
                     log.debug(
                         "fetched_signed_urls count for download is %s",
@@ -229,10 +234,15 @@ class File(Resource):
             )
         # Use requests directly for small files.
         elif small_enough:
+            log.debug(
+                "Using Direct Signed url for downloading file resource %s", self.id
+            )
             return self._dl_signed_url(file_obj=file_obj, chunk_size=chunk_size)
         # Use google-resumable-media for large files
         else:
-            log.debug("Using Signed url for downloading file resource %s", self.id)
+            log.debug(
+                "Using Resumable Signed url for downloading file resource %s", self.id
+            )
             return self._dl_signed_url_resumable(
                 file_obj=file_obj, chunk_size=chunk_size
             )
@@ -288,9 +298,13 @@ class File(Resource):
                 "Signed URL missing in response for resource {id}".format(id=self.id)
             )
 
+        log.trace("Using Resumable upload signed url: %s", signed_url)
+
         signed_url_headers = Headers(
             upload_response_json.get("signedURL").get("headers")
         )
+
+        log.trace("Signed url headers: %s", signed_url_headers)
 
         if not signed_url_headers:
             raise KeyError(

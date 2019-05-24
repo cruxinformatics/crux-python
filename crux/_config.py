@@ -1,6 +1,5 @@
 """Module provides CruxConfig object to manage API configuration settings."""
 
-import logging
 import os
 import platform
 import re
@@ -12,9 +11,9 @@ from requests.packages.urllib3.util.retry import (  # Dynamic load pylint: disab
 )
 
 from crux.__version__ import __version__
-from crux._utils import get_session, str_to_bool
+from crux._utils import create_logger, get_session, str_to_bool
 
-log = logging.getLogger(__name__)
+log = create_logger(__name__)
 
 
 class CruxConfig(object):
@@ -55,10 +54,12 @@ class CruxConfig(object):
             if "CRUX_API_KEY" in os.environ:
                 log.debug("Fetching API KEY from OS Environment Variable")
                 self.api_key = os.environ.get("CRUX_API_KEY")  # type: Optional[str]
+                log.trace("API KEY: %s", self.api_key)
             else:
                 raise ValueError("API KEY is required")
         else:
             self.api_key = api_key  # type: Optional[str]
+            log.trace("API KEY: %s", self.api_key)
 
         if api_host is None:
             self.api_host = os.environ.get(
@@ -67,17 +68,21 @@ class CruxConfig(object):
             log.debug("Setting API host to %s", self.api_host)
         else:
             self.api_host = api_host
+            log.debug("Setting API host to %s", self.api_host)
 
         if api_prefix is None:
             self.api_prefix = os.environ.get("CRUX_API_PREFIX", "plat-api")
+            log.trace("Setting API prefix to %s", self.api_prefix)
         else:
             self.api_prefix = api_prefix
+            log.trace("Setting API prefix to %s", self.api_prefix)
 
         if user_agent is None:
             self.user_agent = self._default_user_agent()
             log.debug("Setting User Agent to %s", self.user_agent)
         else:
             self.user_agent = user_agent
+            log.debug("Setting User Agent to %s", self.user_agent)
 
         self.proxies = (
             proxies if proxies else {}
@@ -90,6 +95,7 @@ class CruxConfig(object):
             log.debug("Setting only_use_crux_domain to %s", self.only_use_crux_domains)
         else:
             self.only_use_crux_domains = only_use_crux_domains  # type: bool
+            log.debug("Setting only_use_crux_domain to %s", self.only_use_crux_domains)
 
         if session is None:
             retries = Retry(

@@ -1,5 +1,6 @@
 """Modules contains set of utility functions."""
 
+import logging
 import posixpath
 from typing import List, Tuple  # noqa: F401
 
@@ -13,6 +14,7 @@ from crux._compat import urllib_quote
 
 
 DEFAULT_CHUNK_SIZE = 10485760  # 10 MB
+TRACE = 5
 
 
 def quote(data):
@@ -215,3 +217,12 @@ class ResumableUploadSignedSession(Session):
         )
 
         return response
+
+
+def create_logger(namespace):
+    """Creates Logger with TRACE support."""
+    # (str) -> logging.RootLogger
+    logging.addLevelName(TRACE, "TRACE")
+    logger = logging.getLogger(namespace)
+    setattr(logger, "trace", lambda *args: logger.log(TRACE, *args))
+    return logger

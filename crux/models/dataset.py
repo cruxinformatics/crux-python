@@ -1,12 +1,11 @@
 """Module contains Dataset model."""
 
-import logging
 import os
 import posixpath
 from typing import Any, Dict, IO, Iterator, List, Tuple, Union  # noqa: F401
 
 from crux._compat import unicode
-from crux._utils import Headers, split_posixpath_filename_dirpath
+from crux._utils import create_logger, Headers, split_posixpath_filename_dirpath
 from crux.exceptions import CruxAPIError, CruxClientError, CruxResourceNotFoundError
 from crux.models._factory import get_resource_object
 from crux.models.file import File
@@ -20,7 +19,7 @@ from crux.models.resource import Resource
 from crux.models.table import Table
 
 
-log = logging.getLogger(__name__)
+log = create_logger(__name__)
 
 
 class Dataset(CruxModel):
@@ -870,7 +869,11 @@ class Dataset(CruxModel):
 
         if resource_ids or resource_objects or resource_paths:
             if resource_paths:
-                log.debug("Add permissions to resource paths")
+                log.debug(
+                    "Add permission %s to %s for resource paths",
+                    permission,
+                    identity_id,
+                )
                 resource_ids = list()
                 for resource_path in resource_paths:
                     resource_object = self._get_resource(
@@ -880,17 +883,28 @@ class Dataset(CruxModel):
                 body["resourceIds"] = resource_ids
 
             if resource_objects:
-                log.debug("Add permissions to resource objects")
+                log.debug(
+                    "Add permissions %s to %s for resource objects",
+                    permission,
+                    identity_id,
+                )
                 resource_ids = list()
                 for resource_object in resource_objects:
                     resource_ids.append(resource_object.id)
                 body["resourceIds"] = resource_ids
 
             if resource_ids:
-                log.debug("Add permissions to resource ids")
+                log.debug(
+                    "Add permissions %s to %s for resource ids", permission, identity_id
+                )
                 body["resourceIds"] = resource_ids
         else:
-            log.debug("Add permissions to dataset %s", self.id)
+            log.debug(
+                "Add permission %s to %s for dataset %s",
+                permission,
+                identity_id,
+                self.id,
+            )
             body["datasetId"] = self.id
 
         return self.connection.api_call(
@@ -942,7 +956,11 @@ class Dataset(CruxModel):
 
         if resource_ids or resource_objects or resource_paths:
             if resource_paths:
-                log.debug("Delete permissions from resource paths")
+                log.debug(
+                    "Delete permission %s for %s from resource paths",
+                    permission,
+                    identity_id,
+                )
                 resource_ids = list()
                 for resource_path in resource_paths:
                     resource_object = self._get_resource(
@@ -952,17 +970,30 @@ class Dataset(CruxModel):
                 body["resourceIds"] = resource_ids
 
             if resource_objects:
-                log.debug("Delete permissions from resource objects")
+                log.debug(
+                    "Delete permission %s for %s from resource objects",
+                    permission,
+                    identity_id,
+                )
                 resource_ids = list()
                 for resource_object in resource_objects:
                     resource_ids.append(resource_object.id)
                 body["resourceIds"] = resource_ids
 
             if resource_ids:
-                log.debug("Delete permissions from resource ids")
+                log.debug(
+                    "Delete permission %s for %s from resource ids",
+                    permission,
+                    identity_id,
+                )
                 body["resourceIds"] = resource_ids
         else:
-            log.debug("Delete permissions from dataset %s", self.id)
+            log.debug(
+                "Delete permission %s for %s from dataset %s",
+                permission,
+                identity_id,
+                self.id,
+            )
             body["datasetId"] = self.id
 
         return self.connection.api_call(

@@ -1,59 +1,68 @@
 -i https://pypi.org/simple
 alabaster==0.7.12
 appdirs==1.4.3
-astroid==2.1.0
-atomicwrites==1.2.1; python_version != '3.3.*'
-attrs==18.2.0
-babel==2.6.0
-black==18.9b0
+astroid==2.2.5
+atomicwrites==1.3.0
+attrs==19.1.0
+babel==2.7.0
+black==19.3b0
 bleach==3.1.0
-certifi==2018.11.29
+certifi==2019.3.9
 chardet==3.0.4
-click==7.0; python_version != '3.3.*'
+click==7.0
 colorlog==3.2.0
-commonmark==0.8.1; python_version != '3.2.*'
+commonmark==0.9.0
 docutils==0.14
-flake8-import-order==0.18
-flake8==3.6.0
-future==0.17.1; python_version != '3.2.*'
-idna==2.8; python_version != '3.3.*'
-imagesize==1.1.0; python_version != '3.3.*'
-isort==4.3.4; python_version != '3.3.*'
-jinja2==2.10; python_version != '3.3.*'
-lazy-object-proxy==1.3.1
-markupsafe==1.1.0; python_version != '3.3.*'
+entrypoints==0.3
+flake8-import-order==0.18.1
+flake8==3.7.7
+future==0.17.1
+idna==2.8
+imagesize==1.1.0
+importlib-metadata==0.15
+isort==4.3.20
+jinja2==2.10.1
+lazy-object-proxy==1.4.1
+markupsafe==1.1.1
 mccabe==0.6.1
-more-itertools==5.0.0; python_version != '3.1.*'
+more-itertools==7.0.0 ; python_version > '2.7'
 mypy-extensions==0.4.1
-mypy==0.650
-nox==2018.10.17
-packaging==18.0; python_version >= '2.6'
-pbr==5.1.1
+mypy==0.701
+nox==2019.4.11
+packaging==19.0
+pbr==5.2.0
 pkginfo==1.5.0.1
-pluggy==0.8.1; python_version != '3.3.*'
-py==1.7.0; python_version != '3.3.*'
-pycodestyle==2.4.0
-pyflakes==2.0.0; python_version != '3.3.*'
-pygments==2.3.1
-pylint==2.2.2
-pyparsing==2.3.1
-pytest==4.1.1
-pytz==2018.9
+pluggy==0.12.0
+py==1.8.0
+pycodestyle==2.5.0
+pyflakes==2.1.1
+pygments==2.4.2
+pylint==2.3.1
+pyparsing==2.4.0
+pytest==4.5.0
+pytz==2019.1
 readme-renderer==24.0
 recommonmark==0.5.0
-requests-toolbelt==0.8.0
-requests==2.21.0
-six==1.12.0; python_version >= '2.6'
+requests-toolbelt==0.9.1
+requests==2.22.0
+six==1.12.0
 snowballstemmer==1.2.1
-sphinx==1.8.3
+sphinx==2.0.1
 sphinxcontrib-apidoc==0.3.0
-sphinxcontrib-websupport==1.1.0; python_version != '3.3.*'
+sphinxcontrib-applehelp==1.0.1
+sphinxcontrib-devhelp==1.0.1
+sphinxcontrib-htmlhelp==1.0.2
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-qthelp==1.0.2
+sphinxcontrib-serializinghtml==1.1.3
 toml==0.10.0
-tqdm==4.29.1; python_version != '3.1.*'
-twine==1.12.1
-typed-ast==1.1.2
-urllib3==1.24.1; python_version != '3.3.*'
-virtualenv==16.2.0; python_version != '3.2.*'
+tqdm==4.32.1
+twine==1.13.0
+typed-ast==1.3.5 ; implementation_name == 'cpython'
+urllib3==1.25.3
+virtualenv==16.6.0
+wcwidth==0.1.7
 webencodings==0.5.1
-wheel==0.32.3
-wrapt==1.11.0
+wheel==0.33.4
+wrapt==1.11.1
+zipp==0.5.1

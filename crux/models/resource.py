@@ -284,14 +284,15 @@ class Resource(CruxModel):
             "DELETE", ["resources", self.id], headers=headers
         )
 
-    def update(self, name=None, description=None, tags=None):
-        # type: (str, str, List[str]) -> bool
+    def update(self, name=None, description=None, tags=None, provenance=None):
+        # type: (str, str, List[str], str) -> bool
         """Updates the metadata for Resource.
 
         Args:
             name (str): Name of resource. Defaults to None.
             description (str): Description of the resource. Defaults to None.
             tags (:obj:`list` of :obj:`str`): List of tags. Defaults to None.
+            provenance (str): Provenance for a resource. Defaults to None.
 
         Returns:
             bool: True, if resource is updated.
@@ -314,6 +315,8 @@ class Resource(CruxModel):
                 body["tags"] = tags
             else:
                 raise TypeError("Tags should be of type list")
+        if provenance is not None:
+            body["provenance"] = provenance
 
         if body:
             response = self.connection.api_call(
@@ -323,14 +326,16 @@ class Resource(CruxModel):
             response_dict = response.json()
 
             if "name" in response_dict:
-                self._name = response.json().get("name")
+                self._name = response_dict["name"]
             if "tags" in response_dict and tags is not None:
-                self._tags = response.json().get("tags")
+                self._tags = response_dict["tags"]
             if "description" in response_dict:
-                self._description = response.json().get("description")
+                self._description = response_dict["description"]
+            if "provenance" in response_dict:
+                self._provenance = response_dict["provenance"]
             return True
         else:
-            raise ValueError("Name, Description or Tags should be set")
+            raise ValueError("Name, Description, Tags or Provenance should be set")
 
     def add_permission(self, identity_id, permission):
         # type: (str, str) -> Union[bool, Permission]

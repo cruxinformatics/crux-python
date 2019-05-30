@@ -285,7 +285,7 @@ class Resource(CruxModel):
         )
 
     def update(self, name=None, description=None, tags=None, provenance=None):
-        # type: (str, str, List[str]) -> bool
+        # type: (str, str, List[str], str) -> bool
         """Updates the metadata for Resource.
 
         Args:

@@ -326,13 +326,13 @@ class Resource(CruxModel):
             response_dict = response.json()
 
             if "name" in response_dict:
-                self._name = response.json().get("name")
+                self._name = response_dict["name"]
             if "tags" in response_dict and tags is not None:
-                self._tags = response.json().get("tags")
+                self._tags = response_dict["tags"]
             if "description" in response_dict:
-                self._description = response.json().get("description")
+                self._description = response_dict["description"]
             if "provenance" in response_dict:
-                self._provenance = response.json().get("provenance")
+                self._provenance = response_dict["provenance"]
             return True
         else:
             raise ValueError("Name, Description, Tags or Provenance should be set")

@@ -11,7 +11,7 @@ from crux import Crux
 
 
 logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("crux").setLevel(logging.DEBUG)
 
 
 conn = Crux()
@@ -28,7 +28,7 @@ Crux client provides `TRACE` level logging to understand and troubleshoot proble
 import logging
 from crux import Crux, TRACE
 logging.basicConfig()
-logging.getLogger().setLevel(TRACE)
+logging.getLogger("crux").setLevel(TRACE)
 conn=Crux()
 identity_object = conn.whoami()
 ```

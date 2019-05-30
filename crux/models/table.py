@@ -1,14 +1,13 @@
 """Module contains Table model."""
 
-import logging
 from typing import Any, Dict  # noqa: F401
 
 from crux._compat import unicode
-from crux._utils import DEFAULT_CHUNK_SIZE
+from crux._utils import create_logger, DEFAULT_CHUNK_SIZE
 from crux.models.resource import Resource
 
 
-log = logging.getLogger(__name__)
+log = create_logger(__name__)
 
 
 class Table(Resource):

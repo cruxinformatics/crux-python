@@ -1,6 +1,5 @@
 """Module contains code pertaining to CruxClient."""
 
-import logging
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
     Dict,
@@ -22,7 +21,7 @@ from requests.exceptions import (
 )
 
 from crux._config import CruxConfig
-from crux._utils import Headers, url_builder
+from crux._utils import create_logger, Headers, url_builder
 from crux.exceptions import (
     CruxAPIError,
     CruxClientConnectionError,
@@ -32,7 +31,7 @@ from crux.exceptions import (
 )
 
 
-log = logging.getLogger(__name__)
+log = create_logger(__name__)
 
 
 class CruxClient(object):
@@ -120,9 +119,10 @@ class CruxClient(object):
 
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
-                log.debug("Setting request stream: %s", stream)
-                log.debug("Setting request data: %s, json: %s", data, json)
-                log.debug("Setting request params: %s", params)
+                log.trace("Setting request stream: %s", stream)
+                log.trace("Setting request data: %s, json: %s", data, json)
+                log.trace("Setting request params: %s", params)
+                log.trace("Setting headers: %s", headers)
                 response = session.request(
                     method,
                     url,

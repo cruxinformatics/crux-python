@@ -196,3 +196,8 @@ def test_get_resource(monkeypatch, monkey_conn):
     resource = monkey_conn.get_resource("UNIT_TEST_RESOURCE_ID")
     assert isinstance(resource, File)
     assert resource.id == "UNIT_TEST_RESOURCE_ID"
+
+def test_deepcopy(monkey_conn):
+    import copy
+    monkey_copy = copy.deepcopy(monkey_conn)
+    assert type(monkey_conn) == type(monkey_copy)

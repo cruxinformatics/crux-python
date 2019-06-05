@@ -47,8 +47,8 @@ class CruxConfig(object):
         Raises:
             ValueError: If CRUX_API_KEY is not set.
         """
-        self.re_user_agent_banned_chars = re.compile(r"[^a-zA-Z0-9._+~-]")
-        self.re_whitespace_runs = re.compile(r"\s+")
+        self.re_user_agent_banned_chars = "[^a-zA-Z0-9._+~-]"
+        self.re_whitespace_runs = "\s+"
 
         if api_key is None:
             if "CRUX_API_KEY" in os.environ:
@@ -146,8 +146,8 @@ class CruxConfig(object):
     def _sanitize_user_agent_part(self, part):
         # type: (str) -> str
         if part:
-            no_space_part = self.re_whitespace_runs.sub("_", part)
-            sanitized_part = self.re_user_agent_banned_chars.sub("", no_space_part)
+            no_space_part = re.sub(self.re_whitespace_runs, "_", part)
+            sanitized_part = re.sub(self.re_user_agent_banned_chars, "", no_space_part)
             if sanitized_part:
                 return sanitized_part
         return "unknown"

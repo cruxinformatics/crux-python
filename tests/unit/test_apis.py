@@ -1,5 +1,5 @@
 import os
-
+import copy
 import pytest
 
 from crux import Crux
@@ -198,6 +198,5 @@ def test_get_resource(monkeypatch, monkey_conn):
     assert resource.id == "UNIT_TEST_RESOURCE_ID"
 
 def test_deepcopy(monkey_conn):
-    import copy
     monkey_copy = copy.deepcopy(monkey_conn)
     assert type(monkey_conn) == type(monkey_copy)

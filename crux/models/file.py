@@ -88,10 +88,11 @@ class File(Resource):
         try:
             with transport as session:
                 response = session.get(signed_url, stream=True)
+                response.raise_for_status()
                 for chunk in response.iter_content(chunk_size=chunk_size):
                     file_obj.write(chunk)
         except (HTTPError, TooManyRedirects) as err:
-            raise CruxClientHTTPError(str(err))
+            raise CruxClientHTTPError(str(err), err.response)
         except (ProxyError, SSLError) as err:
             raise CruxClientConnectionError(str(err))
         except (ConnectTimeout, ReadTimeout) as err:

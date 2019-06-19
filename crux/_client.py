@@ -134,7 +134,7 @@ class CruxClient(object):
                     timeout=(connect_timeout, read_timeout),
                 )
             except (HTTPError, TooManyRedirects) as err:
-                raise CruxClientHTTPError(str(err))
+                raise CruxClientHTTPError(str(err), err.response)
             except (ProxyError, SSLError) as err:
                 raise CruxClientConnectionError(str(err))
             except (ConnectTimeout, ReadTimeout) as err:

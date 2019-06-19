@@ -125,8 +125,10 @@ def monkeypatch_update_resource(*args, **kwargs):
 def test_update_resource(resource, monkeypatch):
     monkeypatch.setattr(resource.connection, "api_call", monkeypatch_update_resource)
     update_result = resource.update(
-        name="test_dataset1", description="test_description", tags=["tag1"], 
-        provenance='{"raw_resource_id": ["resource_id1", "resource_id2"]}'
+        name="test_dataset1",
+        description="test_description",
+        tags=["tag1"],
+        provenance='{"raw_resource_id": ["resource_id1", "resource_id2"]}',
     )
     assert update_result is True
 

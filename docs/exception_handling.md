@@ -23,6 +23,10 @@ The `crux` client will raise exceptions when errors are encountered. There are t
 
 `CruxClientHTTPError` is raised when client encounters HTTP related errors.
 
+## CruxClientTooManyRedirects
+
+`CruxClientTooManyRedirects` is raised when client encounters too many redirects.
+
 ## CruxClientConnectionError
 
 `CruxClientConnectionError` is raised when client encounters Proxy and SSL related errors.

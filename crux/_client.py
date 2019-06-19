@@ -27,6 +27,7 @@ from crux.exceptions import (
     CruxClientConnectionError,
     CruxClientHTTPError,
     CruxClientTimeout,
+    CruxClientTooManyRedirects,
     CruxResourceNotFoundError,
 )
 
@@ -133,8 +134,10 @@ class CruxClient(object):
                     params=params,
                     timeout=(connect_timeout, read_timeout),
                 )
-            except (HTTPError, TooManyRedirects) as err:
-                raise CruxClientHTTPError(str(err))
+            except HTTPError as err:
+                raise CruxClientHTTPError(str(err), err.response)
+            except TooManyRedirects as err:
+                raise CruxClientTooManyRedirects(str(err))
             except (ProxyError, SSLError) as err:
                 raise CruxClientConnectionError(str(err))
             except (ConnectTimeout, ReadTimeout) as err:

@@ -33,6 +33,7 @@ from crux.exceptions import (
     CruxClientError,
     CruxClientHTTPError,
     CruxClientTimeout,
+    CruxClientTooManyRedirects,
 )
 from crux.models.resource import MediaType, Resource
 
@@ -88,10 +89,13 @@ class File(Resource):
         try:
             with transport as session:
                 response = session.get(signed_url, stream=True)
+                response.raise_for_status()
                 for chunk in response.iter_content(chunk_size=chunk_size):
                     file_obj.write(chunk)
-        except (HTTPError, TooManyRedirects) as err:
-            raise CruxClientHTTPError(str(err))
+        except HTTPError as err:
+            raise CruxClientHTTPError(str(err), err.response)
+        except TooManyRedirects as err:
+            raise CruxClientTooManyRedirects(str(err))
         except (ProxyError, SSLError) as err:
             raise CruxClientConnectionError(str(err))
         except (ConnectTimeout, ReadTimeout) as err:

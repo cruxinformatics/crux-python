@@ -2,6 +2,8 @@
 
 from typing import Dict, Union  # noqa: F401
 
+import requests  # pylint: disable=unused-import
+
 
 class CruxAPIError(Exception):
     """Exception which should be raised when the API response expects an error."""
@@ -45,6 +47,28 @@ class CruxClientError(Exception):
 
 class CruxClientHTTPError(CruxClientError):
     """Exception should be raised when SDK expects any HTTP related errors."""
+
+    def __init__(self, message, response):
+        # type: (str, requests.Response) -> None
+        """
+        Args:
+            message (str): Human readable string describing the exception.
+            response (requests.Response): Response object.
+
+        Attributes:
+            message (str): Human readable string describing the exception.
+            response (requests.Response): Response object.
+        """
+        super(CruxClientHTTPError, self).__init__(message)
+        self.message = message
+        self.response = response
+
+    def __str__(self):
+        return "{message}".format(message=self.message)
+
+
+class CruxClientTooManyRedirects(CruxClientError):
+    """Exception should be raised when SDK gets too many redirects."""
 
     def __str__(self):
         return "{message}".format(message=self.message)

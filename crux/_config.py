@@ -140,7 +140,7 @@ class CruxConfig(object):
 
         return user_agent
 
-    def _sanitize_user_agent_part(self, part):
+    def _sanitize_user_agent_part(self, part):  # pylint: disable = no-self-use
         # type: (str) -> str
         if part:
             no_space_part = re.sub(r"\s+", "_", part)

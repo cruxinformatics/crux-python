@@ -498,14 +498,16 @@ class Dataset(CruxModel):
             model=Resource,
         )
 
-    def download_files(self, folder, local_path):
-        # type: (str, str) -> List[str]
+    def download_files(self, folder, local_path, only_use_crux_domains=False):
+        # type: (str, str, bool) -> List[str]
         """Downloads the resources recursively.
 
         Args:
             folder (str): Crux Dataset Folder from where the
                 file resources should be recursively downloaded.
             local_path (str): Local OS Path where the file resources should be downloaded.
+            only_use_crux_domains (bool): True if content is required to be downloaded
+                from Crux domain.
 
         Returns:
             list (:obj:`str`): List of location of download files.
@@ -541,21 +543,31 @@ class Dataset(CruxModel):
                 os.mkdir(resource_local_path)
                 log.debug("Created local directory %s", resource_local_path)
                 local_file_list += self.download_files(
-                    folder=resource_path, local_path=resource_local_path
+                    folder=resource_path,
+                    local_path=resource_local_path,
+                    only_use_crux_domains=only_use_crux_domains,
                 )
             elif resource.type == "file":
                 file_resource = File.from_dict(resource.to_dict())
                 file_resource.connection = self.connection
-                file_resource.download(resource_local_path)
+                file_resource.download(
+                    resource_local_path, only_use_crux_domains=only_use_crux_domains
+                )
                 local_file_list.append(resource_local_path)
                 log.debug("Downloaded file at %s", resource_local_path)
 
         return local_file_list
 
     def upload_files(
-        self, local_path, folder, media_type=None, description=None, tags=None
+        self,
+        local_path,
+        folder,
+        media_type=None,
+        description=None,
+        tags=None,
+        only_use_crux_domains=False,
     ):
-        # type: (str, str, str, str, List[str]) -> List[File]
+        # type: (str, str, str, str, List[str], bool) -> List[File]
         """Uploads the resources recursively.
 
         Args:
@@ -568,6 +580,8 @@ class Dataset(CruxModel):
                 Defaults to None.
             tags (:obj:`list` of :obj:`str`): Tags to be set on uploaded resources.
                 Defaults to None.
+            only_use_crux_domains (bool): True if content is required to be downloaded
+                from Crux domain.
 
         Returns:
             list (:obj:`crux.models.File`): List of uploaded file objects.
@@ -603,6 +617,7 @@ class Dataset(CruxModel):
                     local_path=content_local_path,
                     tags=tags,
                     description=description,
+                    only_use_crux_domains=only_use_crux_domains,
                 )
 
             elif os.path.isfile(content_local_path):
@@ -612,6 +627,7 @@ class Dataset(CruxModel):
                     media_type=media_type,
                     tags=tags,
                     description=description,
+                    only_use_crux_domains=only_use_crux_domains,
                 )
                 uploaded_file_objects.append(fil_o)
                 log.debug("Uploaded file %s in dataset %s", content_path, self.id)
@@ -737,8 +753,16 @@ class Dataset(CruxModel):
             headers=headers,
         )
 
-    def upload_file(self, src, dest, media_type=None, description=None, tags=None):
-        # type: (Union[IO, str], str, str, str, List[str]) -> File
+    def upload_file(
+        self,
+        src,
+        dest,
+        media_type=None,
+        description=None,
+        tags=None,
+        only_use_crux_domains=False,
+    ):
+        # type: (Union[IO, str], str, str, str, List[str], bool) -> File
         """Uploads the File.
 
         Args:
@@ -748,6 +772,8 @@ class Dataset(CruxModel):
             media_type (str): Content type of the file. Defaults to None.
             description (str): Description of the file. Defaults to None.
             tags (:obj:`list` of :obj:`str`): Tags to be attached to the file resource.
+            only_use_crux_domains (bool): True if content is required to be downloaded
+                from Crux domain.
 
         Returns:
             crux.models.File: File Object.
@@ -757,7 +783,9 @@ class Dataset(CruxModel):
         file_resource = self.create_file(tags=tags, description=description, path=dest)
 
         try:
-            return file_resource.upload(src, media_type=media_type)
+            return file_resource.upload(
+                src, media_type=media_type, only_use_crux_domains=only_use_crux_domains
+            )
         except (CruxClientError, CruxAPIError, IOError):
             file_resource.delete()
             raise

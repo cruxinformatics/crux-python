@@ -507,7 +507,7 @@ class Dataset(CruxModel):
                 file resources should be recursively downloaded.
             local_path (str): Local OS Path where the file resources should be downloaded.
             only_use_crux_domains (bool): True if content is required to be downloaded
-                from Crux domain.
+                from Crux domains.
 
         Returns:
             list (:obj:`str`): List of location of download files.
@@ -581,7 +581,7 @@ class Dataset(CruxModel):
             tags (:obj:`list` of :obj:`str`): Tags to be set on uploaded resources.
                 Defaults to None.
             only_use_crux_domains (bool): True if content is required to be downloaded
-                from Crux domain.
+                from Crux domains.
 
         Returns:
             list (:obj:`crux.models.File`): List of uploaded file objects.
@@ -773,7 +773,7 @@ class Dataset(CruxModel):
             description (str): Description of the file. Defaults to None.
             tags (:obj:`list` of :obj:`str`): Tags to be attached to the file resource.
             only_use_crux_domains (bool): True if content is required to be downloaded
-                from Crux domain.
+                from Crux domains.
 
         Returns:
             crux.models.File: File Object.

@@ -259,7 +259,7 @@ class File(Resource):
             dest (str or file): Local OS path at which file resource will be downloaded.
             chunk_size (int): Number of bytes to be read in memory.
             only_use_crux_domains (bool): True if content is required to be downloaded
-                from Crux domain.
+                from Crux domains.
 
         Returns:
             bool: True if it is downloaded.
@@ -400,7 +400,7 @@ class File(Resource):
             src (str or file): Local OS path whose content is to be uploaded.
             media_type (str): Content type of the file. Defaults to None.
             only_use_crux_domains (bool): True if content is required to be downloaded
-                from Crux domain.
+                from Crux domains.
 
         Returns
             File: File model object.

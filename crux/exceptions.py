@@ -67,6 +67,13 @@ class CruxClientHTTPError(CruxClientError):
         return "{message}".format(message=self.message)
 
 
+class CruxClientTooManyRedirects(CruxClientError):
+    """Exception should be raised when SDK gets too many redirects."""
+
+    def __str__(self):
+        return "{message}".format(message=self.message)
+
+
 class CruxClientConnectionError(CruxClientError):
     """Exception should be raised when SDK expects any connection related errors."""
 

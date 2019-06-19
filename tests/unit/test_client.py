@@ -18,6 +18,7 @@ from crux.exceptions import (
     CruxClientConnectionError,
     CruxClientHTTPError,
     CruxClientTimeout,
+    CruxClientTooManyRedirects,
 )
 from crux.models.model import CruxModel
 
@@ -386,9 +387,7 @@ def monkeypatch_test_too_many_redirects_exception(
     proxies=None,
     timeout=None,
 ):
-    response = Response()
-    response.status_code = 301
-    raise TooManyRedirects("Test Connect Timeout Error", response=response)
+    raise TooManyRedirects("Test Connect Timeout Error")
 
 
 def test_client_too_many_redirects_exception(client, monkeypatch):
@@ -398,6 +397,5 @@ def test_client_too_many_redirects_exception(client, monkeypatch):
         monkeypatch_test_too_many_redirects_exception,
     )
 
-    with pytest.raises(CruxClientHTTPError) as redirect_error:
+    with pytest.raises(CruxClientTooManyRedirects):
         client.api_call(method="GET", path=["test-path"], model=SampleModel)
-    assert redirect_error.value.response.status_code == 301

@@ -223,7 +223,7 @@ class File(Resource):
         return data.iter_content(chunk_size=chunk_size)
 
     def _download_file(
-        self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE, only_use_crux_domains=False
+        self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE, only_use_crux_domains=None
     ):
         # google-resumable-media has a bug where is expects the 'content-range' even
         # for 200 OK responses, which happens when the range is larger than the size.
@@ -233,7 +233,10 @@ class File(Resource):
         small_enough = self.size < (chunk_size * 2)
 
         # If we must use only Crux domains, download via the API.
-        if self.connection.crux_config.only_use_crux_domains or only_use_crux_domains:
+        if only_use_crux_domains is None:
+            only_use_crux_domains = self.connection.crux_config.only_use_crux_domains
+
+        if only_use_crux_domains:
             log.debug("Using Crux Domain for downloading file resource %s", self.id)
             return self._download(
                 file_obj=file_obj, media_type=None, chunk_size=chunk_size
@@ -253,9 +256,7 @@ class File(Resource):
                 file_obj=file_obj, chunk_size=chunk_size
             )
 
-    def download(
-        self, dest, chunk_size=DEFAULT_CHUNK_SIZE, only_use_crux_domains=False
-    ):
+    def download(self, dest, chunk_size=DEFAULT_CHUNK_SIZE, only_use_crux_domains=None):
         # type: (str, int, bool) -> bool
         """Downloads the file resource.
 
@@ -377,9 +378,12 @@ class File(Resource):
             json=payload,
         )
 
-    def _upload(self, file_obj, media_type, only_use_crux_domains=False):
+    def _upload(self, file_obj, media_type, only_use_crux_domains=None):
 
-        if self.connection.crux_config.only_use_crux_domains or only_use_crux_domains:
+        if only_use_crux_domains is None:
+            only_use_crux_domains = self.connection.crux_config.only_use_crux_domains
+
+        if only_use_crux_domains:
             log.debug("Using Crux Domain for uploading file resource %s", self.id)
             headers = Headers(
                 {"content-type": media_type, "accept": "application/json"}
@@ -396,7 +400,7 @@ class File(Resource):
             log.debug("Using Signed url for uploading file resource %s", self.id)
             return self._ul_signed_url_resumable(file_obj, media_type)
 
-    def upload(self, src, media_type=None, only_use_crux_domains=False):
+    def upload(self, src, media_type=None, only_use_crux_domains=None):
         # type: (Union[IO, str], str, bool) -> File
         """Uploads the content to empty file resource.
 

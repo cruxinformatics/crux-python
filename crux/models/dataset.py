@@ -498,7 +498,7 @@ class Dataset(CruxModel):
             model=Resource,
         )
 
-    def download_files(self, folder, local_path, only_use_crux_domains=False):
+    def download_files(self, folder, local_path, only_use_crux_domains=None):
         # type: (str, str, bool) -> List[str]
         """Downloads the resources recursively.
 
@@ -565,7 +565,7 @@ class Dataset(CruxModel):
         media_type=None,
         description=None,
         tags=None,
-        only_use_crux_domains=False,
+        only_use_crux_domains=None,
     ):
         # type: (str, str, str, str, List[str], bool) -> List[File]
         """Uploads the resources recursively.
@@ -760,7 +760,7 @@ class Dataset(CruxModel):
         media_type=None,
         description=None,
         tags=None,
-        only_use_crux_domains=False,
+        only_use_crux_domains=None,
     ):
         # type: (Union[IO, str], str, str, str, List[str], bool) -> File
         """Uploads the File.

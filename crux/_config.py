@@ -55,7 +55,7 @@ class CruxConfig(object):
             else:
                 raise ValueError("API KEY is required")
         else:
-            self.api_key = api_key  # type: Optional[str]
+            self.api_key = api_key
             log.trace("API KEY: %s", self.api_key)
 
         if api_host is None:
@@ -91,7 +91,7 @@ class CruxConfig(object):
             )
             log.debug("Setting only_use_crux_domain to %s", self.only_use_crux_domains)
         else:
-            self.only_use_crux_domains = only_use_crux_domains  # type: bool
+            self.only_use_crux_domains = only_use_crux_domains
             log.debug("Setting only_use_crux_domain to %s", self.only_use_crux_domains)
 
         if session is None:

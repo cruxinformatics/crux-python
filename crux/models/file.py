@@ -222,7 +222,9 @@ class File(Resource):
 
         return data.iter_content(chunk_size=chunk_size)
 
-    def _download_file(self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE):
+    def _download_file(
+        self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE, only_use_crux_domains=None
+    ):
         # google-resumable-media has a bug where is expects the 'content-range' even
         # for 200 OK responses, which happens when the range is larger than the size.
         # There isn't much point in using resumable media for small files.
@@ -231,7 +233,10 @@ class File(Resource):
         small_enough = self.size < (chunk_size * 2)
 
         # If we must use only Crux domains, download via the API.
-        if self.connection.crux_config.only_use_crux_domains:
+        if only_use_crux_domains is None:
+            only_use_crux_domains = self.connection.crux_config.only_use_crux_domains
+
+        if only_use_crux_domains:
             log.debug("Using Crux Domain for downloading file resource %s", self.id)
             return self._download(
                 file_obj=file_obj, media_type=None, chunk_size=chunk_size
@@ -251,13 +256,15 @@ class File(Resource):
                 file_obj=file_obj, chunk_size=chunk_size
             )
 
-    def download(self, dest, chunk_size=DEFAULT_CHUNK_SIZE):
-        # type: (str, int) -> bool
+    def download(self, dest, chunk_size=DEFAULT_CHUNK_SIZE, only_use_crux_domains=None):
+        # type: (str, int, bool) -> bool
         """Downloads the file resource.
 
         Args:
             dest (str or file): Local OS path at which file resource will be downloaded.
             chunk_size (int): Number of bytes to be read in memory.
+            only_use_crux_domains (bool): True if content is required to be downloaded
+                from Crux domains else False.
 
         Returns:
             bool: True if it is downloaded.
@@ -269,10 +276,16 @@ class File(Resource):
             raise ValueError("chunk_size should be multiple of 256 KiB")
 
         if hasattr(dest, "write"):
-            return self._download_file(dest, chunk_size=chunk_size)
+            return self._download_file(
+                dest, chunk_size=chunk_size, only_use_crux_domains=only_use_crux_domains
+            )
         elif isinstance(dest, (str, unicode)):
             with open(dest, "wb") as file_obj:
-                return self._download_file(file_obj, chunk_size=chunk_size)
+                return self._download_file(
+                    file_obj,
+                    chunk_size=chunk_size,
+                    only_use_crux_domains=only_use_crux_domains,
+                )
         else:
             raise TypeError("Invalid Data Type for dest: {}".format(type(dest)))
 
@@ -365,9 +378,12 @@ class File(Resource):
             json=payload,
         )
 
-    def _upload(self, file_obj, media_type):
+    def _upload(self, file_obj, media_type, only_use_crux_domains=None):
 
-        if self.connection.crux_config.only_use_crux_domains:
+        if only_use_crux_domains is None:
+            only_use_crux_domains = self.connection.crux_config.only_use_crux_domains
+
+        if only_use_crux_domains:
             log.debug("Using Crux Domain for uploading file resource %s", self.id)
             headers = Headers(
                 {"content-type": media_type, "accept": "application/json"}
@@ -384,13 +400,15 @@ class File(Resource):
             log.debug("Using Signed url for uploading file resource %s", self.id)
             return self._ul_signed_url_resumable(file_obj, media_type)
 
-    def upload(self, src, media_type=None):
-        # type: (Union[IO, str], str) -> File
+    def upload(self, src, media_type=None, only_use_crux_domains=None):
+        # type: (Union[IO, str], str, bool) -> File
         """Uploads the content to empty file resource.
 
         Args:
             src (str or file): Local OS path whose content is to be uploaded.
             media_type (str): Content type of the file. Defaults to None.
+            only_use_crux_domains (bool): True if content is required to be downloaded
+                from Crux domains else False.
 
         Returns
             File: File model object.
@@ -404,7 +422,9 @@ class File(Resource):
             if media_type is None:
                 media_type = MediaType.detect(getattr(src, "name"))
 
-            upload_result = self._upload(src, media_type=media_type)
+            upload_result = self._upload(
+                src, media_type=media_type, only_use_crux_domains=only_use_crux_domains
+            )
 
         elif isinstance(src, str):
 
@@ -412,7 +432,11 @@ class File(Resource):
                 media_type = MediaType.detect(src)
 
             with open(src, "rb") as file_obj:
-                upload_result = self._upload(file_obj, media_type=media_type)
+                upload_result = self._upload(
+                    file_obj,
+                    media_type=media_type,
+                    only_use_crux_domains=only_use_crux_domains,
+                )
 
         else:
             raise TypeError("Invalid Data Type for source path: {}".format(type(src)))

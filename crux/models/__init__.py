@@ -6,6 +6,7 @@ import logging
 from logging import NullHandler
 
 from crux.models.dataset import Dataset
+from crux.models.delivery import Delivery
 from crux.models.file import File
 from crux.models.folder import Folder
 from crux.models.identity import Identity

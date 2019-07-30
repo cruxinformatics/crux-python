@@ -13,6 +13,7 @@ from crux.models.folder import Folder
 from crux.models.job import LoadJob, StitchJob
 from crux.models.label import Label
 from crux.models.model import CruxModel
+from crux.models.delivery import Delivery
 from crux.models.permission import Permission
 from crux.models.query import Query
 from crux.models.resource import Resource
@@ -1335,3 +1336,24 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "GET", ["datasets", "stitch", job_id], headers=headers, model=StitchJob
         )
+
+    def get_deliveries(self, start_date=None, end_date=None):
+
+        headers = Headers({"accept": "application/json"})
+
+        params = {}
+        params["start_date"] = start_date
+        params["end_date"] = end_date
+
+        response = self.connection.api_call(
+            "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
+        )
+
+        if response.json():
+            for delivery_id in response.json():
+                obj = Delivery.from_dict(delivery_id)
+                obj.connection = self.connection
+                obj.dataset_id = self.id
+                yield obj
+
+        return None

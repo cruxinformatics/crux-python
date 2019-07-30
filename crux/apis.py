@@ -12,7 +12,7 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 from crux._client import CruxClient
 from crux._config import CruxConfig
 from crux._utils import Headers
-from crux.models import Dataset, Delivery, File, Folder, Identity, Job, Query, Table
+from crux.models import Dataset, File, Folder, Identity, Job, Query, Table
 from crux.models._factory import get_resource_object
 
 
@@ -228,31 +228,3 @@ class Crux(object):
             "POST", ["datasets", "provenance"], headers=headers, json=provenance
         )
         return response.json()
-
-
-    def get_deliveries(self, dataset, start_date=None, end_date=None):
-
-        if isinstance(dataset, Dataset):
-            dataset_id = dataset.id
-        elif isinstance(dataset, str):
-            dataset_id = dataset
-        else:
-            raise TypeError("Please enter validate data type for dataset")
-
-        headers = Headers({"accept": "application/json"})
-
-        params = {}
-        params["start_date"] = start_date
-        params["end_date"] = end_date
-
-        deliveries = self.api_client.api_call(
-            "GET", ["deliveries", dataset_id, "ids"], headers=headers, params=params, model=Delivery
-        )
-
-        # Explictly setting datset_id property as the repsonse from /deliveries/dataset_id/ids only responds with delivery ids.
-        # Fetching data endpoint requires dataset_id, for eg: /deliveries/dataset_id/delivery_id/data
-        # If this needs to be avoided then direct delivery endpoints can be used. for eg: /deliveries/delivery_id/data instead of the above.
-        for delivery in deliveries:
-            delivery.dataset_id = dataset_id
-
-        return deliveries

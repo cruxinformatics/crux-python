@@ -1,3 +1,4 @@
+from crux.models.file import File
 from crux.models.model import CruxModel
 from crux.models._factory import get_resource_object
 
@@ -55,18 +56,9 @@ class Delivery(CruxModel):
 
         if resource_list:
             for resource in resource_list:
-                delivery_resources.append(self._resource_object(resource["resource_id"]))
+                obj = File(id=resource["resource_id"])
+                obj.connection = self.connection
+                delivery_resources.append(obj)
             return delivery_resources
 
         return None
-
-    def _resource_object(self, resource_id):
-        response = self.connection.api_call("GET", ["resources", resource_id])
-        raw_resource = response.json()
-
-        resource = get_resource_object(
-            resource_type=raw_resource.get("type"), data=raw_resource
-        )
-        resource.connection = self.connection
-        resource.raw_response = raw_resource
-        return resource

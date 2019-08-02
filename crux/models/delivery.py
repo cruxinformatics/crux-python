@@ -1,3 +1,5 @@
+from enum import Enum
+
 from crux.models.file import File
 from crux.models.model import CruxModel
 from crux.models._factory import get_resource_object
@@ -7,17 +9,41 @@ class Delivery(CruxModel):
     def __init__(
         self,
         id=None,
+        status=None,
         dataset_id=None,
-        connection=None
+        connection=None,
     ):
         self._id = id
 
         self.connection = connection
         self.dataset_id = dataset_id
+        self.meta = None
 
     @property
     def id(self):
         return self._id
+
+    @property
+    def status(self):
+        if self.meta is None:
+            self.meta = self.summary()
+
+        ACCEPTABLE_STATUS = [
+            "DELIVERY_SUCCEEDED",
+            "DELIVERY_OBSOLETE",
+            "DELIVERY_FAILED",
+            "DELIVERY_IN_PROGRESS"
+        ]
+        if self.meta["latest_health_status"] not in ACCEPTABLE_STATUS:
+            raise ValueError("Invalid Status")
+
+        return self.meta["latest_health_status"]
+
+    @property
+    def schedule_datetime(self):
+        if self.meta is None:
+            self.meta = self.summary()
+        return self.meta["schedule_dt"]
 
     @classmethod
     def from_dict(cls, id):

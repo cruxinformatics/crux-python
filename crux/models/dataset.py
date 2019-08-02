@@ -1337,7 +1337,13 @@ class Dataset(CruxModel):
             "GET", ["datasets", "stitch", job_id], headers=headers, model=StitchJob
         )
 
-    def get_deliveries(self, start_date=None, end_date=None):
+    def get_deliveries(
+        self,
+        start_date=None,
+        end_date=None,
+        latest_version=True,
+        health_status="DELIVERY_SUCCEEDED"
+        ):
 
         headers = Headers({"accept": "application/json"})
 
@@ -1349,11 +1355,27 @@ class Dataset(CruxModel):
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )
 
-        if response.json():
-            for delivery_id in response.json():
-                obj = Delivery.from_dict(delivery_id)
-                obj.connection = self.connection
-                obj.dataset_id = self.id
-                yield obj
+        all_deliveries = response.json()
+        deliveries = []
 
-        return None
+        # Only fetch the latest version
+        if latest_version:
+            version_delivery_map = {}
+            for delivery_id in all_deliveries:
+                ingestion_id, version_id = delivery_id.split(".")
+                if ingestion_id not in version_delivery_map:
+                    version_delivery_map[ingestion_id] = version_id
+                elif version_id > version_delivery_map[ingestion_id]:
+                    version_delivery_map[ingestion_id] = version_id
+
+            for ingestion_id in version_delivery_map:
+                deliveries.append("{ingestion_id}.{version_id}".format(ingestion_id=ingestion_id, version_id=version_delivery_map[ingestion_id]))
+
+        deliveries = deliveries if deliveries else all_deliveries
+
+        for delivery_id in deliveries:
+            obj = Delivery.from_dict(delivery_id)
+            obj.connection = self.connection
+            obj.dataset_id = self.id
+            if obj.status == health_status:
+                yield obj

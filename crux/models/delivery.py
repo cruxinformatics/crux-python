@@ -1,15 +1,12 @@
-from enum import Enum
-
+from crux.models.resource import MediaType
 from crux.models.file import File
 from crux.models.model import CruxModel
-from crux.models._factory import get_resource_object
 
 
 class Delivery(CruxModel):
     def __init__(
         self,
         id=None,
-        status=None,
         dataset_id=None,
         connection=None,
     ):
@@ -46,11 +43,11 @@ class Delivery(CruxModel):
         return self.meta["schedule_dt"]
 
     @classmethod
-    def from_dict(cls, id):
-        id = id
+    def from_dict(cls, id, dataset_id):
 
         return cls(
             id=id,
+            dataset_id=dataset_id
         )
 
     def summary(self):
@@ -61,16 +58,11 @@ class Delivery(CruxModel):
 
         return response.json()
 
-    def data(self, file_format=None, lookback=None):
+    def get_data(self, file_format=MediaType.AVRO.value):
         delivery_resources = []
         params = {}
 
-        if file_format:
-            params["delivery_resource_format"] = file_format
-
-        if lookback:
-            params["delivery_lookback"] = lookback
-
+        params["delivery_resource_format"] = file_format
 
         response = self.connection.api_call(
             "GET",
@@ -83,6 +75,25 @@ class Delivery(CruxModel):
         if resource_list:
             for resource in resource_list:
                 obj = File(id=resource["resource_id"])
+                obj.connection = self.connection
+                delivery_resources.append(obj)
+            return delivery_resources
+
+        return None
+
+    def get_raw(self):
+        delivery_resources = []
+
+        response = self.connection.api_call(
+            "GET",
+            ["deliveries", self.dataset_id, self.id, "data"],
+        )
+
+        resource_list = response.json()["resource_ids"]
+
+        if resource_list:
+            for resource in resource_list:
+                obj = File(id=resource)
                 obj.connection = self.connection
                 delivery_resources.append(obj)
             return delivery_resources

@@ -90,6 +90,10 @@ def split_posixpath_filename_dirpath(path):
 
     filename = posixpath.basename(path)  # type: str
     dirpath = posixpath.dirname(path)  # type: str
+
+    if not dirpath:
+        dirpath = "/"
+
     return filename, dirpath
 
 

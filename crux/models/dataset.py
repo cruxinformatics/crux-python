@@ -1421,5 +1421,13 @@ class Dataset(CruxModel):
 
             ingestion_map[ingestion_id].append(version_id)
 
-            obj = Ingestion.from_dict(ingestion_id, ingestion_map[ingestion_id], self.id)
+            obj = Ingestion.from_dict(
+                {
+                    "ingestion_id": ingestion_id,
+                    "versions": ingestion_map[ingestion_id],
+                    "dataset_id": self.id
+                }
+            )
+
+            obj.connection = self.connection
             yield obj

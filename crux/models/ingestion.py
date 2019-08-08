@@ -8,8 +8,8 @@ class Ingestion(CruxModel):
         self,
         id=None,
         versions=None,
-        connection=None,
-        dataset_id=None
+        dataset_id=None,
+        connection=None
     ):
         self._id = id
         self._versions = versions
@@ -26,7 +26,11 @@ class Ingestion(CruxModel):
         return sorted(self._versions)
 
     @classmethod
-    def from_dict(cls, id, versions, dataset_id):
+    def from_dict(cls, a_dict):
+
+        id = a_dict["ingestion_id"]
+        versions = a_dict["versions"]
+        dataset_id = a_dict["dataset_id"]
 
         return cls(
             id,
@@ -45,7 +49,7 @@ class Ingestion(CruxModel):
 
         delivery_id = "{}.{}".format(self.id, version)
 
-        delivery_object = Delivery.from_dict(delivery_id, self.dataset_id)
+        delivery_object = Delivery.from_dict({"delivery_id": delivery_id, "dataset_id": self.dataset_id})
         delivery_object.connection = self.connection
 
         return delivery_object.get_data(file_format=file_format)
@@ -60,7 +64,7 @@ class Ingestion(CruxModel):
 
         delivery_id = "{}.{}".format(self.id, version)
 
-        delivery_object = Delivery.from_dict(delivery_id, self.dataset_id)
+        delivery_object = Delivery.from_dict({"delivery_id": delivery_id, "dataset_id": self.dataset_id})
         delivery_object.connection = self.connection
 
         return delivery_object.get_raw()

@@ -43,7 +43,10 @@ class Delivery(CruxModel):
         return self.meta["schedule_dt"]
 
     @classmethod
-    def from_dict(cls, id, dataset_id):
+    def from_dict(cls, a_dict):
+
+        id = a_dict["delivery_id"]
+        dataset_id = a_dict["dataset_id"]
 
         return cls(
             id=id,
@@ -59,7 +62,6 @@ class Delivery(CruxModel):
         return response.json()
 
     def get_data(self, file_format=MediaType.AVRO.value):
-        delivery_resources = []
         params = {}
 
         params["delivery_resource_format"] = file_format
@@ -76,17 +78,13 @@ class Delivery(CruxModel):
             for resource in resource_list:
                 obj = File(id=resource["resource_id"])
                 obj.connection = self.connection
-                delivery_resources.append(obj)
-            return delivery_resources
-
-        return None
+                yield obj
 
     def get_raw(self):
-        delivery_resources = []
 
         response = self.connection.api_call(
             "GET",
-            ["deliveries", self.dataset_id, self.id, "data"],
+            ["deliveries", self.dataset_id, self.id, "raw"],
         )
 
         resource_list = response.json()["resource_ids"]
@@ -95,7 +93,4 @@ class Delivery(CruxModel):
             for resource in resource_list:
                 obj = File(id=resource)
                 obj.connection = self.connection
-                delivery_resources.append(obj)
-            return delivery_resources
-
-        return None
+                yield obj

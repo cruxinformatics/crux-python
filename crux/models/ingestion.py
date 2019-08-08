@@ -1,6 +1,6 @@
+from crux._utils import create_logger
 from crux.models.model import CruxModel
 from crux.models.delivery import Delivery
-
 
 
 class Ingestion(CruxModel):
@@ -42,6 +42,7 @@ class Ingestion(CruxModel):
         self,
         version=None,
         file_format=None,
+        accepted_status=["DELIVERY_SUCCEEDED"]
         ):
 
         if version is None:
@@ -51,6 +52,9 @@ class Ingestion(CruxModel):
 
         delivery_object = Delivery.from_dict({"delivery_id": delivery_id, "dataset_id": self.dataset_id})
         delivery_object.connection = self.connection
+
+        if delivery_object.status not in accepted_status:
+            raise Exception("Ingestion not found in acceptable statuses {}".format(accepted_status))
 
         return delivery_object.get_data(file_format=file_format)
 

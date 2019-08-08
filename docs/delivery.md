@@ -10,10 +10,11 @@ conn = Crux()
 dataset = conn.get_dataset("A_DATASET_ID")
 delivery = dataset.get_delivery("A_DELIVERY_ID")
 
-for file in delivery.get_data()
-    print(resource.id)
-    file.refresh() #Refresh to fetch the metadata
-    file.download("/tmp/{}".format(resource.name))
+if delivery.status == "DELIVERY_SUCCEEDED":
+    for file in delivery.get_data()
+        print(resource.id)
+        file.refresh() #Refresh to fetch the metadata
+        file.download("/tmp/{}".format(resource.name))
 ```
 ## Fetching Delivery Raw Data
 
@@ -44,7 +45,7 @@ ingestions = dataset.get_ingestions()
 ingestion = next(ingestions)
 
 # Get the DELTA data from the latest version of ingestion
-for file in ingestion.get_data()
+for file in ingestion.get_data(accepted_status=["DELIVERY_SUCCEEDED"])
     print(resource.id)
     file.refresh() #Refresh to fetch the metadata
     file.download("/tmp/{}".format(resource.name))

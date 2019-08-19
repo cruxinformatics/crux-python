@@ -78,6 +78,7 @@ class Delivery(CruxModel):
             for resource in resource_list:
                 obj = File(id=resource["resource_id"])
                 obj.connection = self.connection
+                obj.refresh()
                 yield obj
 
     def get_raw(self):
@@ -93,4 +94,5 @@ class Delivery(CruxModel):
             for resource in resource_list:
                 obj = File(id=resource)
                 obj.connection = self.connection
+                obj.refresh()
                 yield obj

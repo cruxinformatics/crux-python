@@ -219,7 +219,11 @@ class File(Resource):
             raise ValueError("chunk_size should be multiple of 256 KiB")
 
         # If we must use only Crux domains, download via the API.
+        if only_use_crux_domains is None:
+            only_use_crux_domains = self.connection.crux_config.only_use_crux_domains
+
         if only_use_crux_domains:
+
             log.debug("Using Crux Domain for streaming file resource %s", self.id)
             data = self.connection.api_call(
                 "GET", ["resources", self.id, "content"], headers=headers, stream=True

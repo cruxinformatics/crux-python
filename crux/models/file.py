@@ -197,12 +197,14 @@ class File(Resource):
 
         return True
 
-    def iter_content(self, chunk_size=DEFAULT_CHUNK_SIZE):
-        # type: (int) -> Iterable[str]
+    def iter_content(self, chunk_size=DEFAULT_CHUNK_SIZE, only_use_crux_domains=None):
+        # type: (int, bool) -> Iterable[str]
         """Streams the file resource.
 
         Args:
             chunk_size (int): Chunk Size for the stream.
+            only_use_crux_domains (bool): True if content is required to be downloaded
+                from Crux domains else False.
 
         Yields:
             bytes: Bytes of file resource.
@@ -216,9 +218,20 @@ class File(Resource):
         if not valid_chunk_size(chunk_size):
             raise ValueError("chunk_size should be multiple of 256 KiB")
 
-        data = self.connection.api_call(
-            "GET", ["resources", self.id, "content"], headers=headers, stream=True
-        )
+        # If we must use only Crux domains, download via the API.
+        if only_use_crux_domains:
+            log.debug("Using Crux Domain for streaming file resource %s", self.id)
+            data = self.connection.api_call(
+                "GET", ["resources", self.id, "content"], headers=headers, stream=True
+            )
+            # Performing early return to avoid below computation
+            return data.iter_content(chunk_size=chunk_size)
+
+        log.debug("Using Resumable Signed url for streaming file resource %s", self.id)
+
+        signed_url = self._get_signed_url()
+        session = get_session(proxies=self.connection.crux_config.proxies)
+        data = session.get(signed_url, stream=True)
 
         return data.iter_content(chunk_size=chunk_size)
 

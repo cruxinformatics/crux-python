@@ -44,21 +44,6 @@ log = create_logger(__name__)
 class File(Resource):
     """File Model."""
 
-    def to_dict(self):
-        # type: () -> Dict[str, Any]
-        """Transforms File object to File Dictionary.
-
-        Returns:
-            dict: File Dictionary.
-        """
-        return {
-            "name": self.name,
-            "description": self.description,
-            "tags": self.tags,
-            "type": self.type,
-            "folder": self.folder,
-        }
-
     def _get_signed_url(self):
         headers = Headers(
             {"content-type": "application/json", "accept": "application/json"}

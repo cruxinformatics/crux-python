@@ -13,21 +13,6 @@ log = create_logger(__name__)
 class Folder(Resource):
     """Folder Model."""
 
-    def to_dict(self):
-        # type: () -> Dict[str, Any]
-        """Transforms Folder object to Folder Dictionary.
-
-        Returns:
-            dict: Folder Dictionary.
-        """
-        return {
-            "name": self.name,
-            "description": self.description,
-            "tags": self.tags,
-            "type": self.type,
-            "folder": self.folder,
-        }
-
     def add_permission(  # It is by design pylint: disable=arguments-differ
         self, identity_id, permission, recursive=False
     ):

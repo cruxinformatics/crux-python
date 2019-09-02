@@ -4,8 +4,6 @@ from typing import Any, Dict, Union  # noqa: F401
 
 from crux.models.file import File
 from crux.models.folder import Folder
-from crux.models.query import Query
-from crux.models.table import Table
 
 
 def get_resource_object(resource_type, data):
@@ -26,9 +24,5 @@ def get_resource_object(resource_type, data):
         return File.from_dict(data)
     elif resource_type == "folder":
         return Folder.from_dict(data)
-    elif resource_type == "query":
-        return Query.from_dict(data)
-    elif resource_type == "table":
-        return Table.from_dict(data)
     else:
         raise TypeError("Invalid Resource Type")

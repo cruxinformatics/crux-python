@@ -12,7 +12,7 @@ from typing import (  # noqa: F401 pylint: disable=unused-import
 from crux._client import CruxClient
 from crux._config import CruxConfig
 from crux._utils import Headers
-from crux.models import Dataset, File, Folder, Identity, Job, Query, Table
+from crux.models import Dataset, File, Folder, Identity, Job
 from crux.models._factory import get_resource_object
 
 
@@ -76,10 +76,10 @@ class Crux(object):
         headers = Headers(
             {"content-type": "application/json", "accept": "application/json"}
         )  # type: MutableMapping[Text, Text]
-        dataset = Dataset(name=name, description=description, tags=tags)
-        return self.api_client.api_call(
-            "POST", ["datasets"], json=dataset.to_dict(), model=Dataset, headers=headers
-        )
+        object_model = {"name": name, "description": description, "tags": tags}
+        dataset = Dataset(object_model=object_model, connection=self.api_client)
+        if dataset.create():
+            return dataset
 
     def get_dataset(self, id):  # id name is by design pylint: disable=redefined-builtin
         # type: (str) -> Dataset

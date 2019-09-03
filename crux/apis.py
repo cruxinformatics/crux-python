@@ -1,13 +1,6 @@
 """Module contains Crux object to interact with root APIs."""
 
-from typing import (  # noqa: F401 pylint: disable=unused-import
-    Dict,
-    List,
-    MutableMapping,
-    Optional,
-    Text,
-    Union,
-)
+from typing import List, MutableMapping, Optional, Text, Union  # noqa: F401
 
 from crux._client import CruxClient
 from crux._config import CruxConfig
@@ -72,14 +65,10 @@ class Crux(object):
         """
 
         tags = tags if tags else []
-
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )  # type: MutableMapping[Text, Text]
-        object_model = {"name": name, "description": description, "tags": tags}
-        dataset = Dataset(object_model=object_model, connection=self.api_client)
-        if dataset.create():
-            return dataset
+        raw_model = {"name": name, "description": description, "tags": tags}
+        dataset = Dataset(raw_model=raw_model, connection=self.api_client)
+        dataset.create()
+        return dataset
 
     def get_dataset(self, id):  # id name is by design pylint: disable=redefined-builtin
         # type: (str) -> Dataset
@@ -99,7 +88,7 @@ class Crux(object):
         )
 
     def get_resource(self, id):  # id is by design pylint: disable=redefined-builtin
-        # type: (str) -> Union[File, Folder, Query, Table]
+        # type: (str) -> Union[File, Folder]
         """Fetches the Resource by ID.
 
         Any supported resource can be fetched. The object returned will be an instance
@@ -123,7 +112,6 @@ class Crux(object):
             resource_type=raw_resource.get("type"), data=raw_resource
         )
         resource.connection = self.api_client
-        resource.raw_response = raw_resource
         return resource
 
     def _call_drives_my(self):

@@ -6,10 +6,12 @@ from crux.models import Folder
 @pytest.fixture(scope="module")
 def folder():
     return Folder(
-        name="my_folder",
-        type="folder",
-        tags=["tags"],
-        description="my_folder_description",
+        raw_model={
+            "name": "my_folder",
+            "type": "folder",
+            "tags": ["tags"],
+            "description": "my_folder_description",
+        }
     )
 
 

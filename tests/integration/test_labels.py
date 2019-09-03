@@ -93,6 +93,8 @@ def test_update_field_label(dataset, helpers):
 
     file_1.update()
 
+    file_1.refresh()
+
     assert file_1.description == "new_description"
 
     assert file_1.labels.get("label1") == "value1"

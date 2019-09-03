@@ -7,7 +7,7 @@ from crux.models.folder import Folder
 
 
 def get_resource_object(resource_type, data):
-    # type: (str, Dict[str, Any]) -> Union[File, Folder, Query, Table]
+    # type: (str, Dict[str, Any]) -> Union[File, Folder]
     """Creates resource object based on its type.
 
     Args:

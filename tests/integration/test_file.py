@@ -128,3 +128,24 @@ def test_upload_file_object(connection, dataset, helpers):
     assert isinstance(file_from_id, File)
     assert file_from_id.id == file_1.id
     assert file_from_id.size == file_1.size
+
+
+@pytest.mark.usefixtures("dataset", "helpers")
+def test_update_file(dataset, helpers):
+    upload_path = os.path.join(
+        os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
+        "data",
+        "test_file.csv",
+    )
+
+    file_name = "test_file_" + helpers.generate_random_string(16) + ".csv"
+
+    file_1 = dataset.upload_file(upload_path, "/" + file_name)
+
+    file_1.description = "new_test_description"
+    file_1.tags = ["tag1", "tag2"]
+    file_1.update()
+    assert file_1.description == "new_test_description"
+    file_1.description = "new_2_test_description"
+    file_1.refresh()
+    assert file_1.description == "new_test_description"

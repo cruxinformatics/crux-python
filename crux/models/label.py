@@ -1,6 +1,6 @@
 """Module contains Label model."""
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from crux.models.model import CruxModel
 
@@ -47,3 +47,40 @@ class Label(CruxModel):
             crux.models.Label: Label Object.
         """
         return cls(raw_model=a_dict)
+
+
+class LabelMapper(object):
+    # type() -> None
+    """Maps data from and to API models"""
+
+    @classmethod
+    def to_raw_model(cls, labels):
+        # type: (List[Dict[str,str]]) -> Dict[str,str]
+        """Converts API to Raw Model
+
+        Args:
+            labels (dict): API Model Label dictionary.
+
+        Returnes:
+            dict: Raw Model Label dictionary
+        """
+        labels_dict = {}
+        for label in labels:
+            labels_dict[label["labelKey"]] = label["labelValue"]
+        return labels_dict
+
+    @classmethod
+    def to_api_model(cls, labels):
+        # type: (Dict[str,str]) -> List[Dict[str,str]]
+        """Converts Raw to API Model
+
+        Args:
+            labels (dict): Raw Model Label dictionary.
+
+        Returnes:
+            dict: API Model Label dictionary
+        """
+        labels_list = []
+        for label in labels:
+            labels_list.append({"labelKey": label, "labelValue": labels[label]})
+        return labels_list

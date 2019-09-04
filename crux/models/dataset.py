@@ -189,10 +189,6 @@ class Dataset(CruxModel):
 
         body = self.to_dict()
 
-        # Removing owner and contact keys as they aren't ignored
-        body.pop("owner")
-        body.pop("contact")
-
         dataset_object = self.connection.api_call(
             "PUT", ["datasets", self.id], headers=headers, json=body, model=Dataset
         )

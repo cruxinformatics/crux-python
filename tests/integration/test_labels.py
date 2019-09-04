@@ -98,3 +98,31 @@ def test_update_field_label(dataset, helpers):
     assert file_1.description == "new_description"
 
     assert file_1.labels.get("label1") == "value1"
+
+
+def test_labels_update(dataset, helpers):
+    file_1 = dataset.create_file(
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
+    )
+
+    file_1.add_label("label1", "value1")
+
+    assert file_1.labels["label1"] == "value1"
+
+    file_1.labels["label2"] = "value2"
+
+    file_1.update()
+
+    assert len(file_1.labels) == 2
+    assert file_1.labels["label2"] == "value2"
+
+    file_1.labels = {"label3": "value3"}
+
+    file_1.update()
+
+    assert len(file_1.labels) == 3
+    assert file_1.labels["label3"] == "value3"
+
+    file_1.refresh()
+
+    assert len(file_1.labels) == 3

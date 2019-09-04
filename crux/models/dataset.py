@@ -2,7 +2,17 @@
 
 import os
 import posixpath
-from typing import Any, Dict, IO, Iterator, List, Tuple, Union  # noqa: F401
+from typing import (
+    Any,
+    Dict,
+    IO,
+    Iterator,
+    List,
+    MutableMapping,
+    Text,
+    Tuple,
+    Union,
+)  # noqa: F401
 
 from crux._client import CruxClient
 from crux._client import CruxConfig
@@ -828,7 +838,10 @@ class Dataset(CruxModel):
         Returns:
             crux.models.Permission: Permission Object.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }  # type: MutableMapping[Text, Text]
         return self.connection.api_call(
             "PUT",
             ["permissions", self.id, identity_id, permission],
@@ -847,7 +860,10 @@ class Dataset(CruxModel):
         Returns:
             bool: True if it is able to delete it.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }  # type: MutableMapping[Text, Text]
         return self.connection.api_call(
             "DELETE", ["permissions", self.id, identity_id, permission], headers=headers
         )
@@ -859,7 +875,7 @@ class Dataset(CruxModel):
         Returns:
             list (:obj:`crux.models.Permission`): List of Permission Objects.
         """
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/json"}  # type: MutableMapping[Text, Text]
         return self.connection.api_call(
             "GET",
             ["datasets", self.id, "permissions"],

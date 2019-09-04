@@ -2,6 +2,7 @@
 
 from typing import (  # noqa: F401 pylint: disable=unused-import
     Any,
+    AnyStr,
     Dict,
     List,
     MutableMapping,
@@ -52,7 +53,7 @@ class CruxClient(object):
         method,  # type: str
         path,  # type: List[str]
         model=None,  # type: Any
-        headers=None,  # type: MutableMapping[Any, Any]
+        headers=None,  # type: MutableMapping[Text,Text]
         params=None,  # type: Dict[Any,Any]
         json=None,  # type: Dict[Any,Any]
         data=None,  # type: Dict[Any,Any]

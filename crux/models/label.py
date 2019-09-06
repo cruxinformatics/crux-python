@@ -49,12 +49,21 @@ class Label(CruxModel):
         return cls(raw_model=a_dict)
 
 
-class LabelMapper(object):
+class LabelProxy(dict):
     # type() -> None
     """Maps data from and to API models"""
 
+    def __delitem__(self, key):
+        raise RuntimeError("Removal of key not allowed")
+
+    def pop(self, key):
+        raise RuntimeError("Removal of key not allowed")
+
+    def popitem(self):
+        raise RuntimeError("Removal of key not allowed")
+
     @classmethod
-    def to_raw_model(cls, labels):
+    def to_dict(cls, labels):
         # type: (List[Dict[str,str]]) -> Dict[str,str]
         """Converts API to Raw Model
 
@@ -64,7 +73,7 @@ class LabelMapper(object):
         Returnes:
             dict: Raw Model Label dictionary
         """
-        labels_dict = {}
+        labels_dict = cls()
         for label in labels:
             labels_dict[label["labelKey"]] = label["labelValue"]
         return labels_dict

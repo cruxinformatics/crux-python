@@ -126,3 +126,12 @@ def test_labels_update(dataset, helpers):
     file_1.refresh()
 
     assert len(file_1.labels) == 3
+
+    with pytest.raises(RuntimeError):
+        del file_1.labels["label1"]
+
+    with pytest.raises(RuntimeError):
+        file_1.labels.pop("label1")
+
+    with pytest.raises(RuntimeError):
+        file_1.labels.popitem()

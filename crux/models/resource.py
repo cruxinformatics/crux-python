@@ -10,7 +10,7 @@ from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 from crux._client import CruxClient
 from crux._config import CruxConfig
 from crux._utils import create_logger, DEFAULT_CHUNK_SIZE, Headers
-from crux.models.label import LabelMapper
+from crux.models.label import LabelProxy
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
 
@@ -35,7 +35,7 @@ class Resource(CruxModel):
         self.connection = (
             connection if connection is not None else CruxClient(CruxConfig())
         )
-        self._labels = {}  # type: Dict[str,str]
+        self._labels = LabelProxy()
 
     @property
     def id(self):
@@ -116,14 +116,14 @@ class Resource(CruxModel):
     def labels(self):
         """dict: Gets the Resource labels."""
         if not self._labels:
-            self._labels = LabelMapper.to_raw_model(self.raw_model["labels"])
+            self._labels = LabelProxy.to_dict(self.raw_model["labels"])
 
         return self._labels
 
     @labels.setter
     def labels(self, labels):
         self._labels.update(labels)
-        self.raw_model["labels"] = LabelMapper.to_api_model(labels)
+        self.raw_model["labels"] = LabelProxy.to_api_model(labels)
 
     @property
     def as_of(self):
@@ -228,7 +228,7 @@ class Resource(CruxModel):
         if provenance is not None:
             self.raw_model["provenance"] = provenance
 
-        self.raw_model["labels"] = LabelMapper.to_api_model(self.labels)
+        self.raw_model["labels"] = LabelProxy.to_api_model(self.labels)
 
         body = self.to_dict()
 
@@ -328,7 +328,6 @@ class Resource(CruxModel):
         if response_result:
             # Sync the latest data from API to prevent inconsistency
             self.refresh()
-            self._labels = {}
 
         return True
 
@@ -354,7 +353,6 @@ class Resource(CruxModel):
         if response_result:
             # Sync the latest data from API to prevent inconsistency
             self.refresh()
-            self._labels = {}
 
         return True
 
@@ -394,7 +392,6 @@ class Resource(CruxModel):
         if response_result:
             # Sync the latest data from API to prevent inconsistency
             self.refresh()
-            self._labels = {}
 
         return True
 
@@ -445,9 +442,9 @@ class Resource(CruxModel):
             "GET", ["resources", self.id], headers=headers, model=Resource
         )
 
-        self._labels = {}
-
         self.raw_model = resource_object.raw_model
+
+        self._labels = LabelProxy()
 
         return True
 

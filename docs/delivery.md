@@ -301,3 +301,98 @@ def main():
 
 main()
 ```
+
+
+## Fetching particular Delivery
+
+
+```python
+""" Fetches All deliveries for a Dataset within Timeframe and CSV"""
+
+import os
+import logging
+import multiprocessing
+
+from crux import Crux
+from botocore.config import Config
+import boto3
+import smart_open
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+
+
+if not os.getenv("CRUX_API_KEY"):
+    raise ValueError("CRUX_API_KEY is unset")
+
+if not os.getenv("CRUX_DSID"):
+    raise ValueError("CRUX_DSID is unset")
+
+if not os.getenv("DELIVERY_BUCKET"):
+    raise ValueError("DELIVERY_BUCKET is unset")
+
+
+CRUX_CLIENT = Crux(api_key=os.getenv("CRUX_API_KEY"))
+
+
+def stream_file(delivery_file, delivery_bucket):
+    """Streaming Function for File"""
+
+    # Creating connection each time so that retries are per
+    # connection
+    config = Config(retries={"max_attempts": 10})
+    transport_params = {
+        "session": boto3.Session(),
+        "resource_kwargs": {"config": config},
+    }
+
+    s3_file_path = os.path.join(
+        "s3://",
+        delivery_bucket,
+        delivery_file.dataset_id,
+        delivery_file.labels["workflow_id"],
+        delivery_file.labels["pipeline_id"],
+        # Other options for timestamp could be crux_available_dt, schedule_dt or asOf
+        delivery_file.labels["supplier_modified_dt"],
+        delivery_file.labels["ingestion_id"],
+        delivery_file.labels["version_id"],
+        delivery_file.name,
+    )
+
+    log.info("Streaming started for %s", s3_file_path)
+    with smart_open.open(s3_file_path, "wb", transport_params=transport_params) as fout:
+        for chunk in delivery_file.iter_content():
+            fout.write(chunk)
+    log.info("Streaming completed for %s", s3_file_path)
+
+
+def main():
+    """Main Function"""
+
+    logging.basicConfig(level=logging.INFO)
+
+    dataset_id = os.getenv("CRUX_DSID")
+    delivery_id = os.getenv("CRUX_DELIVERY_ID")
+    dataset = CRUX_CLIENT.get_dataset(dataset_id)
+    delivery_bucket = os.getenv("DELIVERY_BUCKET")
+
+    delivery_object = dataset.get_delivery(delivery_id)
+
+    processes = []
+
+    for delivery_file in delivery_object.get_data():
+        process = multiprocessing.Process(
+            target=stream_file, args=(delivery_file, delivery_bucket)
+        )
+        processes.append(process)
+
+    # Start all processes
+    for process in processes:
+        process.start()
+    # Make sure all processes have finished
+    for process in processes:
+        process.join()
+
+
+main()
+```

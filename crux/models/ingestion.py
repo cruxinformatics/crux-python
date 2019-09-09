@@ -4,9 +4,12 @@ from typing import Any, Dict, Iterator
 
 from crux._client import CruxClient
 from crux._config import CruxConfig
+from crux._utils import create_logger
 from crux.models.delivery import Delivery
 from crux.models.model import CruxModel
 from crux.models.resource import MediaType, Resource
+
+log = create_logger(__name__)
 
 
 class Ingestion(CruxModel):
@@ -84,9 +87,12 @@ class Ingestion(CruxModel):
         delivery_object.connection = self.connection
 
         if delivery_object.status not in accepted_status:
-            raise Exception(
-                "Ingestion not found in acceptable statuses {}".format(accepted_status)
+            log.info(
+                "Delivery %s has unacceptable status %s",
+                delivery_object.id,
+                delivery_object.status,
             )
+            return iter([])
 
         return delivery_object.get_data(file_format=file_format)
 

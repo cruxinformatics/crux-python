@@ -28,12 +28,12 @@ class Delivery(CruxModel):
     @property
     def id(self):
         """str: Gets the Delivery ID."""
-        return self.raw_model["deliveryId"]
+        return self.raw_model["delivery_id"]
 
     @property
     def dataset_id(self):
         """str: Gets the Dataset ID."""
-        return self.raw_model["datasetId"]
+        return self.raw_model["dataset_id"]
 
     @property
     def status(self):

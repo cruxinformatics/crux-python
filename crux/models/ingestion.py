@@ -82,7 +82,7 @@ class Ingestion(CruxModel):
         delivery_id = "{}.{}".format(self.id, version)
 
         delivery_object = Delivery.from_dict(
-            {"deliveryId": delivery_id, "datasetId": self.dataset_id}
+            {"delivery_id": delivery_id, "dataset_id": self.dataset_id}
         )
         delivery_object.connection = self.connection
 

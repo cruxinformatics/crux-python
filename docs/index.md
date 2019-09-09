@@ -57,6 +57,7 @@ Details on specific topics:
 - [Authentication](authentication.md)
 - [Client](client.md)
 - [Searching](searching.md)
+- [Delivery](delivery.md)
 - [Downloading](downloading.md)
 - [Uploading](uploading.md)
 - [Stitching](stitching.md)

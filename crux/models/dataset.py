@@ -8,13 +8,13 @@ from crux._compat import unicode
 from crux._utils import create_logger, Headers, split_posixpath_filename_dirpath
 from crux.exceptions import CruxAPIError, CruxClientError, CruxResourceNotFoundError
 from crux.models._factory import get_resource_object
+from crux.models.delivery import Delivery
 from crux.models.file import File
 from crux.models.folder import Folder
+from crux.models.ingestion import Ingestion
 from crux.models.job import LoadJob, StitchJob
 from crux.models.label import Label
 from crux.models.model import CruxModel
-from crux.models.delivery import Delivery
-from crux.models.ingestion import Ingestion
 from crux.models.permission import Permission
 from crux.models.query import Query
 from crux.models.resource import Resource
@@ -1338,67 +1338,32 @@ class Dataset(CruxModel):
             "GET", ["datasets", "stitch", job_id], headers=headers, model=StitchJob
         )
 
-    # def get_deliveries(
-    #     self,
-    #     start_date=None,
-    #     end_date=None,
-    #     latest_version=True,
-    #     health_status="DELIVERY_SUCCEEDED"
-    #     ):
+    def get_delivery(self, delivery_id=None):
+        # type: (str) -> Delivery
+        """Gets Delivery object.
 
-    #     headers = Headers({"accept": "application/json"})
+        Args:
+            delivery_id (str): Delivery ID.
 
-    #     params = {}
-    #     params["start_date"] = start_date
-    #     params["end_date"] = end_date
-
-    #     response = self.connection.api_call(
-    #         "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
-    #     )
-
-    #     all_deliveries = response.json()
-    #     deliveries = []
-
-    #     # Only fetch the latest version
-    #     if latest_version:
-    #         version_delivery_map = {}
-    #         for delivery_id in all_deliveries:
-    #             ingestion_id, version_id = delivery_id.split(".")
-    #             if ingestion_id not in version_delivery_map:
-    #                 version_delivery_map[ingestion_id] = version_id
-    #             elif version_id > version_delivery_map[ingestion_id]:
-    #                 version_delivery_map[ingestion_id] = version_id
-
-    #         for ingestion_id in version_delivery_map:
-    #             deliveries.append("{ingestion_id}.{version_id}".format(ingestion_id=ingestion_id, version_id=version_delivery_map[ingestion_id]))
-
-    #     deliveries = deliveries if deliveries else all_deliveries
-
-    #     for delivery_id in deliveries:
-    #         obj = Delivery.from_dict(delivery_id, self.id)
-    #         obj.connection = self.connection
-    #         obj.dataset_id = self.id
-    #         if obj.status == health_status:
-    #             yield obj
-
-    def get_delivery(
-        self,
-        delivery_id=None
-    ):
+        Returns:
+            crux.models.Delivery: Delivery Object.
+        """
         headers = Headers({"accept": "application/json"})
         return self.connection.api_call(
-            "GET", ["deliveries", self.id, delivery_id],
-            headers=headers,
-            model=Delivery
+            "GET", ["deliveries", self.id, delivery_id], headers=headers, model=Delivery
         )
 
+    def get_ingestions(self, start_date=None, end_date=None):
+        # type: (str, str) -> Iterator[Ingestion]
+        """Gets Ingestions.
 
-    def get_ingestions(
-        self,
-        start_date=None,
-        end_date=None,
-        ):
+        Args:
+            start_date (str): ISO format start time.
+            end_date (str): ISO format end time.
 
+        Returns:
+            crux.models.Delivery: Delivery Object.
+        """
         headers = Headers({"accept": "application/json"})
 
         params = {}
@@ -1410,12 +1375,12 @@ class Dataset(CruxModel):
         )
 
         all_deliveries = response.json()
-        ingestion_map = {}
+        ingestion_map = {}  # type: Dict[str, List[str]]
 
         for delivery in all_deliveries:
             ingestion_id, version_id = delivery.split(".")
 
-            if  ingestion_id not in ingestion_map.keys():
+            if ingestion_id not in ingestion_map.keys():
                 # Initializing list
                 ingestion_map[ingestion_id] = []
 
@@ -1424,9 +1389,9 @@ class Dataset(CruxModel):
         for ingestion_id in ingestion_map:
             obj = Ingestion.from_dict(
                 {
-                    "ingestion_id": ingestion_id,
+                    "ingestionId": ingestion_id,
                     "versions": ingestion_map[ingestion_id],
-                    "dataset_id": self.id
+                    "datasetId": self.id,
                 }
             )
             obj.connection = self.connection

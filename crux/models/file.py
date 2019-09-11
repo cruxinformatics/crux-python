@@ -232,6 +232,13 @@ class File(Resource):
         # There isn't much point in using resumable media for small files.
         # Make sure size is greater than 2x chunk_size if Google Resumable media is
         # to be used.
+
+        # If size is not, then it is either being upload or empty,
+        # hence create empty file on disk
+        if self.size is None:
+            log.debug("File resource %s is of size None", self.id)
+            return True
+
         small_enough = self.size < (chunk_size * 2)
 
         # If we must use only Crux domains, download via the API.

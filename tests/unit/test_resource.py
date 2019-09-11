@@ -115,7 +115,7 @@ def monkeypatch_update_resource(*args, **kwargs):
         raw_model={
             "resourceId": "12345",
             "name": "test_dataset2",
-            "description": "test_description",
+            "description": "test_description_2",
             "tags": ["tag1"],
         }
     )
@@ -130,3 +130,6 @@ def test_update_resource(resource, monkeypatch):
         provenance='{"raw_resource_id": ["resource_id1", "resource_id2"]}',
     )
     assert update_result is True
+
+    assert resource.name == "test_dataset2"
+    assert resource.description == "test_description_2"

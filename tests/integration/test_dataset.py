@@ -15,17 +15,7 @@ def test_create_get_delete_dataset(connection, helpers):
     assert d1.id == dataset.id
     assert d1.name == dataset_name
     assert d1.description == "test_description"
-    dataset.delete()
-    with pytest.raises(CruxAPIError):
-        dataset.delete()
 
-
-@pytest.mark.usefixtures("connection", "helpers")
-def test_update_dataset(connection, helpers):
-    dataset_name = "crux_py_dataset_" + helpers.generate_random_string(6)
-    dataset = connection.create_dataset(
-        name=dataset_name, description="test_description"
-    )
     assert dataset.name == dataset_name
     assert dataset.description == "test_description"
     dataset.description = "new_description"
@@ -34,6 +24,9 @@ def test_update_dataset(connection, helpers):
     dataset.description = "new_2_description"
     dataset.refresh()
     assert dataset.description == "new_description"
+    dataset.delete()
+    with pytest.raises(CruxAPIError):
+        dataset.delete()
 
 
 @pytest.mark.usefixtures("connection")

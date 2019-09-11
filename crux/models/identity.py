@@ -48,6 +48,10 @@ class Identity(CruxModel):
         """str: Gets the Description."""
         return self.raw_model["description"]
 
+    @description.setter
+    def description(self, description):
+        self.raw_model["description"] = description
+
     @property
     def first_name(self):
         """str: Gets the First name."""

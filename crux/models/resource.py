@@ -53,7 +53,7 @@ class Resource(CruxModel):
 
     @property
     def media_type(self):
-        """str: Gets the Resource Description."""
+        """str: Gets the Media type."""
         return self.raw_model["mediaType"]
 
     @property
@@ -65,6 +65,10 @@ class Resource(CruxModel):
     def folder_id(self):
         """str: Gets the Folder ID."""
         return self.raw_model["folderId"]
+
+    @folder_id.setter
+    def folder_id(self, folder_id):
+        self.raw_model["folderId"] = folder_id
 
     @property
     def storage_id(self):
@@ -91,7 +95,7 @@ class Resource(CruxModel):
 
     @property
     def provenance(self):
-        """str: Gets the Provenance."""
+        """dict: Gets the Provenance."""
         return self.raw_model["provenance"]
 
     @provenance.setter
@@ -143,8 +147,7 @@ class Resource(CruxModel):
     @property
     def size(self):
         """int: Gets the size."""
-        size = self.raw_model["size"]
-        return int(size if size else 0)
+        return self.raw_model["size"]
 
     @property
     def path(self):

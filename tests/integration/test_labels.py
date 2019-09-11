@@ -113,19 +113,15 @@ def test_labels_update(dataset, helpers):
 
     file_1.update()
 
-    assert len(file_1.labels) == 2
     assert file_1.labels["label2"] == "value2"
 
     file_1.labels = {"label3": "value3"}
 
     file_1.update()
 
-    assert len(file_1.labels) == 3
     assert file_1.labels["label3"] == "value3"
 
     file_1.refresh()
-
-    assert len(file_1.labels) == 3
 
     with pytest.raises(RuntimeError):
         del file_1.labels["label1"]

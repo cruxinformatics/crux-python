@@ -12,6 +12,7 @@ def resource():
     conn = CruxClient(crux_config=None)
     resource = Resource(
         raw_model={
+            "resourceId": "12345",
             "name": "test_file",
             "type": "file",
             "tags": ["tags"],
@@ -107,3 +108,25 @@ def test_delete_label(resource, monkeypatch):
     resp = resource.delete_label(label_key="test_label1")
 
     assert resp == {}
+
+
+def monkeypatch_update_resource(*args, **kwargs):
+    return Resource(
+        raw_model={
+            "resourceId": "12345",
+            "name": "test_dataset2",
+            "description": "test_description",
+            "tags": ["tag1"],
+        }
+    )
+
+
+def test_update_resource(resource, monkeypatch):
+    monkeypatch.setattr(resource.connection, "api_call", monkeypatch_update_resource)
+    update_result = resource.update(
+        name="test_dataset1",
+        description="test_description",
+        tags=["tag1"],
+        provenance='{"raw_resource_id": ["resource_id1", "resource_id2"]}',
+    )
+    assert update_result is True

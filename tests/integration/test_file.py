@@ -112,6 +112,7 @@ def test_upload_file_string_with_update(dataset, helpers):
     file_1.refresh()
     assert file_1.description == "new_test_description"
 
+
 @pytest.mark.usefixtures("connection", "dataset", "helpers")
 def test_upload_file_object(connection, dataset, helpers):
     upload_file_string = os.path.join(

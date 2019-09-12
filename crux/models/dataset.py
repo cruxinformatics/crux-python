@@ -2,21 +2,31 @@
 
 import os
 import posixpath
-from typing import Any, Dict, IO, Iterator, List, Tuple, Union  # noqa: F401
+from typing import (
+    Any,
+    Dict,
+    IO,
+    Iterator,
+    List,
+    MutableMapping,
+    Text,
+    Tuple,
+    Union,
+)  # noqa: F401
 
+from crux._client import CruxClient
+from crux._client import CruxConfig
 from crux._compat import unicode
 from crux._utils import create_logger, Headers, split_posixpath_filename_dirpath
 from crux.exceptions import CruxAPIError, CruxClientError, CruxResourceNotFoundError
 from crux.models._factory import get_resource_object
 from crux.models.file import File
 from crux.models.folder import Folder
-from crux.models.job import LoadJob, StitchJob
+from crux.models.job import StitchJob
 from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
-from crux.models.query import Query
 from crux.models.resource import Resource
-from crux.models.table import Table
 
 
 log = create_logger(__name__)
@@ -25,106 +35,89 @@ log = create_logger(__name__)
 class Dataset(CruxModel):
     """Dataset Model."""
 
-    def __init__(
-        self,
-        id=None,  # type: str # id name is by design pylint: disable=redefined-builtin
-        owner_identity_id=None,  # type: str
-        contact_identity_id=None,  # type: str
-        name=None,  # type: str
-        description=None,  # type: str
-        website=None,  # type: str
-        created_at=None,  # type: str
-        modified_at=None,  # type: str
-        connection=None,
-        raw_response=None,  # type: Dict[Any, Any]
-        tags=None,  # type: List[str]
-    ):
-        # type: (...) -> None
+    def __init__(self, raw_model=None, connection=None):
+        # type: (Dict, CruxClient) -> None
         """
         Attributes:
-            id (str): Dataset Id. Defaults to None.
-            owner_identity_id (str): Owner Identity Id. Defaults to None.
-            contact_identity_id (str): Contact Identity Id. Defaults to None.
-            name (str): Dataset name. Defaults to None.
-            description (str): Dataset description. Defaults to None.
-            website (str): Dataset website. Defaults to None.
-            created_at (str): Dataset created. Defaults to None.
-            modified_at (str): Dataset Modified. Defaults to None.
-            connection (crux._client.CruxClient): Connection Object. Defaults to None.
-            raw_response (dict): Response Content. Defaults to None.
-            tags (:obj:`list` of :obj:`str`): List of tags to be applied to dataset.
-                Defaults to None.
-
-        Raises:
-            ValueError: If name or tags are set to None.
+            raw_model (dict): Dataset raw dictionary. Defaults to None.
+            connection (CruxClient): Connection Object. Defaults to None.
         """
-        self._id = id
-        self._owner_identity_id = owner_identity_id
-        self._contact_identity_id = contact_identity_id
-        self._name = name
-        self._description = description
-        self._website = website
-        self._created_at = created_at
-        self._modified_at = modified_at
-        self._tags = tags
-        self._provenance = None
-
-        self.connection = connection
-        self.raw_response = raw_response
+        self.raw_model = raw_model if raw_model is not None else {}
+        self.connection = (
+            connection if connection is not None else CruxClient(CruxConfig())
+        )
 
     @property
     def id(self):
         """str: Gets the Dataset ID."""
-        return self._id
+        return self.raw_model["datasetId"]
 
     @property
     def owner_identity_id(self):
         """str: Gets the Owner Identity ID."""
-        return self._owner_identity_id
+        return self.raw_model["ownerIdentityId"]
 
     @property
     def contact_identity_id(self):
         """str: Gets the Contact Identity ID."""
-        return self._contact_identity_id
+        return self.raw_model["contactIdentityId"]
 
     @property
     def name(self):
         """str: Gets the Dataset Name."""
-        return self._name
+        return self.raw_model["name"]
+
+    @name.setter
+    def name(self, name):
+        self.raw_model["name"] = name
 
     @property
     def tags(self):
-        """str: Gets the tags."""
-        return self._tags
+        """str: Gets the tags.
+
+        Raises:
+            TypeError: If tags is not a list
+        """
+        return self.raw_model["tags"]
+
+    @tags.setter
+    def tags(self, tags):
+        if not isinstance(tags, list):
+            raise TypeError("Tags should be of type list")
+        self.raw_model["tags"] = tags
 
     @property
     def description(self):
         """str: Gets the Dataset Description."""
-        return self._description
+        return self.raw_model["description"]
+
+    @description.setter
+    def description(self, description):
+        self.raw_model["description"] = description
 
     @property
     def website(self):
         """str: Gets the Dataset Website."""
-        return self._website
+        return self.raw_model["website"]
+
+    @website.setter
+    def website(self, website):
+        self.raw_model["website"] = website
 
     @property
     def created_at(self):
         """str: Gets the Dataset created_at."""
-        return self._created_at
+        return self.raw_model["createdAt"]
 
     @property
     def modified_at(self):
         """str: Gets the Dataset modified_at."""
-        return self._modified_at
+        return self.raw_model["modifiedAt"]
 
     @property
     def provenance(self):
         """str: Compute or Get the provenance."""
-        if self._provenance:
-            return self._provenance
-
-        self._provenance = self._get_provenance()
-        return self._provenance
+        return self.raw_model["provenance"]
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -133,17 +126,7 @@ class Dataset(CruxModel):
         Returns:
             dict: Dataset Dictionary.
         """
-        return {
-            "datasetId": self.id,
-            "ownerIdentityId": self.owner_identity_id,
-            "contactIdentityId": self.contact_identity_id,
-            "description": self.description,
-            "name": self.name,
-            "website": self.website,
-            "createdAt": self.created_at,
-            "modifiedAt": self.modified_at,
-            "tags": self.tags,
-        }
+        return self.raw_model
 
     @classmethod
     def from_dict(cls, a_dict):
@@ -156,50 +139,30 @@ class Dataset(CruxModel):
         Returns:
             crux.models.Dataset: Dataset Object.
         """
-        id = a_dict[  # id name is by design pylint: disable=redefined-builtin
-            "datasetId"
-        ]
-        owner_identity_id = a_dict["ownerIdentityId"]
-        contact_identity_id = a_dict["contactIdentityId"]
-        description = a_dict["description"]
-        name = a_dict["name"]
-        website = a_dict["website"]
-        created_at = a_dict["createdAt"]
-        modified_at = a_dict["modifiedAt"]
-        tags = a_dict["tags"]
 
-        return cls(
-            id=id,
-            owner_identity_id=owner_identity_id,
-            contact_identity_id=contact_identity_id,
-            description=description,
-            name=name,
-            website=website,
-            created_at=created_at,
-            modified_at=modified_at,
-            tags=tags,
-        )
+        return cls(raw_model=a_dict)
 
-    def _get_provenance(self):
-        # type: () -> str
-        """Fetches the provenance of the Dataset.
+    def create(self):
+        # type: () -> bool
+        """Creates the Dataset.
 
         Returns:
-            list: List of provenance dictionaries containing DatasetID, WorkFlowID,
-                systemOfRecord, cronSpec, createdAt and modifiedAt keys.
+            bool: True if dataset is created.
         """
         headers = Headers(
             {"content-type": "application/json", "accept": "application/json"}
         )
-        response = self.connection.api_call(
-            "GET", ["datasets", self.id, "provenance"], headers=headers
+        dataset_object = self.connection.api_call(
+            "POST", ["datasets"], json=self.to_dict(), model=Dataset, headers=headers
         )
 
-        return response.json()
+        self.raw_model = dataset_object.raw_model
+
+        return True
 
     def delete(self):
         # type: () -> bool
-        """Deletes the dataset.
+        """Deletes the Dataset.
 
         Returns:
             bool: True if dataset is deleted.
@@ -213,7 +176,7 @@ class Dataset(CruxModel):
 
     def update(self, name=None, description=None, tags=None):
         # type: (str, str, List[str]) -> bool
-        """Updates the metadata of dataset.
+        """Updates the Dataset.
 
         Args:
             name (str): Name of the dataset. Defaults to None.
@@ -222,36 +185,49 @@ class Dataset(CruxModel):
 
         Returns:
             bool: True, if dataset is updated.
-
-        Raises:
-            ValueError: It is raised if name, description or tags are unset.
-            TypeError: It is raised if tags is not of type list.
         """
         headers = Headers(
             {"content-type": "application/json", "accept": "application/json"}
         )
-        body = {}  # type: Dict[str, Union[str, List]]
-        if name is not None:
-            body["name"] = name
-        if description is not None:
-            body["description"] = description
-        if tags is not None:
-            if isinstance(tags, list):
-                body["tags"] = tags
-            else:
-                raise TypeError("Tags should be of type list")
 
-        if body:
-            dataset_object = self.connection.api_call(
-                "PUT", ["datasets", self.id], headers=headers, json=body, model=Dataset
-            )
-            self.__dict__.update(dataset_object.__dict__)
-            log.debug(
-                "Updated dataset %s with content %s", self.id, dataset_object.__dict__
-            )
-            return True
-        else:
-            raise ValueError("Name, Description or Tags should be set")
+        if name is not None:
+            self.raw_model["name"] = name
+        if description is not None:
+            self.raw_model["description"] = description
+        if tags is not None:
+            self.raw_model["tags"] = tags
+
+        body = self.to_dict()
+
+        dataset_object = self.connection.api_call(
+            "PUT", ["datasets", self.id], headers=headers, json=body, model=Dataset
+        )
+
+        self.raw_model = dataset_object.raw_model
+
+        log.debug(
+            "Updated dataset %s with content %s", self.id, dataset_object.__dict__
+        )
+        return True
+
+    def refresh(self):
+        """Refresh Resource model from API backend.
+
+        Returns:
+            bool: True, if it is able to refresh the model,
+                False otherwise.
+        """
+        # type () -> bool
+        headers = Headers(
+            {"content-type": "application/json", "accept": "application/json"}
+        )
+        dataset_object = self.connection.api_call(
+            "GET", ["datasets", self.id], headers=headers, model=Resource
+        )
+
+        self.raw_model = dataset_object.raw_model
+
+        return True
 
     def create_file(self, path, tags=None, description=None):
         # type: (str, List[str], str) -> File
@@ -276,60 +252,21 @@ class Dataset(CruxModel):
 
         file_name, folder = split_posixpath_filename_dirpath(path)
 
-        file_resource = File(
-            name=file_name,
-            type="file",
-            tags=tags,
-            description=description,
-            folder=folder,
-        )
+        raw_model = {
+            "name": file_name,
+            "type": "file",
+            "tags": tags,
+            "description": description,
+            "folder": folder,
+        }
+
+        file_resource = File(raw_model=raw_model)
 
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
             json=file_resource.to_dict(),
             model=File,
-            headers=headers,
-        )
-
-    def create_table(self, path, config, tags=None, description=None):
-        # type: (str, Dict[str, Any], List[str], str) -> Table
-        """Creates Table resource in Dataset.
-
-        Args:
-            path (str): Table resource Path.
-            config (dict): Table Schema Configuration.
-            tags (:obj:`list` of :obj:`str`): Tags of the Table resource.
-                Defaults to None.
-            description (str): Description of the Table resource.
-                Defaults to None.
-
-        Returns:
-            crux.models.Table: Table Object
-        """
-
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
-
-        table_name, folder = split_posixpath_filename_dirpath(path)
-
-        tags = tags if tags else []
-
-        table_resource = Table(
-            name=table_name,
-            type="table",
-            tags=tags,
-            description=description,
-            config=config,
-            folder=folder,
-        )
-
-        return self.connection.api_call(
-            "POST",
-            ["datasets", self.id, "resources"],
-            json=table_resource.to_dict(),
-            model=Table,
             headers=headers,
         )
 
@@ -358,13 +295,15 @@ class Dataset(CruxModel):
 
         file_name, folder = split_posixpath_filename_dirpath(path)
 
-        folder_resource = Folder(
-            name=file_name,
-            type="folder",
-            tags=tags,
-            description=description,
-            folder=folder,
-        )
+        raw_model = {
+            "name": file_name,
+            "type": "folder",
+            "tags": tags,
+            "description": description,
+            "folder": folder,
+        }
+
+        folder_resource = Folder(raw_model=raw_model)
 
         return self.connection.api_call(
             "POST",
@@ -445,30 +384,6 @@ class Dataset(CruxModel):
             crux.models.Folder: Folder Object.
         """
         return self._get_resource(path=path, model=Folder)
-
-    def get_table(self, path):
-        # type: (str) -> Table
-        """Method which gets the Table resource
-
-        Args:
-            path: Table resource path
-
-        Returns:
-            crux.models.Table: Table Object
-        """
-        return self._get_resource(path=path, model=Table)
-
-    def get_query(self, path):
-        # type: (str) -> Query
-        """Gets the Query resource object.
-
-        Args:
-            path (str): Query resource path.
-
-        Returns:
-            crux.models.Query: Query Object.
-        """
-        return self._get_resource(path=path, model=Query)
 
     def list_resources(
         self, folder="/", offset=0, limit=1, include_folders=False, sort=None
@@ -700,59 +615,6 @@ class Dataset(CruxModel):
             headers=headers,
         )
 
-    def load_table_from_file(self, source_file, dest_table, append=False):
-        # type: (str, str, bool) -> LoadJob
-        """Loads table from file resource.
-
-        Args:
-            source_file (str or file): Source File Path in string or File Object.
-            dest_table (str or crux.models.Table): Destination File Path in
-                string or Table Object.
-            append (bool): Sets whether to append to existing table. Defaults to False.
-
-        Returns:
-            crux.models.LoadJob: LoadJob Object.
-
-        Raises:
-            TypeError: If source_file or dest_table is not file or string object.
-        """
-
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
-
-        if isinstance(source_file, File):
-            src_file = source_file
-        elif isinstance(source_file, str):
-            src_file = self._get_resource(path=source_file, model=File)
-        else:
-            raise TypeError(
-                "Invalid Type. It should be file path string or File resource object"
-            )
-
-        if isinstance(dest_table, Table):
-            dst_table = dest_table
-        elif isinstance(dest_table, (str, unicode)):
-            dst_table = self._get_resource(path=dest_table, model=Table)
-        else:
-            raise TypeError(
-                "Invalid Type. It should be path string or Table resource object"
-            )
-
-        payload = {
-            "sourceId": src_file.id,
-            "destinationId": dst_table.id,
-            "append": append,
-        }
-
-        return self.connection.api_call(
-            "POST",
-            ["jobs", "loadtablefromfileresource"],
-            json=payload,
-            model=LoadJob,
-            headers=headers,
-        )
-
     def upload_file(
         self,
         src,
@@ -790,69 +652,6 @@ class Dataset(CruxModel):
             file_resource.delete()
             raise
 
-    def create_query(self, path, config, tags=None, description=None):
-        # type: (str, Dict[str, Any], List[str], str) -> Query
-        """Creates Query resource in Dataset.
-
-        Args:
-            path (str): Query resource Path.
-            config (dict): Query configuration.
-            tags (:obj:`list` of :obj:`str`): Tags of the Query resource.
-                Defaults to None.
-            description (str): Description of the Query resource.
-                Defaults to None.
-
-        Returns:
-            crux.models.Query: Query Object.
-        """
-
-        query_name, folder = split_posixpath_filename_dirpath(path)
-
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
-
-        tags = tags if tags else []
-
-        query_resource = Query(
-            name=query_name,
-            type="query",
-            tags=tags,
-            description=description,
-            config=config,
-            folder=folder,
-        )
-
-        return self.connection.api_call(
-            "POST",
-            ["datasets", self.id, "resources"],
-            json=query_resource.to_dict(),
-            model=Query,
-            headers=headers,
-        )
-
-    def upload_query(self, sql_file, path, description=None, tags=None):
-        # type: (str, str, str, List[str]) -> Query
-        """Uploads the Query File.
-
-        Args:
-            path (str): Query resource path.
-            sql_file (str): Local OS SQL file to be uploaded as query resource.
-            description (str): Description for the Query resource.
-                Defaults to None.
-            tags (:obj:`list` of :obj:`str`): Tags for the Query resource.
-                Defaults to None.
-
-        Returns:
-            crux.models.Query: Query Object.
-        """
-
-        with open(sql_file, mode="r") as data:
-            query_config = {"query": data.read()}
-            return self.create_query(
-                path=path, tags=tags, description=description, config=query_config
-            )
-
     def add_permission_to_resources(
         self,
         identity_id,
@@ -861,7 +660,7 @@ class Dataset(CruxModel):
         resource_objects=None,
         resource_ids=None,
     ):
-        # type: (str, str, List[str], List[Union[File,Folder,Table,Query]], List[str]) -> bool
+        # type: (str, str, List[str], List[Union[File,Folder]], List[str]) -> bool
         """Adds permission to all or specific Dataset resources.
 
         Args:
@@ -947,7 +746,7 @@ class Dataset(CruxModel):
         resource_objects=None,
         resource_ids=None,
     ):
-        # type: (str, str, List[str], List[Union[File,Folder,Table,Query]], List[str]) -> bool
+        # type: (str, str, List[str], List[Union[File,Folder]], List[str]) -> bool
         """Method which deletes permission from all or specific Dataset resources.
 
         Args:
@@ -1039,7 +838,10 @@ class Dataset(CruxModel):
         Returns:
             crux.models.Permission: Permission Object.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }  # type: MutableMapping[Text, Text]
         return self.connection.api_call(
             "PUT",
             ["permissions", self.id, identity_id, permission],
@@ -1058,7 +860,10 @@ class Dataset(CruxModel):
         Returns:
             bool: True if it is able to delete it.
         """
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }  # type: MutableMapping[Text, Text]
         return self.connection.api_call(
             "DELETE", ["permissions", self.id, identity_id, permission], headers=headers
         )
@@ -1070,7 +875,7 @@ class Dataset(CruxModel):
         Returns:
             list (:obj:`crux.models.Permission`): List of Permission Objects.
         """
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/json"}  # type: MutableMapping[Text, Text]
         return self.connection.api_call(
             "GET",
             ["datasets", self.id, "permissions"],
@@ -1136,7 +941,7 @@ class Dataset(CruxModel):
         )
 
     def find_resources_by_label(self, predicates, max_per_page=1000):
-        # type: (List[Dict[str,str]],int)->Iterator[Union[File,Folder,Query,Table]]
+        # type: (List[Dict[str,str]],int)->Iterator[Union[File,Folder]]
         """Method which searches the resouces for given labels in Dataset
 
         Each predicate can be either:
@@ -1229,7 +1034,6 @@ class Dataset(CruxModel):
                         resource_type=resource.get("type"), data=resource
                     )
                     obj.connection = self.connection
-                    obj.raw_response = resource
                     yield obj
             else:
                 return
@@ -1259,6 +1063,8 @@ class Dataset(CruxModel):
         Returns:
             tuple (:obj:`crux.models.File`, :obj:`str`): File object of destination resource.
                     Job ID for background running job.
+        Raises:
+            TypeError: Source and Destination resource should be of type File or String
         """
         headers = Headers(
             {"content-type": "application/json", "accept": "application/json"}
@@ -1312,8 +1118,6 @@ class Dataset(CruxModel):
         file_object = Resource.from_dict(raw_json)
 
         file_object.connection = self.connection
-
-        file_object.raw_response = raw_json
 
         job_id = response.json().get("jobId")
 

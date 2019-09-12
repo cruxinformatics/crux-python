@@ -80,3 +80,21 @@ def test_delete_label(dataset, helpers):
     d2_result = file_2.delete_label(label_key="label1")
 
     assert d2_result is True
+
+
+def test_update_field_label(dataset, helpers):
+    file_1 = dataset.create_file(
+        path="/test_file_" + helpers.generate_random_string(16) + ".csv"
+    )
+
+    file_1.add_label("label1", "value1")
+
+    file_1.description = "new_description"
+
+    file_1.update()
+
+    file_1.refresh()
+
+    assert file_1.description == "new_description"
+
+    assert file_1.labels.get("label1") == "value1"

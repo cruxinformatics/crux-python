@@ -156,7 +156,6 @@ class CruxClient(object):
                     for item in response.json():
                         obj = model.from_dict(item)
                         obj.connection = self
-                        obj.raw_response = response.json()
                         serial_list.append(obj)
                     return serial_list
 
@@ -164,7 +163,6 @@ class CruxClient(object):
                     log.debug("Response is of type %s", model)
                     obj = model.from_dict(response.json())
                     obj.connection = self
-                    obj.raw_response = response.json()
                     return obj
         elif response.status_code == 204:
             log.debug("Response code is 204, returning True boolean value")

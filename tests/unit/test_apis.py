@@ -4,49 +4,53 @@ import os
 import pytest
 
 from crux import Crux
-from crux.models import Dataset, File, Identity, Job
-from crux.models.job import Load, Statistics, Status
+from crux.models import Dataset, File, Identity
 
 
 def monkeypatch_whoami():
-    return Identity(
-        identity_id="1234",
-        parent_identity_id="4567",
-        description="Creating Identity",
-        company_name="ACME Corp",
-        first_name="John",
-        last_name="Doe",
-        role="Admin",
-        phone="0000000000",
-        email="johndoe@acme.com",
-        type="user",
-        website="acme.com",
-        landing_page="acme.com",
-    )
+
+    raw_model = {
+        "identityId": "1234",
+        "parentIdentityId": "4567",
+        "description": "Creating Identity",
+        "companyName": "ACME Corp",
+        "firstName": "John",
+        "lastName": "Doe",
+        "role": "Admin",
+        "phone": "0000000000",
+        "email": "johndoe@acme.com",
+        "type": "user",
+        "website": "acme.com",
+        "landingPage": "acme.com",
+    }
+
+    return Identity(raw_model=raw_model)
 
 
 def monkeypatch_create_dataset(name=None, description=None, tags=None):
-    return Dataset(
-        id="123545",
-        owner_identity_id="12342366",
-        contact_identity_id="123235ewr",
-        name=name,
-        description=description,
-        website="acme.com",
-        tags=["tags1"],
-    )
+    raw_model = {
+        "datasetId": "123545",
+        "ownerIdentityId": "12342366",
+        "contactIdentityId": "123235ewr",
+        "name": name,
+        "description": description,
+        "website": "acme.com",
+        "tags": ["tags1"],
+    }
+    return Dataset(raw_model=raw_model)
 
 
 def monkeypatch_get_dataset(dataset_id):
-    return Dataset(
-        id=dataset_id,
-        owner_identity_id="12342366",
-        contact_identity_id="123235ewr",
-        name="my_dataset",
-        description="dataset_description",
-        website="acme.com",
-        tags=["tags1"],
-    )
+    raw_model = {
+        "datasetId": "1234",
+        "ownerIdentityId": "12342366",
+        "contactIdentityId": "123235ewr",
+        "name": "my_dataset",
+        "description": "dataset_description",
+        "website": "acme.com",
+        "tags": ["tags1"],
+    }
+    return Dataset(raw_model=raw_model)
 
 
 def monkeypatch_call_drives_my():
@@ -89,21 +93,6 @@ def monkeypatch_call_drives_my():
             },
         ],
     }
-
-
-def monkeypatch_get_job(job_id=None):
-    status = Status(state="Done")
-    load = Load(
-        input_files="files",
-        input_file_bytes="bytes",
-        output_bytes="0",
-        output_rows="0",
-        bad_records="0",
-    )
-    stats = Statistics(
-        creation_time="1234", start_time="12234", end_time="1234", load=load
-    )
-    return Job(job_id=job_id, status=status, statistics=stats)
 
 
 def monkeypatch_get_resource_dict(method, path, model=None, headers=None):
@@ -182,12 +171,6 @@ def test_list_owned_datasets(monkeypatch, monkey_conn):
     monkeypatch.setattr(monkey_conn, "_call_drives_my", monkeypatch_call_drives_my)
     monkey_datasets = monkey_conn.list_datasets(subscribed=False)
     assert len(monkey_datasets) == 1
-
-
-def test_get_job(monkeypatch, monkey_conn):
-    monkeypatch.setattr(monkey_conn, "get_job", monkeypatch_get_job)
-    monkey_job = monkey_conn.get_job(job_id="1234")
-    assert monkey_job.job_id == "1234"
 
 
 def test_get_resource(monkeypatch, monkey_conn):

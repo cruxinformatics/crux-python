@@ -6,7 +6,11 @@ from crux.models import Permission
 @pytest.fixture(scope="module")
 def permission():
     return Permission(
-        identity_id="_subscribed_", permission_name="Read", target_id="12345"
+        raw_model={
+            "identityId": "_subscribed_",
+            "permissionName": "Read",
+            "targetId": "12345",
+        }
     )
 
 

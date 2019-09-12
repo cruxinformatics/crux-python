@@ -23,7 +23,7 @@ class Delivery(CruxModel):
         self.connection = (
             connection if connection is not None else CruxClient(CruxConfig())
         )
-        self.meta = None
+        self._summary = None
 
     @property
     def id(self):
@@ -38,26 +38,22 @@ class Delivery(CruxModel):
     @property
     def status(self):
         """str: Gets the Status of delivery."""
-        if self.meta is None:
-            self.meta = self.summary()
-
-        acceptable_status = [
-            "DELIVERY_SUCCEEDED",
-            "DELIVERY_OBSOLETE",
-            "DELIVERY_FAILED",
-            "DELIVERY_IN_PROGRESS",
-        ]
-        if self.meta["latest_health_status"] not in acceptable_status:
-            raise ValueError("Invalid Status")
-
-        return self.meta["latest_health_status"]
+        return self.summary["latest_health_status"]
 
     @property
     def schedule_datetime(self):
         """str: Gets schedule datetime of delivery."""
-        if self.meta is None:
-            self.meta = self.summary()
-        return self.meta["schedule_dt"]
+        return self.summary["schedule_dt"]
+
+    @property
+    def summary(self):
+        """dict: Gets the Delivery Summary"""
+        if self._summary is None:
+            response = self.connection.api_call(
+                "GET", ["deliveries", self.dataset_id, self.id]
+            )
+            self._summary = response.json()
+        return self._summary
 
     @classmethod
     def from_dict(cls, a_dict):
@@ -71,19 +67,6 @@ class Delivery(CruxModel):
             crux.models.Delivery: Delivery Object.
         """
         return cls(raw_model=a_dict)
-
-    def summary(self):
-        # type: () -> Dict[Any, Any]
-        """Get the Delivery summary
-
-        Returns:
-            dict: Dictionary containing delivery summary.
-        """
-        response = self.connection.api_call(
-            "GET", ["deliveries", self.dataset_id, self.id]
-        )
-
-        return response.json()
 
     def get_data(self, file_format=MediaType.AVRO.value):
         # type: (str) -> Iterator[Resource]
@@ -107,7 +90,7 @@ class Delivery(CruxModel):
 
         if resource_list:
             for resource in resource_list:
-                obj = File(id=resource["resource_id"])
+                obj = File(raw_model={"resourceId": resource["resource_id"]})
                 obj.connection = self.connection
                 obj.refresh()
                 yield obj
@@ -127,7 +110,7 @@ class Delivery(CruxModel):
 
         if resource_list:
             for resource in resource_list:
-                obj = File(id=resource)
+                obj = File(raw_model={"resourceId": resource["resource_id"]})
                 obj.connection = self.connection
                 obj.refresh()
                 yield obj

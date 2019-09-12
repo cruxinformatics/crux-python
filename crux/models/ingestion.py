@@ -26,6 +26,7 @@ class Ingestion(CruxModel):
         self.connection = (
             connection if connection is not None else CruxClient(CruxConfig())
         )
+        self._delivery_objects = {}  # type: Dict[int, Delivery]
 
     @property
     def id(self):
@@ -55,11 +56,20 @@ class Ingestion(CruxModel):
         """
         return cls(raw_model=a_dict)
 
+    def _get_delivery_object(self, version=None):
+        if version not in self._delivery_objects:
+            delivery_id = "{}.{}".format(self.id, version)
+            delivery_object = Delivery.from_dict(
+                {"delivery_id": delivery_id, "dataset_id": self.dataset_id}
+            )
+            delivery_object.connection = self.connection
+            self._delivery_objects[version] = delivery_object
+        return self._delivery_objects[version]
+
     def get_data(
         self,
         version=None,  # type: int
         file_format=MediaType.AVRO.value,  # type: str
-        accepted_status=None,  # type: list
     ):
         # type: (...) -> Iterator[Resource]
         """Get the processed delivery data
@@ -74,26 +84,17 @@ class Ingestion(CruxModel):
             list (:obj:`crux.models.Resource`): List of resources.
         """
         if version is None:
-            version = max(self.versions)
-
-        if accepted_status is None:
-            accepted_status = ["DELIVER_SUCCEEDED"]
-
-        delivery_id = "{}.{}".format(self.id, version)
-
-        delivery_object = Delivery.from_dict(
-            {"delivery_id": delivery_id, "dataset_id": self.dataset_id}
-        )
-        delivery_object.connection = self.connection
-
-        if delivery_object.status not in accepted_status:
+            for version_no in sorted(self.versions, reverse=True):
+                delivery_object = self._get_delivery_object(version_no)
+                if delivery_object.status == "DELIVERY_SUCCEEDED":
+                    return delivery_object.get_data(file_format=file_format)
             log.info(
-                "Delivery %s has unacceptable status %s",
+                "Delivery %s has no version with DELIVERY_SUCCEEDED status",
                 delivery_object.id,
-                delivery_object.status,
             )
             return iter([])
 
+        delivery_object = self._get_delivery_object(version)
         return delivery_object.get_data(file_format=file_format)
 
     def get_raw(self, version=None):

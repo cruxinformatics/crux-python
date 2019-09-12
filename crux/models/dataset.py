@@ -1,14 +1,17 @@
 """Module contains Dataset model."""
 
+from collections import defaultdict
 import os
 import posixpath
 from typing import (
     Any,
+    DefaultDict,
     Dict,
     IO,
     Iterator,
     List,
     MutableMapping,
+    Set,
     Text,
     Tuple,
     Union,
@@ -1142,7 +1145,7 @@ class Dataset(CruxModel):
             "GET", ["datasets", "stitch", job_id], headers=headers, model=StitchJob
         )
 
-    def get_delivery(self, delivery_id=None):
+    def get_delivery(self, delivery_id):
         # type: (str) -> Delivery
         """Gets Delivery object.
 
@@ -1179,16 +1182,11 @@ class Dataset(CruxModel):
         )
 
         all_deliveries = response.json()
-        ingestion_map = {}  # type: Dict[str, List[str]]
+        ingestion_map = defaultdict(set)  # type: DefaultDict[str, Set]
 
         for delivery in all_deliveries:
             ingestion_id, version_id = delivery.split(".")
-
-            if ingestion_id not in ingestion_map.keys():
-                # Initializing list
-                ingestion_map[ingestion_id] = []
-
-            ingestion_map[ingestion_id].append(version_id)
+            ingestion_map[ingestion_id].add(int(version_id))
 
         for ingestion_id in ingestion_map:
             obj = Ingestion.from_dict(

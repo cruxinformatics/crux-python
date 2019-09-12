@@ -89,7 +89,7 @@ def test_delete_file(dataset, helpers):
 
 
 @pytest.mark.usefixtures("dataset", "helpers")
-def test_upload_file_string(dataset, helpers):
+def test_upload_file_string_with_update(dataset, helpers):
     upload_file_string = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "data",
@@ -103,6 +103,14 @@ def test_upload_file_string(dataset, helpers):
     uploaded_object = file_1.upload(upload_file_string)
 
     assert uploaded_object.name == file_1.name
+
+    file_1.description = "new_test_description"
+    file_1.tags = ["tag1", "tag2"]
+    file_1.update()
+    assert file_1.description == "new_test_description"
+    file_1.description = "new_2_test_description"
+    file_1.refresh()
+    assert file_1.description == "new_test_description"
 
 
 @pytest.mark.usefixtures("connection", "dataset", "helpers")

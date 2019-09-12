@@ -21,57 +21,6 @@ print(conn.whoami())
 
 See the [requests proxy documentation](http://docs.python-requests.org/en/master/user/advanced/#proxies) for full usage.
 
-## Fetching raw response from API call
-
-The Crux Python Client support raw reponse dictionary to provide forward compatibility of newly added fields.
-
-```python
-conn = Crux()
-dataset_object = conn.create_dataset("dataset_1")
-print(dataset_object.raw_response)
-
-{
-    'datasetId': '1234567',
-    'ownerIdentityId': '89101112',
-    'owner': {
-        'identityId': '1314151617',
-        'description': 'created using automation',
-        'companyName': 'test Identity Name',
-        'firstName': 'test FirstName',
-        'lastName': 'test LastName',
-        'phone': '2021222324',
-        'email': 'example@example.com',
-        'type': 'company',
-        'website': 'www.example.com',
-        'imageUrl': None
-        },
-    'contactIdentityId': '4041424344',
-    'contact': {
-        'identityId': '1314151617',
-        'description': 'created using automation',
-        'companyName': 'test Identity Name',
-        'firstName': 'test FirstName',
-        'lastName': 'test LastName',
-        'phone': '2021222324',
-        'email': 'example@example.com',
-        'type': 'company',
-        'website': 'www.example.com',
-        'imageUrl': None
-        },
-    'name': 'dataset_1',
-    'imageName': None,
-    'imageUrl': None,
-    'description': 'dataset for user test_user',
-    'tags': [],
-    'website': None,
-    'approved': False,
-    'public': False,
-    'permissionScheme': 'coarse',
-    'createdAt': '2019-03-20T09:16:36.000Z',
-    'modifiedAt': '2019-03-20T09:16:36.000Z'
-}
-```
-
 # Custom API calls
 
 The Crux Python Client can make API calls apart from the methods incorporated. Custom calls can be initiated via `Crux().api_client.api_call()` method. Below example explains the implementation and usage:

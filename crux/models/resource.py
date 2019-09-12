@@ -7,165 +7,140 @@ from typing import Any, Dict, List, Union  # noqa: F401
 
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
-from crux._utils import DEFAULT_CHUNK_SIZE, Headers
+from crux._client import CruxClient
+from crux._config import CruxConfig
+from crux._utils import create_logger, DEFAULT_CHUNK_SIZE, Headers
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
+
+
+log = create_logger(__name__)
 
 
 class Resource(CruxModel):
     """Resource Model."""
 
-    def __init__(
-        self,
-        id=None,  # type: str # id name is by design pylint: disable=redefined-builtin
-        dataset_id=None,  # type: str
-        folder_id=None,  # type: str
-        folder=None,  # type: str
-        name=None,  # type: str
-        size=None,  # type: str
-        type=None,  # type: str # type name is by design pylint: disable=redefined-builtin
-        config=None,  # type: Dict[str, Any]
-        provenance=None,  # type: str
-        as_of=None,  # type: str
-        created_at=None,  # type: str
-        modified_at=None,  # type: str
-        storage_id=None,  # type: str
-        description=None,  # type: str
-        media_type=None,  # type: str
-        tags=None,  # type: List[str]
-        labels=None,  # type: Dict[str, str]
-        connection=None,
-        raw_response=None,  # type: Dict[Any, Any]
-    ):
-        # type: (...) -> None
+    def __init__(self, raw_model=None, connection=None):
+        # type: (Dict, CruxClient) -> None
         """
         Attributes:
-            id (str): Resourece Id. Defaults to None.
-            dataset_id (str): Dataset Identity. Defaults to None.
-            folder_id (str): Folder Identity. Defaults to None.
-            folder (str): Folder Name. Defaults to None.
-            name (str): Resource name. Defaults to None.
-            size (str): Resource size. Defaults to None.
-            type (str): Resource type. Defaults to None.
-            config (str): Resource config. Defaults to None.
-            provenance (list): Resource Provenance. Defaults to None.
-            as_of (str): Resource as_of. Defaults to None.
-            created_at (str): Resource created_at. Defaults to None.
-            modified_at (str): Resource modified_at. Defaults to None.
-            storage_id (str): Resource storage Identity. Defaults to None.
-            description (str): Resource description. Defaults to None.
-            media_type (str): Resource Media Type. Defaults to None.
-            tags (:obj:`list` of :obj:`str`): Resource tags. Defaults to None.
-            labels (dict): Dictionary containing Label Key and Values.
-                Defaults to None.
-            connection (crux._client.CruxClient): Connection Object. Defaults to None.
-            raw_response (dict): Response Content. Defaults to None.
-
+            raw_model (dict): Resource raw dictionary. Defaults to None.
+            connection (CruxClient): Connection Object. Defaults to None.
         Raises:
             ValueError: If name or tags are set to None.
-            TypeError: If tags are not of list type.
         """
-        self._id = id
-        self._dataset_id = dataset_id
-        self._folder_id = folder_id
-        self._description = description
-        self._name = name
-        self._size = size if size else 0
-        self._type = type
-        self._config = config
-        self._provenance = provenance
-        self._as_of = as_of
-        self._created_at = created_at
-        self._storage_id = storage_id
-        self._media_type = media_type
-        self._modified_at = modified_at
-        self._tags = tags
         self._folder = None
-        self._labels = labels if labels else {}  # type: Dict[str, str]
-        self._folder = folder
-
-        self.connection = connection
-        self.raw_response = raw_response
+        self.raw_model = raw_model if raw_model is not None else {}
+        self.connection = (
+            connection if connection is not None else CruxClient(CruxConfig())
+        )
 
     @property
     def id(self):
         """str: Gets the Resource ID."""
-        return self._id
+        return self.raw_model["resourceId"]
 
     @property
     def description(self):
         """str: Gets the Resource Description."""
-        return self._description
+        return self.raw_model["description"]
+
+    @description.setter
+    def description(self, description):
+        self.raw_model["description"] = description
 
     @property
     def media_type(self):
-        """str: Gets the Resource Description."""
-        return self._media_type
+        """str: Gets the Media type."""
+        return self.raw_model["mediaType"]
 
     @property
     def dataset_id(self):
         """str: Gets the Dataset ID."""
-        return self._dataset_id
+        return self.raw_model["datasetId"]
 
     @property
     def folder_id(self):
         """str: Gets the Folder ID."""
-        return self._folder_id
+        return self.raw_model["folderId"]
+
+    @folder_id.setter
+    def folder_id(self, folder_id):
+        self.raw_model["folderId"] = folder_id
 
     @property
     def storage_id(self):
         """str: Gets the Storage ID."""
-        return self._storage_id
+        return self.raw_model["storageId"]
 
     @property
     def name(self):
         """str: Gets the Resource Name."""
-        return self._name
+        return self.raw_model["name"]
+
+    @name.setter
+    def name(self, name):
+        self.raw_model["name"] = name
 
     @property
     def config(self):
         """str: Gets the config."""
-        return self._config
+        return self.raw_model["config"]
+
+    @config.setter
+    def config(self, config):
+        self.raw_model["config"] = config
 
     @property
     def provenance(self):
-        """str: Gets the Provenance."""
-        return self._provenance
+        """dict: Gets the Provenance."""
+        return self.raw_model["provenance"]
+
+    @provenance.setter
+    def provenance(self, provenance):
+        self.raw_model["provenance"] = provenance
 
     @property
     def type(self):
         """str: Gets the Resource Type."""
-        return self._type
+        return self.raw_model["type"]
 
     @property
     def tags(self):
         """:obj:`list` of :obj:`str`: Gets the Resource Tags."""
-        return self._tags
+        return self.raw_model["tags"]
+
+    @tags.setter
+    def tags(self, tags):
+        self.raw_model["tags"] = tags
 
     @property
     def labels(self):
         """dict: Gets the Resource labels."""
-        return self._labels
+        labels_dict = {}
+        for label in self.raw_model["labels"]:
+            labels_dict[label["labelKey"]] = label["labelValue"]
+        return labels_dict
 
     @property
     def as_of(self):
         """str: Gets the as_of."""
-        return self._as_of
+        return self.raw_model["asOf"]
 
     @property
     def created_at(self):
         """str: Gets created_at."""
-        return self._created_at
+        return self.raw_model["createdAt"]
 
     @property
     def modified_at(self):
         """str: Gets modified_at."""
-        return self._modified_at
+        return self.raw_model["modifiedAt"]
 
     @property
     def size(self):
         """int: Gets the size."""
-        return int(self._size)
+        return self.raw_model["size"]
 
     @property
     def path(self):
@@ -188,24 +163,7 @@ class Resource(CruxModel):
         Returns:
             dict: Resource Dictionary.
         """
-        return {
-            "resourceId": self.id,
-            "datasetId": self.dataset_id,
-            "description": self.description,
-            "folderId": self.folder_id,
-            "mediaType": self.media_type,
-            "name": self.name,
-            "size": self.size,
-            "type": self.type,
-            "config": self.config,
-            "provenance": self.provenance,
-            "asOf": self.as_of,
-            "tags": self.tags,
-            "labels": self.labels,
-            "storageId": self.storage_id,
-            "createdAt": self.created_at,
-            "modifiedAt": self.modified_at,
-        }
+        return self.raw_model
 
     @classmethod
     def from_dict(cls, a_dict):
@@ -218,57 +176,8 @@ class Resource(CruxModel):
         Returns:
             crux.models.Resource: Resource Object.
         """
-        id = a_dict[  # id name is by design pylint: disable=redefined-builtin
-            "resourceId"
-        ]
-        dataset_id = a_dict["datasetId"]
-        description = a_dict["description"]
-        folder_id = a_dict["folderId"]
-        storage_id = a_dict["storageId"]
-        media_type = a_dict["mediaType"]
-        description = a_dict["description"]
-        name = a_dict["name"]
-        if "tags" in a_dict:
-            tags = a_dict["tags"]
-        else:
-            tags = []
-        type = a_dict[  # type name is by design pylint: disable=redefined-builtin
-            "type"
-        ]
-        if "config" in a_dict:
-            config = a_dict["config"]
-        else:
-            config = None
-        if "labels" in a_dict:
-            labels = {}
-            for label in a_dict["labels"]:
-                labels[label["labelKey"]] = label["labelValue"]
-        else:
-            labels = {}
-        provenance = a_dict["provenance"]
-        created_at = a_dict["createdAt"]
-        modified_at = a_dict["modifiedAt"]
-        size = a_dict["size"]
-        as_of = a_dict["asOf"]
 
-        return cls(
-            dataset_id=dataset_id,
-            id=id,
-            folder_id=folder_id,
-            media_type=media_type,
-            storage_id=storage_id,
-            description=description,
-            name=name,
-            tags=tags,
-            labels=labels,
-            type=type,
-            config=config,
-            provenance=provenance,
-            created_at=created_at,
-            modified_at=modified_at,
-            size=size,
-            as_of=as_of,
-        )
+        return cls(raw_model=a_dict)
 
     def delete(self):
         # type: () -> bool
@@ -307,35 +216,26 @@ class Resource(CruxModel):
         body = {}  # type: Dict[str, Union[str, List, Dict]]
 
         if name is not None:
-            body["name"] = name
+            self.raw_model["name"] = name
         if description is not None:
-            body["description"] = description
+            self.raw_model["description"] = description
         if tags is not None:
-            if isinstance(tags, list):
-                body["tags"] = tags
-            else:
-                raise TypeError("Tags should be of type list")
+            self.raw_model["tags"] = tags
         if provenance is not None:
-            body["provenance"] = provenance
+            self.raw_model["provenance"] = provenance
 
-        if body:
-            response = self.connection.api_call(
-                "PUT", ["resources", self.id], headers=headers, json=body
-            )
+        body = self.to_dict()
 
-            response_dict = response.json()
+        log.debug("Body %s", body)
 
-            if "name" in response_dict:
-                self._name = response_dict["name"]
-            if "tags" in response_dict and tags is not None:
-                self._tags = response_dict["tags"]
-            if "description" in response_dict:
-                self._description = response_dict["description"]
-            if "provenance" in response_dict:
-                self._provenance = response_dict["provenance"]
-            return True
-        else:
-            raise ValueError("Name, Description, Tags or Provenance should be set")
+        resource_object = self.connection.api_call(
+            "PUT", ["resources", self.id], headers=headers, json=body, model=Resource
+        )
+
+        self.raw_model = resource_object.raw_model
+
+        log.debug("Updated dataset %s with content %s", self.id, self.raw_model)
+        return True
 
     def add_permission(self, identity_id, permission):
         # type: (str, str) -> Union[bool, Permission]
@@ -420,10 +320,10 @@ class Resource(CruxModel):
         )
 
         if response_result:
-            self._labels[label_key] = label_value
-            return True
-        else:
-            return False
+            # Sync the latest data from API to prevent inconsistency
+            self.refresh()
+
+        return True
 
     def delete_label(self, label_key):
         # type: (str) -> bool
@@ -445,13 +345,10 @@ class Resource(CruxModel):
         )
 
         if response_result:
-            try:
-                del self._labels[label_key]
-            except KeyError:
-                return False
-            return True
-        else:
-            return False
+            # Sync the latest data from API to prevent inconsistency
+            self.refresh()
+
+        return True
 
     def add_labels(self, labels_dict):
         # type: (dict) -> bool
@@ -487,11 +384,10 @@ class Resource(CruxModel):
         )
 
         if response_result:
-            for label_key, label_value in labels_dict.items():
-                self._labels[label_key] = label_value
-            return True
-        else:
-            return False
+            # Sync the latest data from API to prevent inconsistency
+            self.refresh()
+
+        return True
 
     def _get_folder(self):
         # type: () -> str
@@ -539,7 +435,9 @@ class Resource(CruxModel):
         resource_object = self.connection.api_call(
             "GET", ["resources", self.id], headers=headers, model=Resource
         )
-        self.__dict__.update(resource_object.__dict__)
+
+        self.raw_model = resource_object.raw_model
+
         return True
 
 

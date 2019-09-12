@@ -6,7 +6,12 @@ from crux.models import File, Permission
 @pytest.fixture(scope="module")
 def file():
     return File(
-        name="test_file", type="file", tags=["tags"], description="test_description"
+        raw_model={
+            "name": "test_file",
+            "type": "file",
+            "tags": ["tags"],
+            "description": "test_description",
+        }
     )
 
 
@@ -28,14 +33,22 @@ def test_file_type(file):
 
 def monkeypatch_add_permission():
     return Permission(
-        identity_id="_subscribed_", permission_name="Read", target_id="12345"
+        raw_model={
+            "identityId": "_subscribed_",
+            "permissionName": "Read",
+            "targetId": "12345",
+        }
     )
 
 
 def monkeypatch_list_permissions():
     return [
         Permission(
-            identity_id="_subscribed_", permission_name="Read", target_id="12345"
+            raw_model={
+                "identityId": "_subscribed_",
+                "permissionName": "Read",
+                "targetId": "12345",
+            }
         )
     ]
 

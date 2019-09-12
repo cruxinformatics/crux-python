@@ -15,6 +15,15 @@ def test_create_get_delete_dataset(connection, helpers):
     assert d1.id == dataset.id
     assert d1.name == dataset_name
     assert d1.description == "test_description"
+
+    assert dataset.name == dataset_name
+    assert dataset.description == "test_description"
+    dataset.description = "new_description"
+    dataset.update()
+    assert dataset.description == "new_description"
+    dataset.description = "new_2_description"
+    dataset.refresh()
+    assert dataset.description == "new_description"
     dataset.delete()
     with pytest.raises(CruxAPIError):
         dataset.delete()

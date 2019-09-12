@@ -1,6 +1,6 @@
 """Module contains Label model."""
 
-from typing import Any, Dict, Optional  # noqa: F401
+from typing import Any, Dict
 
 from crux.models.model import CruxModel
 
@@ -8,15 +8,23 @@ from crux.models.model import CruxModel
 class Label(CruxModel):
     """Label Model."""
 
-    def __init__(self, label_key=None, label_value=None):
-        # type: (str, str) -> None
+    def __init__(self, raw_model=None):
+        # type: (Dict) -> None
         """
         Attributes:
-            label_key (str): Label Key. Defaults to None.
-            label_value (str): Label value. Defaults to None.
+            raw_model (dict): Identity raw dictionary. Defaults to None.
         """
-        self.label_key = label_key
-        self.label_value = label_value
+        self.raw_model = raw_model if raw_model is not None else {}
+
+    @property
+    def label_key(self):
+        """str: Gets the Label Key."""
+        return self.raw_model["labelKey"]
+
+    @property
+    def label_value(self):
+        """str: Gets the Label Value."""
+        return self.raw_model["labelValue"]
 
     def to_dict(self):
         # type: () -> Dict[str, Any]
@@ -25,7 +33,7 @@ class Label(CruxModel):
         Returns:
             dict: Label Dictionary.
         """
-        return {"labelKey": self.label_key, "labelValue": self.label_value}
+        return self.raw_model
 
     @classmethod
     def from_dict(cls, a_dict):
@@ -38,7 +46,4 @@ class Label(CruxModel):
         Returns:
             crux.models.Label: Label Object.
         """
-        label_key = a_dict["labelKey"]
-        label_value = a_dict["labelValue"]
-
-        return cls(label_key=label_key, label_value=label_value)
+        return cls(raw_model=a_dict)

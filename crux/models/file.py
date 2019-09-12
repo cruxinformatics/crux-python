@@ -227,18 +227,21 @@ class File(Resource):
     def _download_file(
         self, file_obj, chunk_size=DEFAULT_CHUNK_SIZE, only_use_crux_domains=None
     ):
+
+        # If size is None it means the file has been created,
+        # but no contents uploaded. This is similar to doing touch on command line,
+        # it creates an empty file.
+        # By returning True here we effectively "download" and write an empty file,
+        # which matches file system mechanics of creating a file without writing contents
+        if self.size is None:
+            log.debug("File resource %s is of size None", self.id)
+            return True
+
         # google-resumable-media has a bug where is expects the 'content-range' even
         # for 200 OK responses, which happens when the range is larger than the size.
         # There isn't much point in using resumable media for small files.
         # Make sure size is greater than 2x chunk_size if Google Resumable media is
         # to be used.
-
-        # If size is not, then it is either being upload or empty,
-        # hence create empty file on disk
-        if self.size is None:
-            log.debug("File resource %s is of size None", self.id)
-            return True
-
         small_enough = self.size < (chunk_size * 2)
 
         # If we must use only Crux domains, download via the API.

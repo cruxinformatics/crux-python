@@ -29,18 +29,6 @@ def test_create_get_delete_dataset(connection, helpers):
         dataset.delete()
 
 
-@pytest.mark.usefixtures("connection")
-def test_whoami(connection):
-    identity = connection.whoami()
-    assert identity.type == "user"
-
-
-@pytest.mark.usefixtures("inline_connection")
-def test_whoami_inline(inline_connection):
-    identity = inline_connection.whoami()
-    assert identity.type == "user"
-
-
 @pytest.mark.skip(reason="Test is flaky")
 @pytest.mark.usefixtures("connection", "dataset")
 def test_set_datasets_provenance(connection, dataset):

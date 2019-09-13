@@ -1,28 +1,10 @@
 """Module contains Identity model."""
 
-from typing import Any, Dict  # noqa: F401
-
-from crux._client import CruxClient
-from crux._config import CruxConfig
 from crux.models.model import CruxModel
 
 
 class Identity(CruxModel):
     """Identity Model."""
-
-    def __init__(self, raw_model=None, connection=None):
-        # type: (Dict, CruxClient) -> None
-        """
-        Attributes:
-            raw_model (dict): Identity raw dictionary. Defaults to None.
-            connection (CruxClient): Connection Object. Defaults to None.
-        Raises:
-            ValueError: If name or tags are set to None.
-        """
-        self.raw_model = raw_model if raw_model is not None else {}
-        self.connection = (
-            connection if connection is not None else CruxClient(CruxConfig(api_key=""))
-        )
 
     @property
     def identity_id(self):
@@ -119,25 +101,3 @@ class Identity(CruxModel):
     @phone.setter
     def phone(self, phone):
         self.raw_model["phone"] = phone
-
-    def to_dict(self):
-        # type: () -> Dict[str, Any]
-        """Transforms Identity object to Identity Dictionary.
-
-        Returns:
-            dict: Identity Dictionary.
-        """
-        return self.raw_model
-
-    @classmethod
-    def from_dict(cls, a_dict, connection=None):
-        # type: (Dict[str, str], CruxClient) -> Identity
-        """Transforms Identity Dictionary to Identity object.
-
-        Args:
-            a_dict (dict): Identity Dictionary.
-            connection (CruxClient): Connection Object. Defaults to None.
-        Returns:
-            crux.models.Identity: Identity Object.
-        """
-        return cls(raw_model=a_dict, connection=connection)

@@ -1,4 +1,3 @@
-import os
 import random
 import string
 
@@ -17,11 +16,6 @@ class Helpers:
 @pytest.fixture
 def helpers():
     return Helpers
-
-
-@pytest.fixture(scope="module")
-def inline_connection():
-    return Crux(api_host=os.getenv("CRUX_API_HOST"), api_key=os.getenv("CRUX_API_KEY"))
 
 
 @pytest.fixture(scope="module")

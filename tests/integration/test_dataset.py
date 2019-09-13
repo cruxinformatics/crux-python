@@ -35,6 +35,12 @@ def test_whoami(connection):
     assert identity.type == "user"
 
 
+@pytest.mark.usefixtures("inline_connection")
+def test_whoami_inline(inline_connection):
+    identity = inline_connection.whoami()
+    assert identity.type == "user"
+
+
 @pytest.mark.skip(reason="Test is flaky")
 @pytest.mark.usefixtures("connection", "dataset")
 def test_set_datasets_provenance(connection, dataset):

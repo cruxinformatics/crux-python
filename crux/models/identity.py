@@ -21,7 +21,7 @@ class Identity(CruxModel):
         """
         self.raw_model = raw_model if raw_model is not None else {}
         self.connection = (
-            connection if connection is not None else CruxClient(CruxConfig())
+            connection if connection is not None else CruxClient(CruxConfig(api_key=""))
         )
 
     @property
@@ -130,14 +130,14 @@ class Identity(CruxModel):
         return self.raw_model
 
     @classmethod
-    def from_dict(cls, a_dict):
-        # type: (Dict[str, str]) -> Identity
+    def from_dict(cls, a_dict, connection=None):
+        # type: (Dict[str, str], CruxClient) -> Identity
         """Transforms Identity Dictionary to Identity object.
 
         Args:
             a_dict (dict): Identity Dictionary.
-
+            connection (CruxClient): Connection Object. Defaults to None.
         Returns:
             crux.models.Identity: Identity Object.
         """
-        return cls(raw_model=a_dict)
+        return cls(raw_model=a_dict, connection=connection)

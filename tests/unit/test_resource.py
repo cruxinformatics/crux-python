@@ -17,9 +17,9 @@ def resource():
             "type": "file",
             "tags": ["tags"],
             "description": "test_description",
-        }
+        },
+        connection=conn,
     )
-    resource.connection = conn
     return resource
 
 

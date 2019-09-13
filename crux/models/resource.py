@@ -32,7 +32,7 @@ class Resource(CruxModel):
         self._folder = None
         self.raw_model = raw_model if raw_model is not None else {}
         self.connection = (
-            connection if connection is not None else CruxClient(CruxConfig())
+            connection if connection is not None else CruxClient(CruxConfig(api_key=""))
         )
 
     @property
@@ -166,18 +166,18 @@ class Resource(CruxModel):
         return self.raw_model
 
     @classmethod
-    def from_dict(cls, a_dict):
-        # type: (Dict[str, Any]) -> Any
+    def from_dict(cls, a_dict, connection=None):
+        # type: (Dict[str, Any], CruxClient) -> Any
         """Transforms Resource Dictionary to Resource object.
 
         Args:
             a_dict (dict): Resource Dictionary.
-
+            connection (CruxClient): Connection Object. Defaults to None.
         Returns:
             crux.models.Resource: Resource Object.
         """
 
-        return cls(raw_model=a_dict)
+        return cls(raw_model=a_dict, connection=connection)
 
     def delete(self):
         # type: () -> bool

@@ -16,8 +16,7 @@ def dataset():
         "description": "test_dataset_description",
         "tags": ["tags1"],
     }
-    dataset = Dataset(raw_model=raw_model)
-    dataset.connection = conn
+    dataset = Dataset(raw_model=raw_model, connection=conn)
     return dataset
 
 

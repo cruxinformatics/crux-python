@@ -44,7 +44,7 @@ class Dataset(CruxModel):
         """
         self.raw_model = raw_model if raw_model is not None else {}
         self.connection = (
-            connection if connection is not None else CruxClient(CruxConfig())
+            connection if connection is not None else CruxClient(CruxConfig(api_key=""))
         )
 
     @property
@@ -129,18 +129,18 @@ class Dataset(CruxModel):
         return self.raw_model
 
     @classmethod
-    def from_dict(cls, a_dict):
-        # type: (Dict[str, Any]) -> Dataset
+    def from_dict(cls, a_dict, connection=None):
+        # type: (Dict[str, Any], CruxClient) -> Dataset
         """Transforms Dataset Dictionary to Dataset object.
 
         Args:
             a_dict (dict): Dataset Dictionary.
-
+            connection (CruxClient): Connection Object. Defaults to None.
         Returns:
             crux.models.Dataset: Dataset Object.
         """
 
-        return cls(raw_model=a_dict)
+        return cls(raw_model=a_dict, connection=connection)
 
     def create(self):
         # type: () -> bool
@@ -463,8 +463,9 @@ class Dataset(CruxModel):
                     only_use_crux_domains=only_use_crux_domains,
                 )
             elif resource.type == "file":
-                file_resource = File.from_dict(resource.to_dict())
-                file_resource.connection = self.connection
+                file_resource = File.from_dict(
+                    resource.to_dict(), connection=self.connection
+                )
                 file_resource.download(
                     resource_local_path, only_use_crux_domains=only_use_crux_domains
                 )
@@ -1031,9 +1032,10 @@ class Dataset(CruxModel):
                 after = resource_list[-1].get("resourceId")
                 for resource in resource_list:
                     obj = get_resource_object(
-                        resource_type=resource.get("type"), data=resource
+                        resource_type=resource.get("type"),
+                        data=resource,
+                        connection=self.connection,
                     )
-                    obj.connection = self.connection
                     yield obj
             else:
                 return
@@ -1115,9 +1117,7 @@ class Dataset(CruxModel):
 
         raw_json = response.json().get("destinationResource")
 
-        file_object = Resource.from_dict(raw_json)
-
-        file_object.connection = self.connection
+        file_object = Resource.from_dict(raw_json, connection=self.connection)
 
         job_id = response.json().get("jobId")
 

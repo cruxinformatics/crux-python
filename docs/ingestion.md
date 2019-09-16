@@ -41,6 +41,7 @@ def main():
                 delivery_file.labels["supplier_modified_dt"],
                 delivery_file.labels["ingestion_id"],
                 delivery_file.labels["version_id"],
+                delivery_file.labels["frame_id"],
                 delivery_file.name,
             )
             delivery_file.download(local_file_path)

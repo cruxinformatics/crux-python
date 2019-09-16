@@ -110,7 +110,6 @@ class Delivery(CruxModel):
 
         if resource_list:
             for resource in resource_list:
-                obj = File(raw_model={"resourceId": resource["resource_id"]})
-                obj.connection = self.connection
+                obj = File(raw_model={"resourceId": resource}, connection=self.connection)
                 obj.refresh()
                 yield obj

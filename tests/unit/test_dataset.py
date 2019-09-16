@@ -3,7 +3,16 @@ import os
 import pytest
 
 from crux._client import CruxClient
-from crux.models import Dataset, File, Folder, Label, Resource, StitchJob
+from crux.models import (
+    Dataset,
+    Delivery,
+    File,
+    Folder,
+    Ingestion,
+    Label,
+    Resource,
+    StitchJob,
+)
 
 
 @pytest.fixture(scope="module")
@@ -245,3 +254,31 @@ def test_upload_files(dataset, monkeypatch):
     assert len(file_list) == 2
     assert file_list[0].name == "test_file.txt"
     assert file_list[1].name == "test_file_2.txt"
+
+
+def monkeypatch_get_delivery(*args, **kwargs):
+    return Delivery(
+        raw_model={
+            "lastest_health_status": "DELIVERY_SUCCEEDED",
+            "delivery_id": "123456",
+            "dataset_id": "12345",
+        }
+    )
+
+
+def test_get_delivery(dataset, monkeypatch):
+    monkeypatch.setattr(dataset.connection, "api_call", monkeypatch_get_delivery)
+    delivery_object = dataset.get_delivery("123456")
+    assert delivery_object.id == "123456"
+
+
+def monkeypatch_get_ingestions(*args, **kwargs):
+    yield Ingestion(raw_model={"ingestionId": "123456", "datasetId": "12345"})
+
+
+def test_get_ingestions(dataset, monkeypatch):
+    monkeypatch.setattr(dataset, "get_ingestions", monkeypatch_get_ingestions)
+    ingestions = dataset.get_ingestions()
+    ingestion = next(ingestions)
+    assert ingestion.id == "123456"
+    assert ingestion.dataset_id == "12345"

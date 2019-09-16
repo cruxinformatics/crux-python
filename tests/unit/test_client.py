@@ -24,53 +24,21 @@ from crux.models.model import CruxModel
 
 
 class SampleModel(CruxModel):
-    def __init__(self, attr_1=None, attr_2=None):
-        self._attr_1 = None
-        self._attr_2 = None
-
-        self.attr_1 = attr_1
-        self.attr_2 = attr_2
-
     @property
     def attr_1(self):
-        return self._attr_1
+        return self.raw_model["attr1"]
 
     @attr_1.setter
     def attr_1(self, attr_1):
-        self._attr_1 = attr_1
+        self.raw_model["attr1"] = attr_1
 
     @property
     def attr_2(self):
-        return self._attr_2
+        return self.raw_model["attr2"]
 
     @attr_2.setter
     def attr_2(self, attr_2):
-        self._attr_2 = attr_2
-
-    @classmethod
-    def from_dict(cls, a_dict):
-        """Method which transforms SampleModel Dictionary to SampleModel object
-
-            Args:
-                cls(SampleModel): SampleModel Class
-                a_dict(dict): SampleModel Dictionary
-            Returns:
-                SampleModel(SampleModel): SampleModel Object
-        """
-        attr_1 = a_dict["attr1"]
-        attr_2 = a_dict["attr2"]
-
-        return cls(attr_1=attr_1, attr_2=attr_2)
-
-    def to_dict(self):
-        """ Method which transforms SampleModel object to SampleModel Dictionary
-
-        Args:
-            self: SampleModel instance Object
-        Returns:
-            Resource(dict): SampleModel Dictionary
-        """
-        return {"attr_1": self.attr_1, "attr_2": self.attr_2}
+        self.raw_model["attr1"] = attr_2
 
 
 @pytest.fixture
@@ -179,9 +147,9 @@ def monkeypatch_post_call(
 
 def test_client_post(client, monkeypatch):
     monkeypatch.setattr(requests.sessions.Session, "request", monkeypatch_post_call)
-    sample_obj = SampleModel(attr_1="attr1", attr_2="attr2")
+    sample_obj = SampleModel(raw_model={"attr1": "dummy1", "attr2": "dummy2"})
     resp = client.api_call(
-        method="POST", path=["test-path"], model=SampleModel, json=sample_obj.to_dict()
+        method="POST", path=["test-path"], model=SampleModel, json=sample_obj.raw_model
     )
 
     assert resp.attr_1 == "dummy1"
@@ -208,9 +176,9 @@ def monkeypatch_put_call(
 
 def test_client_put(client, monkeypatch):
     monkeypatch.setattr(requests.sessions.Session, "request", monkeypatch_put_call)
-    sample_obj = SampleModel(attr_1="attr1", attr_2="attr2")
+    sample_obj = SampleModel(raw_model={"attr1": "dummy1", "attr2": "dummy2"})
     resp = client.api_call(
-        method="PUT", path=["test-path"], model=SampleModel, json=sample_obj.to_dict()
+        method="PUT", path=["test-path"], model=SampleModel, json=sample_obj.raw_model
     )
 
     assert resp.attr_1 == "dummy1"

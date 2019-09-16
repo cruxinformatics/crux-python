@@ -42,6 +42,7 @@ def main():
                 delivery_file.labels["ingestion_id"],
                 delivery_file.labels["version_id"],
                 delivery_file.labels["frame_id"],
+                delivery_file.id,
                 delivery_file.name,
             )
             delivery_file.download(local_file_path)
@@ -97,6 +98,7 @@ def main():
                 delivery_file.labels["ingestion_id"],
                 delivery_file.labels["version_id"],
                 delivery_file.labels["frame_id"],
+                delivery_file.id,
                 delivery_file.name,
             )
             delivery_file.download(local_file_path)
@@ -150,6 +152,7 @@ def main():
                 delivery_file.labels["ingestion_id"],
                 delivery_file.labels["version_id"],
                 delivery_file.labels["frame_id"],
+                delivery_file.id,
                 delivery_file.name,
             )
             delivery_file.download(local_file_path)
@@ -201,6 +204,7 @@ def main():
                 delivery_file.labels["ingestion_id"],
                 delivery_file.labels["version_id"],
                 delivery_file.labels["frame_id"],
+                delivery_file.id,
                 delivery_file.name,
             )
             delivery_file.download(local_file_path)

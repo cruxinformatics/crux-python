@@ -260,8 +260,6 @@ def test_get_delivery(dataset, monkeypatch):
     monkeypatch.setattr(dataset.connection, "api_call", monkeypatch_get_delivery)
     delivery_object = dataset.get_delivery("abcd123.1")
     assert delivery_object.id == "abcd123.1"
-    assert delivery_object.status == "DELIVERY_SUCCEEDED"
-
 
 def monkeypatch_get_ingestions(*args, **kwargs):
     class MockResponse:

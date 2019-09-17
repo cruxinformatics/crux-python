@@ -3,16 +3,7 @@ import os
 import pytest
 
 from crux._client import CruxClient
-from crux.models import (
-    Dataset,
-    Delivery,
-    File,
-    Folder,
-    Ingestion,
-    Label,
-    Resource,
-    StitchJob,
-)
+from crux.models import Dataset, Delivery, File, Folder, Label, Resource, StitchJob
 
 
 @pytest.fixture(scope="module")
@@ -25,8 +16,7 @@ def dataset():
         "description": "test_dataset_description",
         "tags": ["tags1"],
     }
-    dataset = Dataset(raw_model=raw_model)
-    dataset.connection = conn
+    dataset = Dataset(raw_model=raw_model, connection=conn)
     return dataset
 
 
@@ -259,8 +249,8 @@ def test_upload_files(dataset, monkeypatch):
 def monkeypatch_get_delivery(*args, **kwargs):
     return Delivery(
         raw_model={
-            "lastest_health_status": "DELIVERY_SUCCEEDED",
-            "delivery_id": "123456",
+            "latest_health_status": "DELIVERY_SUCCEEDED",
+            "delivery_id": "abcd123.1",
             "dataset_id": "12345",
         }
     )
@@ -268,17 +258,26 @@ def monkeypatch_get_delivery(*args, **kwargs):
 
 def test_get_delivery(dataset, monkeypatch):
     monkeypatch.setattr(dataset.connection, "api_call", monkeypatch_get_delivery)
-    delivery_object = dataset.get_delivery("123456")
-    assert delivery_object.id == "123456"
+    delivery_object = dataset.get_delivery("abcd123.1")
+    assert delivery_object.id == "abcd123.1"
+    assert delivery_object.status == "DELIVERY_SUCCEEDED"
 
 
 def monkeypatch_get_ingestions(*args, **kwargs):
-    yield Ingestion(raw_model={"ingestionId": "123456", "datasetId": "12345"})
+    class MockResponse:
+        def json(self):
+            delivery_list = ["abcd123.0", "abcd123.1", "xyz123.0"]
+            return delivery_list
+
+    response = MockResponse()
+    return response
 
 
 def test_get_ingestions(dataset, monkeypatch):
-    monkeypatch.setattr(dataset, "get_ingestions", monkeypatch_get_ingestions)
+    monkeypatch.setattr(dataset.connection, "api_call", monkeypatch_get_ingestions)
     ingestions = dataset.get_ingestions()
-    ingestion = next(ingestions)
-    assert ingestion.id == "123456"
-    assert ingestion.dataset_id == "12345"
+    for ingestion in ingestions:
+        if ingestion.id == "abcd123":
+            assert ingestion.versions == [0, 1]
+        if ingestion.id == "xyz123":
+            assert ingestion.versions == [0]

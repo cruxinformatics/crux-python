@@ -2,6 +2,7 @@
 
 import logging
 import posixpath
+import re
 from typing import List, Tuple  # noqa: F401
 
 from requests import Session
@@ -14,6 +15,7 @@ from crux._compat import urllib_quote
 
 
 DEFAULT_CHUNK_SIZE = 10485760  # 10 MB
+DELIVERY_ID_REGEX = re.compile(r"^[a-zA-Z0-9]+\.[0-9]$")
 TRACE = 5
 
 

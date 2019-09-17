@@ -4,7 +4,6 @@ from collections import defaultdict
 import os
 import posixpath
 from typing import (
-    Any,
     DefaultDict,
     Dict,
     IO,
@@ -17,10 +16,13 @@ from typing import (
     Union,
 )  # noqa: F401
 
-from crux._client import CruxClient
-from crux._client import CruxConfig
 from crux._compat import unicode
-from crux._utils import create_logger, Headers, split_posixpath_filename_dirpath
+from crux._utils import (
+    create_logger,
+    DELIVERY_ID_REGEX,
+    Headers,
+    split_posixpath_filename_dirpath,
+)
 from crux.exceptions import CruxAPIError, CruxClientError, CruxResourceNotFoundError
 from crux.models._factory import get_resource_object
 from crux.models.delivery import Delivery
@@ -39,18 +41,6 @@ log = create_logger(__name__)
 
 class Dataset(CruxModel):
     """Dataset Model."""
-
-    def __init__(self, raw_model=None, connection=None):
-        # type: (Dict, CruxClient) -> None
-        """
-        Attributes:
-            raw_model (dict): Dataset raw dictionary. Defaults to None.
-            connection (CruxClient): Connection Object. Defaults to None.
-        """
-        self.raw_model = raw_model if raw_model is not None else {}
-        self.connection = (
-            connection if connection is not None else CruxClient(CruxConfig())
-        )
 
     @property
     def id(self):
@@ -124,29 +114,6 @@ class Dataset(CruxModel):
         """str: Compute or Get the provenance."""
         return self.raw_model["provenance"]
 
-    def to_dict(self):
-        # type: () -> Dict[str, Any]
-        """Transforms Dataset object to Dataset Dictionary.
-
-        Returns:
-            dict: Dataset Dictionary.
-        """
-        return self.raw_model
-
-    @classmethod
-    def from_dict(cls, a_dict):
-        # type: (Dict[str, Any]) -> Dataset
-        """Transforms Dataset Dictionary to Dataset object.
-
-        Args:
-            a_dict (dict): Dataset Dictionary.
-
-        Returns:
-            crux.models.Dataset: Dataset Object.
-        """
-
-        return cls(raw_model=a_dict)
-
     def create(self):
         # type: () -> bool
         """Creates the Dataset.
@@ -158,7 +125,7 @@ class Dataset(CruxModel):
             {"content-type": "application/json", "accept": "application/json"}
         )
         dataset_object = self.connection.api_call(
-            "POST", ["datasets"], json=self.to_dict(), model=Dataset, headers=headers
+            "POST", ["datasets"], json=self.raw_model, model=Dataset, headers=headers
         )
 
         self.raw_model = dataset_object.raw_model
@@ -202,7 +169,7 @@ class Dataset(CruxModel):
         if tags is not None:
             self.raw_model["tags"] = tags
 
-        body = self.to_dict()
+        body = self.raw_model
 
         dataset_object = self.connection.api_call(
             "PUT", ["datasets", self.id], headers=headers, json=body, model=Dataset
@@ -270,7 +237,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            json=file_resource.to_dict(),
+            json=file_resource.raw_model,
             model=File,
             headers=headers,
         )
@@ -313,7 +280,7 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "POST",
             ["datasets", self.id, "resources"],
-            json=folder_resource.to_dict(),
+            json=folder_resource.raw_model,
             model=Folder,
             headers=headers,
         )
@@ -468,8 +435,9 @@ class Dataset(CruxModel):
                     only_use_crux_domains=only_use_crux_domains,
                 )
             elif resource.type == "file":
-                file_resource = File.from_dict(resource.to_dict())
-                file_resource.connection = self.connection
+                file_resource = File.from_dict(
+                    resource.to_dict(), connection=self.connection
+                )
                 file_resource.download(
                     resource_local_path, only_use_crux_domains=only_use_crux_domains
                 )
@@ -1036,9 +1004,10 @@ class Dataset(CruxModel):
                 after = resource_list[-1].get("resourceId")
                 for resource in resource_list:
                     obj = get_resource_object(
-                        resource_type=resource.get("type"), data=resource
+                        resource_type=resource.get("type"),
+                        data=resource,
+                        connection=self.connection,
                     )
-                    obj.connection = self.connection
                     yield obj
             else:
                 return
@@ -1120,9 +1089,7 @@ class Dataset(CruxModel):
 
         raw_json = response.json().get("destinationResource")
 
-        file_object = Resource.from_dict(raw_json)
-
-        file_object.connection = self.connection
+        file_object = Resource.from_dict(raw_json, connection=self.connection)
 
         job_id = response.json().get("jobId")
 
@@ -1154,8 +1121,14 @@ class Dataset(CruxModel):
 
         Returns:
             crux.models.Delivery: Delivery Object.
+        Raises:
+            ValueError: If delivery_id value is invalid.
         """
         headers = Headers({"accept": "application/json"})
+
+        if not DELIVERY_ID_REGEX.match(delivery_id):
+            raise ValueError("Value of delivery_id is invalid")
+
         return self.connection.api_call(
             "GET", ["deliveries", self.id, delivery_id], headers=headers, model=Delivery
         )
@@ -1185,6 +1158,8 @@ class Dataset(CruxModel):
         ingestion_map = defaultdict(set)  # type: DefaultDict[str, Set]
 
         for delivery in all_deliveries:
+            if not DELIVERY_ID_REGEX.match(delivery):
+                raise ValueError("Value of delivery_id is invalid")
             ingestion_id, version_id = delivery.split(".")
             ingestion_map[ingestion_id].add(int(version_id))
 

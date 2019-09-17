@@ -109,9 +109,10 @@ class Crux(object):
         raw_resource = response.json()
 
         resource = get_resource_object(
-            resource_type=raw_resource.get("type"), data=raw_resource
+            resource_type=raw_resource.get("type"),
+            data=raw_resource,
+            connection=self.api_client,
         )
-        resource.connection = self.api_client
         return resource
 
     def _call_drives_my(self):
@@ -141,12 +142,12 @@ class Crux(object):
 
         if owned:
             for dataset in datasets["owned"]:
-                obj = Dataset.from_dict(dataset)
+                obj = Dataset.from_dict(dataset, connection=self.api_client)
                 dataset_list.append(obj)
 
         if subscribed:
             for dataset in datasets["subscriptions"]:
-                obj = Dataset.from_dict(dataset)
+                obj = Dataset.from_dict(dataset, connection=self.api_client)
                 dataset_list.append(obj)
 
         return dataset_list

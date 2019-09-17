@@ -1,9 +1,8 @@
 """Module contains Ingestion model."""
 
-from typing import Any, Dict, Iterator
+from typing import Dict, Iterator
 
 from crux._client import CruxClient
-from crux._config import CruxConfig
 from crux._utils import create_logger
 from crux.models.delivery import Delivery
 from crux.models.model import CruxModel
@@ -22,11 +21,8 @@ class Ingestion(CruxModel):
             raw_model (dict): Ingestion raw dictionary, Defaults to None.
             connection (CruxClient): Connection Object. Defaults to None.
         """
-        self.raw_model = raw_model if raw_model is not None else {}
-        self.connection = (
-            connection if connection is not None else CruxClient(CruxConfig())
-        )
         self._delivery_objects = {}  # type: Dict[int, Delivery]
+        super(Ingestion, self).__init__(raw_model, connection)
 
     @property
     def id(self):
@@ -42,19 +38,6 @@ class Ingestion(CruxModel):
     def versions(self):
         """list: Gets the list of versions."""
         return sorted(self.raw_model["versions"])
-
-    @classmethod
-    def from_dict(cls, a_dict):
-        # type: (Dict[str, Any]) -> Ingestion
-        """Transforms Ingestion Dictionary to Ingestion object.
-
-        Args:
-            a_dict (dict): Ingestion Dictionary.
-
-        Returns:
-            crux.models.Ingestion: Ingestion Object.
-        """
-        return cls(raw_model=a_dict)
 
     def _get_delivery_object(self, version=None):
         if version not in self._delivery_objects:

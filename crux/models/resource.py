@@ -3,12 +3,11 @@
 from enum import Enum
 import os
 import posixpath
-from typing import Any, Dict, List, Union  # noqa: F401
+from typing import Dict, List, Union  # noqa: F401
 
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
 from crux._client import CruxClient
-from crux._config import CruxConfig
 from crux._utils import create_logger, DEFAULT_CHUNK_SIZE, Headers
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
@@ -26,14 +25,9 @@ class Resource(CruxModel):
         Attributes:
             raw_model (dict): Resource raw dictionary. Defaults to None.
             connection (CruxClient): Connection Object. Defaults to None.
-        Raises:
-            ValueError: If name or tags are set to None.
         """
         self._folder = None
-        self.raw_model = raw_model if raw_model is not None else {}
-        self.connection = (
-            connection if connection is not None else CruxClient(CruxConfig())
-        )
+        super(Resource, self).__init__(raw_model, connection)
 
     @property
     def id(self):
@@ -156,29 +150,6 @@ class Resource(CruxModel):
         self._folder = self._get_folder()
         return self._folder
 
-    def to_dict(self):
-        # type: () -> Dict[str, Any]
-        """Transforms Resource object to Resource Dictionary.
-
-        Returns:
-            dict: Resource Dictionary.
-        """
-        return self.raw_model
-
-    @classmethod
-    def from_dict(cls, a_dict):
-        # type: (Dict[str, Any]) -> Any
-        """Transforms Resource Dictionary to Resource object.
-
-        Args:
-            a_dict (dict): Resource Dictionary.
-
-        Returns:
-            crux.models.Resource: Resource Object.
-        """
-
-        return cls(raw_model=a_dict)
-
     def delete(self):
         # type: () -> bool
         """Deletes Resource from Dataset.
@@ -224,7 +195,7 @@ class Resource(CruxModel):
         if provenance is not None:
             self.raw_model["provenance"] = provenance
 
-        body = self.to_dict()
+        body = self.raw_model
 
         log.debug("Body %s", body)
 

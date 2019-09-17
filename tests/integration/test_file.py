@@ -136,3 +136,30 @@ def test_upload_file_object(connection, dataset, helpers):
     assert isinstance(file_from_id, File)
     assert file_from_id.id == file_1.id
     assert file_from_id.size == file_1.size
+
+
+@pytest.mark.usefixtures("dataset", "helpers")
+def test_replacing_connection(dataset, helpers, monkeypatch):
+    file_name = "/test_file_" + helpers.generate_random_string(16) + ".csv"
+
+    file_1 = dataset.create_file(file_name)
+
+    # Set an invalid API key so refresh() will fail if connection replacement doesn't work
+    monkeypatch.setenv("CRUX_API_KEY", "THIS_IS_NOT_A_VALID_KEY")
+
+    # Create new File instance from the raw model of file_1, without a valid connection
+    file_2 = File.from_dict(file_1.to_dict())
+    # Replace the connection with the one from file_1
+    file_2.connection = file_1.connection
+    del file_2.raw_model["name"]
+    file_2.refresh()
+
+    assert file_2.name == file_1.name
+    assert isinstance(file_2, File)
+
+    file_2_dict = file_2.to_dict()
+    # Test that to_dict() is making an accurate copy
+    assert file_2_dict == file_2.raw_model
+    # Test that to_dict() is sctually making a copy
+    assert id(file_2_dict) != id(file_2.raw_model)
+    assert isinstance(file_2_dict, dict)

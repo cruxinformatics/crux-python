@@ -17,13 +17,13 @@ See the [Pipenv installation instructions](https://pipenv.readthedocs.io/en/late
 Once Pipenv is installed, change into the root of your application directory and run:
 
 ```bash
-pipenv install "crux==0.0.12"
+pipenv install "crux==0.0.13"
 ```
 
 This will add a line to the `[packages]` section of your Pipfile, or create a new Pipfile if one doesn't exist.
 
 ```ini
-crux = "==0.0.12"
+crux = "==0.0.13"
 ```
 
 ## With venv and pip
@@ -33,6 +33,6 @@ Alternatively you can create a virtual environment with Python 3's [venv module]
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install "crux==0.0.12"
+python3 -m pip install "crux==0.0.13"
 python3 -m pip freeze > requirements.txt
 ```

@@ -43,9 +43,9 @@ class Ingestion(CruxModel):
         if version not in self._delivery_objects:
             delivery_id = "{}.{}".format(self.id, version)
             delivery_object = Delivery.from_dict(
-                {"delivery_id": delivery_id, "dataset_id": self.dataset_id}
+                {"delivery_id": delivery_id, "dataset_id": self.dataset_id},
+                connection=self.connection,
             )
-            delivery_object.connection = self.connection
             self._delivery_objects[version] = delivery_object
         return self._delivery_objects[version]
 

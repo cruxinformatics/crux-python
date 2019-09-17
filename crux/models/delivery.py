@@ -1,7 +1,8 @@
 """Module contains Delivery model."""
 
-from typing import Iterator
+from typing import Dict, Iterator
 
+from crux._client import CruxClient
 from crux.models.file import File
 from crux.models.model import CruxModel
 from crux.models.resource import MediaType, Resource
@@ -9,6 +10,16 @@ from crux.models.resource import MediaType, Resource
 
 class Delivery(CruxModel):
     """Delivery Model."""
+
+    def __init__(self, raw_model=None, connection=None):
+        # type: (Dict, CruxClient) -> None
+        """
+        Attributes:
+            raw_model (dict): Ingestion raw dictionary, Defaults to None.
+            connection (CruxClient): Connection Object. Defaults to None.
+        """
+        self._summary = None
+        super(Delivery, self).__init__(raw_model, connection)
 
     @property
     def id(self):
@@ -23,12 +34,22 @@ class Delivery(CruxModel):
     @property
     def status(self):
         """str: Gets the Status of delivery."""
-        return self.raw_model["latest_health_status"]
+        return self.summary["latest_health_status"]
 
     @property
     def schedule_datetime(self):
         """str: Gets schedule datetime of delivery."""
-        return self.raw_model["schedule_dt"]
+        return self.summary["schedule_dt"]
+
+    @property
+    def summary(self):
+        """dict: Gets the Delivery Summary"""
+        if self._summary is None:
+            response = self.connection.api_call(
+                "GET", ["deliveries", self.dataset_id, self.id]
+            )
+            self._summary = response.json()
+        return self._summary
 
     def get_data(self, file_format=MediaType.AVRO.value):
         # type: (str) -> Iterator[Resource]

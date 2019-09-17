@@ -261,6 +261,7 @@ def test_get_delivery(dataset, monkeypatch):
     delivery_object = dataset.get_delivery("abcd123.1")
     assert delivery_object.id == "abcd123.1"
 
+
 def monkeypatch_get_ingestions(*args, **kwargs):
     class MockResponse:
         def json(self):

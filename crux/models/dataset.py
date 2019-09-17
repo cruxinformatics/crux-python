@@ -1,24 +1,34 @@
 """Module contains Dataset model."""
 
+from collections import defaultdict
 import os
 import posixpath
 from typing import (
+    DefaultDict,
     Dict,
     IO,
     Iterator,
     List,
     MutableMapping,
+    Set,
     Text,
     Tuple,
     Union,
 )  # noqa: F401
 
 from crux._compat import unicode
-from crux._utils import create_logger, Headers, split_posixpath_filename_dirpath
+from crux._utils import (
+    create_logger,
+    DELIVERY_ID_REGEX,
+    Headers,
+    split_posixpath_filename_dirpath,
+)
 from crux.exceptions import CruxAPIError, CruxClientError, CruxResourceNotFoundError
 from crux.models._factory import get_resource_object
+from crux.models.delivery import Delivery
 from crux.models.file import File
 from crux.models.folder import Folder
+from crux.models.ingestion import Ingestion
 from crux.models.job import StitchJob
 from crux.models.label import Label
 from crux.models.model import CruxModel
@@ -1101,3 +1111,65 @@ class Dataset(CruxModel):
         return self.connection.api_call(
             "GET", ["datasets", "stitch", job_id], headers=headers, model=StitchJob
         )
+
+    def get_delivery(self, delivery_id):
+        # type: (str) -> Delivery
+        """Gets Delivery object.
+
+        Args:
+            delivery_id (str): Delivery ID.
+
+        Returns:
+            crux.models.Delivery: Delivery Object.
+        Raises:
+            ValueError: If delivery_id value is invalid.
+        """
+        headers = Headers({"accept": "application/json"})
+
+        if not DELIVERY_ID_REGEX.match(delivery_id):
+            raise ValueError("Value of delivery_id is invalid")
+
+        return self.connection.api_call(
+            "GET", ["deliveries", self.id, delivery_id], headers=headers, model=Delivery
+        )
+
+    def get_ingestions(self, start_date=None, end_date=None):
+        # type: (str, str) -> Iterator[Ingestion]
+        """Gets Ingestions.
+
+        Args:
+            start_date (str): ISO format start time.
+            end_date (str): ISO format end time.
+
+        Returns:
+            crux.models.Delivery: Delivery Object.
+        """
+        headers = Headers({"accept": "application/json"})
+
+        params = {}
+        params["start_date"] = start_date
+        params["end_date"] = end_date
+
+        response = self.connection.api_call(
+            "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
+        )
+
+        all_deliveries = response.json()
+        ingestion_map = defaultdict(set)  # type: DefaultDict[str, Set]
+
+        for delivery in all_deliveries:
+            if not DELIVERY_ID_REGEX.match(delivery):
+                raise ValueError("Value of delivery_id is invalid")
+            ingestion_id, version_id = delivery.split(".")
+            ingestion_map[ingestion_id].add(int(version_id))
+
+        for ingestion_id in ingestion_map:
+            obj = Ingestion.from_dict(
+                {
+                    "ingestionId": ingestion_id,
+                    "versions": ingestion_map[ingestion_id],
+                    "datasetId": self.id,
+                }
+            )
+            obj.connection = self.connection
+            yield obj

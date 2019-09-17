@@ -3,7 +3,7 @@ import os
 import pytest
 
 from crux._client import CruxClient
-from crux.models import Dataset, File, Folder, Label, Resource, StitchJob
+from crux.models import Dataset, Delivery, File, Folder, Label, Resource, StitchJob
 
 
 @pytest.fixture(scope="module")
@@ -244,3 +244,39 @@ def test_upload_files(dataset, monkeypatch):
     assert len(file_list) == 2
     assert file_list[0].name == "test_file.txt"
     assert file_list[1].name == "test_file_2.txt"
+
+
+def monkeypatch_get_delivery(*args, **kwargs):
+    return Delivery(
+        raw_model={
+            "latest_health_status": "DELIVERY_SUCCEEDED",
+            "delivery_id": "abcd123.1",
+            "dataset_id": "12345",
+        }
+    )
+
+
+def test_get_delivery(dataset, monkeypatch):
+    monkeypatch.setattr(dataset.connection, "api_call", monkeypatch_get_delivery)
+    delivery_object = dataset.get_delivery("abcd123.1")
+    assert delivery_object.id == "abcd123.1"
+
+
+def monkeypatch_get_ingestions(*args, **kwargs):
+    class MockResponse:
+        def json(self):
+            delivery_list = ["abcd123.0", "abcd123.1", "xyz123.0"]
+            return delivery_list
+
+    response = MockResponse()
+    return response
+
+
+def test_get_ingestions(dataset, monkeypatch):
+    monkeypatch.setattr(dataset.connection, "api_call", monkeypatch_get_ingestions)
+    ingestions = dataset.get_ingestions()
+    for ingestion in ingestions:
+        if ingestion.id == "abcd123":
+            assert ingestion.versions == [0, 1]
+        if ingestion.id == "xyz123":
+            assert ingestion.versions == [0]

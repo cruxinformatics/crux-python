@@ -6,9 +6,11 @@ import logging
 from logging import NullHandler
 
 from crux.models.dataset import Dataset
+from crux.models.delivery import Delivery
 from crux.models.file import File
 from crux.models.folder import Folder
 from crux.models.identity import Identity
+from crux.models.ingestion import Ingestion
 from crux.models.job import Job, StitchJob
 from crux.models.label import Label
 from crux.models.permission import Permission
@@ -25,6 +27,8 @@ __all__ = (
     "Folder",
     "Dataset",
     "Label",
+    "Delivery",
+    "Ingestion",
 )
 
 # Set default logging handler to avoid "No handler found" warnings

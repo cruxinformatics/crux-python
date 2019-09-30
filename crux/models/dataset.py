@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 import os
+from datetime import datetime, timedelta, timezone
 import posixpath
 from typing import (
     DefaultDict,
@@ -1173,3 +1174,47 @@ class Dataset(CruxModel):
             )
             obj.connection = self.connection
             yield obj
+
+    def get_latest_ingestion(self):
+        # type: () -> Ingestion
+        """Gets Ingestions.
+
+        Args:
+            none
+
+        Returns:
+            crux.models.Delivery: Delivery Object.
+        """
+
+        end_date = datetime.utcnow()
+        latest_schedule_dt = datetime.utcfromtimestamp(0)
+        latest_ingestion_dt = datetime.utcfromtimestamp(0)
+        latest_ingestion = None
+
+        for lookback in [1, 3, 9, 16, 32, 93, 186, 369]:
+            start_date = end_date - timedelta(days=lookback)
+
+            all_ingestions = self.get_ingestions(
+                start_date=start_date.isoformat(), end_date=end_date.isoformat()
+            )
+            for ingestion in all_ingestions:
+                all_resources = ingestion.get_data(version=max(ingestion.versions))
+
+                for resource in all_resources:
+                    s_dt = datetime.strptime(
+                        resource.labels["schedule_dt"], "%Y-%m-%dT%H:%M:%S"
+                    )
+                    i_dt = datetime.strptime(
+                        resource.labels["ingestion_dt"], "%Y-%m-%dT%H:%M:%S.%f"
+                    )
+                    if s_dt >= latest_schedule_dt or i_dt > latest_ingestion_dt:
+                        latest_schedule_dt = s_dt
+                        latest_ingestion_dt = i_dt
+                        latest_ingestion = ingestion
+
+                    break  # just review first resource as all have the same schedule/ingestion date
+
+            if latest_ingestion is not None:
+                break
+
+        return latest_ingestion

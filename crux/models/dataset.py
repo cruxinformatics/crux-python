@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 import posixpath
 from typing import (
     DefaultDict,

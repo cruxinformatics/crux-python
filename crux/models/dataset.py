@@ -1191,7 +1191,8 @@ class Dataset(CruxModel):
         latest_ingestion_dt = datetime.utcfromtimestamp(0)
         latest_ingestion = None
 
-        for lookback in [1, 3, 9, 16, 32, 93, 186, 369]:
+        # look back a couple extra days in case query is performed over the weekend
+        for lookback in [1, 1+2, 7+2, 31+2, 180+2, 366+2]:
             start_date = end_date - timedelta(days=lookback)
 
             all_ingestions = self.get_ingestions(

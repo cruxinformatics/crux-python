@@ -1186,14 +1186,13 @@ class Dataset(CruxModel):
             crux.models.Ingestion: Ingestion Object.
         """
 
-        end_date = datetime.utcnow()
         latest_schedule_dt = None
         latest_ingestion_time = None
         latest_ingestion = None
 
         # look back a couple extra days in case query is performed over the weekend
         for lookback in [1, 1 + 2, 7 + 2, 31 + 2, 180 + 2, 366 + 2]:
-            start_date = end_date - timedelta(days=lookback)
+            start_date = datetime.utcnow() - timedelta(days=lookback)
 
             all_ingestions = self.get_ingestions(start_date=start_date.isoformat())
             for ingestion in all_ingestions:

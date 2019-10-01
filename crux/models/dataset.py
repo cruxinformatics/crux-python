@@ -1187,27 +1187,30 @@ class Dataset(CruxModel):
         """
 
         end_date = datetime.utcnow()
-        latest_schedule_dt = datetime.utcfromtimestamp(0).isoformat()
-        latest_ingestion_dt = datetime.utcfromtimestamp(0).isoformat()
+        latest_schedule_dt = None
+        latest_ingestion_time = None
         latest_ingestion = None
 
         # look back a couple extra days in case query is performed over the weekend
-        for lookback in [1, 1+2, 7+2, 31+2, 180+2, 366+2]:
+        for lookback in [1, 1 + 2, 7 + 2, 31 + 2, 180 + 2, 366 + 2]:
             start_date = end_date - timedelta(days=lookback)
 
-            all_ingestions = self.get_ingestions(
-                start_date=start_date.isoformat()
-            )
+            all_ingestions = self.get_ingestions(start_date=start_date.isoformat())
             for ingestion in all_ingestions:
-                all_resources = ingestion.get_data(version=max(ingestion.versions))
-
-                for resource in all_resources:
-                    if  resource.labels["schedule_dt"] >= latest_schedule_dt or resource.labels["ingestion_dt"] > latest_ingestion_dt:
-                        latest_schedule_dt = resource.labels["schedule_dt"]
-                        latest_ingestion_dt = resource.labels["ingestion_dt"]
-                        latest_ingestion = ingestion
-
-                    break  # just review first resource ask all have the same schedule/ingestion date
+                summary = self.get_delivery(
+                    f"{ingestion.id}.{max(ingestion.versions)}"
+                ).summary
+                schedule_dt = summary["schedule_dt"]
+                ingestion_time = summary["ingestion_time"]
+                if (
+                    latest_schedule_dt is None
+                    or schedule_dt >= latest_schedule_dt
+                    or latest_ingestion_time is None
+                    or ingestion_time > latest_ingestion_time
+                ):
+                    latest_schedule_dt = schedule_dt
+                    latest_ingestion_time = ingestion_time
+                    latest_ingestion = ingestion
 
             if latest_ingestion is not None:
                 break

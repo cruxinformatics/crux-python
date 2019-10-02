@@ -1205,7 +1205,10 @@ class Dataset(CruxModel):
                     latest_schedule_dt is None
                     or schedule_dt >= latest_schedule_dt
                     or latest_ingestion_time is None
-                    or ingestion_time > latest_ingestion_time
+                    or (
+                        ingestion_time is not None
+                        and ingestion_time > latest_ingestion_time
+                    )
                 ):
                     latest_schedule_dt = schedule_dt
                     latest_ingestion_time = ingestion_time

@@ -1199,6 +1199,10 @@ class Dataset(CruxModel):
                 summary = self.get_delivery(
                     f"{ingestion.id}.{max(ingestion.versions)}"
                 ).summary
+
+                if summary["latest_health_status"] != "DELIVERY_SUCCEEDED":
+                    continue
+
                 schedule_dt = summary["schedule_dt"]
                 ingestion_time = summary["ingestion_time"]
                 if (

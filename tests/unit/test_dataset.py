@@ -280,3 +280,22 @@ def test_get_ingestions(dataset, monkeypatch):
             assert ingestion.versions == [0, 1]
         if ingestion.id == "xyz123":
             assert ingestion.versions == [0]
+
+
+def monkeypatch_get_resource(predicates=None):
+    return Resource(
+        raw_model={
+            "resourceId": "12345",
+            "datasetId": "4567",
+            "name": "resource1",
+            "type": "file",
+            "tags": ["tag1", "tag2"],
+            "description": "test_resource1",
+        }
+    )
+
+
+def test_get_latest_ingestion(dataset, monkeypatch):
+    monkeypatch.setattr(dataset, "get_latest_ingestion", monkeypatch_get_resource)
+    resource = dataset.get_latest_ingestion()
+    assert resource.id == "12345"

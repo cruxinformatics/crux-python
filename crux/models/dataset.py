@@ -1,8 +1,8 @@
 """Module contains Dataset model."""
 
 from collections import defaultdict
-import os
 from datetime import datetime, timedelta
+import os
 import posixpath
 from typing import (
     DefaultDict,
@@ -11,6 +11,7 @@ from typing import (
     Iterator,
     List,
     MutableMapping,
+    Optional,
     Set,
     Text,
     Tuple,
@@ -1176,7 +1177,7 @@ class Dataset(CruxModel):
             yield obj
 
     def get_latest_ingestion(self):
-        # type: () -> Ingestion
+        # type: () -> Optional[Ingestion]
         """Gets Ingestions.
 
         Args:
@@ -1197,7 +1198,7 @@ class Dataset(CruxModel):
             all_ingestions = self.get_ingestions(start_date=start_date.isoformat())
             for ingestion in all_ingestions:
                 summary = self.get_delivery(
-                    f"{ingestion.id}.{max(ingestion.versions)}"
+                    "{}.{}".format(ingestion.id, max(ingestion.versions))
                 ).summary
 
                 if summary["latest_health_status"] != "DELIVERY_SUCCEEDED":

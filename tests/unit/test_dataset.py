@@ -282,20 +282,32 @@ def test_get_ingestions(dataset, monkeypatch):
             assert ingestion.versions == [0]
 
 
-def monkeypatch_get_resource(predicates=None):
-    return Resource(
+def monkeypatch_get_delivery_w_summary(delivery_id):
+    delivery = Delivery(
         raw_model={
-            "resourceId": "12345",
-            "datasetId": "4567",
-            "name": "resource1",
-            "type": "file",
-            "tags": ["tag1", "tag2"],
-            "description": "test_resource1",
+            "latest_health_status": "DELIVERY_SUCCEEDED",
+            "delivery_id": delivery_id,
+            "dataset_id": "12345",
         }
     )
 
+    times = {
+        "xyz123.0": "019-10-30T05:10:34.677177",
+        "abcd123.0": "019-10-30T06:10:34.677177",
+        "abcd123.1": "019-10-30T06:20:34.677177",
+    }
+    delivery._summary = {
+        "latest_health_status": delivery.raw_model["latest_health_status"],
+        "schedule_dt": "2019-10-30T05:00:00",
+        "ingestion_time": times[delivery_id],
+    }
+
+    return delivery
+
 
 def test_get_latest_ingestion(dataset, monkeypatch):
-    monkeypatch.setattr(dataset, "get_latest_ingestion", monkeypatch_get_resource)
+    monkeypatch.setattr(dataset.connection, "api_call", monkeypatch_get_ingestions)
+    monkeypatch.setattr(dataset, "get_delivery", monkeypatch_get_delivery_w_summary)
     resource = dataset.get_latest_ingestion()
-    assert resource.id == "12345"
+    assert resource.id == "abcd123"
+    assert resource.versions == [0, 1]

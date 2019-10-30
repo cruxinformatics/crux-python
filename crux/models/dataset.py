@@ -1208,10 +1208,9 @@ class Dataset(CruxModel):
                 ingestion_time = summary["ingestion_time"]
                 if (
                     latest_schedule_dt is None
-                    or schedule_dt >= latest_schedule_dt
                     or latest_ingestion_time is None
                     or (
-                        ingestion_time is not None
+                        schedule_dt >= latest_schedule_dt
                         and ingestion_time > latest_ingestion_time
                     )
                 ):

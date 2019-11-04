@@ -1,6 +1,7 @@
 """Module contains Dataset model."""
 
 from collections import defaultdict
+from datetime import datetime, timedelta
 import os
 import posixpath
 from typing import (
@@ -10,6 +11,7 @@ from typing import (
     Iterator,
     List,
     MutableMapping,
+    Optional,
     Set,
     Text,
     Tuple,
@@ -1173,3 +1175,50 @@ class Dataset(CruxModel):
             )
             obj.connection = self.connection
             yield obj
+
+    def get_latest_ingestion(self):
+        # type: () -> Optional[Ingestion]
+        """Gets Ingestions.
+
+        Args:
+            none
+
+        Returns:
+            crux.models.Ingestion: Ingestion Object.
+        """
+
+        latest_schedule_dt = None
+        latest_ingestion_time = None
+        latest_ingestion = None
+
+        # look back a couple extra days in case query is performed over the weekend
+        for lookback in [1, 1 + 2, 7 + 2, 31 + 2, 180 + 2, 366 + 2]:
+            start_date = datetime.utcnow() - timedelta(days=lookback)
+
+            all_ingestions = self.get_ingestions(start_date=start_date.isoformat())
+            for ingestion in all_ingestions:
+                summary = self.get_delivery(
+                    "{}.{}".format(ingestion.id, max(ingestion.versions))
+                ).summary
+
+                if summary["latest_health_status"] != "DELIVERY_SUCCEEDED":
+                    continue
+
+                schedule_dt = summary["schedule_dt"]
+                ingestion_time = summary["ingestion_time"]
+                if (
+                    latest_schedule_dt is None
+                    or latest_ingestion_time is None
+                    or (
+                        schedule_dt >= latest_schedule_dt
+                        and ingestion_time > latest_ingestion_time
+                    )
+                ):
+                    latest_schedule_dt = schedule_dt
+                    latest_ingestion_time = ingestion_time
+                    latest_ingestion = ingestion
+
+            if latest_ingestion is not None:
+                break
+
+        return latest_ingestion

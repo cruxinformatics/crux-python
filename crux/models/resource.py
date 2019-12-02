@@ -419,7 +419,7 @@ class MediaType(Enum):  # type: ignore
     JSON = "application/json"
     NDJSON = "application/x-ndjson"
     CSV = "text/csv"
-    PARQUET = "application/parquet"
+    PARQUET = "parquet/binary"
     AVRO = "avro/binary"
 
     @classmethod

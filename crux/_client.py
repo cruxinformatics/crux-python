@@ -154,7 +154,6 @@ class CruxClient(object):
                     log.debug("Response is pagination of type %s", model)
                     serial_list = []
                     for item in response.json()["results"]:
-                        item["_cursor"] = response.json()["cursor"]
                         obj = model.from_dict(item, connection=self)
                         serial_list.append(obj)
                     return serial_list
@@ -165,7 +164,6 @@ class CruxClient(object):
                         obj = model.from_dict(item, connection=self)
                         serial_list.append(obj)
                     return serial_list
-
                 else:
                     log.debug("Response is of type %s", model)
                     obj = model.from_dict(response.json(), connection=self)

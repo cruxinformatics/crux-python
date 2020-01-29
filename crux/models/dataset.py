@@ -564,12 +564,18 @@ class Dataset(CruxModel):
         model=None,
         sort=None,
     ):
+        # type: (str, int, int, bool, str, dict, str) -> List
 
         headers = Headers(
             {"content-type": "application/json", "accept": "application/json"}
         )
 
-        params = {"folder": folder, "offset": offset, "limit": limit}
+        params = {
+            "datasetId": self.id,
+            "folder": folder,
+            "after": offset,
+            "limit": limit,
+        }
 
         if sort:
             params["sort"] = sort
@@ -582,13 +588,26 @@ class Dataset(CruxModel):
         else:
             params["includeFolders"] = "false"
 
-        return self.connection.api_call(
+        resp = self.connection.api_call(
+            "GET", ["resources"], params=params, model=model, headers=headers,
+        )
+        """
+
+        resp = self.connection.api_call(
             "GET",
             ["datasets", self.id, "resources"],
             params=params,
             model=model,
             headers=headers,
         )
+        """
+
+        if type(resp) is list:
+            resources = resp
+        else:
+            resources = [resp]
+
+        return resources
 
     def upload_file(
         self,
@@ -1196,27 +1215,28 @@ class Dataset(CruxModel):
             start_date = datetime.utcnow() - timedelta(days=lookback)
 
             all_ingestions = self.get_ingestions(start_date=start_date.isoformat())
-            for ingestion in all_ingestions:
-                summary = self.get_delivery(
-                    "{}.{}".format(ingestion.id, max(ingestion.versions))
-                ).summary
+            for idx, ingestion in enumerate(all_ingestions):
+                for ver in ingestion.versions:
+                    summary = self.get_delivery(
+                        "{}.{}".format(ingestion.id, ver)
+                    ).summary
 
-                if summary["latest_health_status"] != "DELIVERY_SUCCEEDED":
-                    continue
+                    if summary["latest_health_status"] != "DELIVERY_SUCCEEDED":
+                        continue
 
-                schedule_dt = summary["schedule_dt"]
-                ingestion_time = summary["ingestion_time"]
-                if (
-                    latest_schedule_dt is None
-                    or latest_ingestion_time is None
-                    or (
-                        schedule_dt >= latest_schedule_dt
-                        and ingestion_time > latest_ingestion_time
-                    )
-                ):
-                    latest_schedule_dt = schedule_dt
-                    latest_ingestion_time = ingestion_time
-                    latest_ingestion = ingestion
+                    schedule_dt = summary["schedule_dt"]
+                    ingestion_time = summary["ingestion_time"]
+                    if (
+                        latest_schedule_dt is None
+                        or latest_ingestion_time is None
+                        or (
+                            schedule_dt >= latest_schedule_dt
+                            and ingestion_time > latest_ingestion_time
+                        )
+                    ):
+                        latest_schedule_dt = schedule_dt
+                        latest_ingestion_time = ingestion_time
+                        latest_ingestion = ingestion
 
             if latest_ingestion is not None:
                 break

@@ -150,7 +150,15 @@ class CruxClient(object):
                 log.debug("Model is set to None, returning response dictionary")
                 return response
             else:
-                if isinstance(response.json(), list):
+                if "results" in response.json() and "cursor" in response.json():
+                    log.debug("Response is pagination of type %s", model)
+                    serial_list = []
+                    for item in response.json()["results"]:
+                        item["_cursor"] = response.json()["cursor"]
+                        obj = model.from_dict(item, connection=self)
+                        serial_list.append(obj)
+                    return serial_list
+                elif isinstance(response.json(), list):
                     log.debug("Response is list of type %s", model)
                     serial_list = []
                     for item in response.json():

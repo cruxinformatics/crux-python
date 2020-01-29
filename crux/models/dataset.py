@@ -591,16 +591,6 @@ class Dataset(CruxModel):
         resp = self.connection.api_call(
             "GET", ["resources"], params=params, model=model, headers=headers,
         )
-        """
-
-        resp = self.connection.api_call(
-            "GET",
-            ["datasets", self.id, "resources"],
-            params=params,
-            model=model,
-            headers=headers,
-        )
-        """
 
         if type(resp) is list:
             resources = resp

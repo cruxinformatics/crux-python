@@ -551,61 +551,35 @@ class Dataset(CruxModel):
 
     def _list_resources(
         self,
-        folder=None,
-        offset=None,
-        limit=None,
+        folder="/",
+        offset=0,
+        limit=1,
         include_folders=False,
+        name=None,
         model=None,
         sort=None,
     ):
-        # type: (str, int, int, bool, dict, str) -> List
-
-        if limit is None:
-            limit = 99999
-        if offset is None:
-            offset = 0
 
         headers = Headers(
             {"content-type": "application/json", "accept": "application/json"}
         )
 
-        params = {"datasetId": self.id, "offset": offset}
-
-        if folder:
-            params["folder"] = folder
+        params = {"datasetId": self.id, "folder": folder, "offset": offset, "limit": limit}
 
         if sort:
             params["sort"] = sort
+
+        if name:
+            params["name"] = name
 
         if include_folders:
             params["includeFolders"] = "true"
         else:
             params["includeFolders"] = "false"
 
-        resources = []
-        retrieved = 0
-        pagesize = 500
-        while retrieved < limit:
-            params["limit"] = min(pagesize, limit - retrieved)
-
-            resp = self.connection.api_call(
-                "GET", ["resources"], params=params, model=model, headers=headers
-            )
-            if type(resp) is list:
-                pg = resp
-            else:
-                pg = [resp]
-            pglen = len(pg)
-
-            resources += pg
-            retrieved += pglen
-
-            if pglen < pagesize:
-                break
-            else:
-                params["offset"] += pagesize
-
-        return resources
+        return self.connection.api_call(
+            "GET", ["resources"], params=params, model=model, headers=headers
+        )
 
     def upload_file(
         self,

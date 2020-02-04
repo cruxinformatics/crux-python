@@ -360,7 +360,7 @@ class Dataset(CruxModel):
         return self._get_resource(path=path, model=Folder)
 
     def list_resources(
-        self, folder=None, offset=None, limit=None, include_folders=False, sort=False
+        self, folder="/", offset=0, limit=1, include_folders=False, sort=None
     ):
         # type: (str, int, int, bool, str) -> Resource
         """Lists the resources in Dataset.
@@ -379,12 +379,12 @@ class Dataset(CruxModel):
             list (:obj:`crux.models.Resource`): List of File resource objects.
         """
         return self._list_resources(
+            sort=sort,
             folder=folder,
             offset=offset,
             limit=limit,
             include_folders=include_folders,
             model=Resource,
-            sort=sort,
         )
 
     def download_files(self, folder, local_path, only_use_crux_domains=None):
@@ -417,7 +417,12 @@ class Dataset(CruxModel):
         local_file_list = []  # type: List[str]
 
         resources = self._list_resources(
-            folder=folder, include_folders=True, model=Resource
+            sort=None,
+            folder=folder,
+            offset=0,
+            limit=None,
+            include_folders=True,
+            model=Resource,
         )
 
         for resource in resources:

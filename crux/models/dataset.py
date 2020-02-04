@@ -557,7 +557,7 @@ class Dataset(CruxModel):
     def _list_resources(
         self,
         folder="/",
-        offset=0,
+        offset=None,
         limit=1,
         include_folders=False,
         name=None,
@@ -569,7 +569,7 @@ class Dataset(CruxModel):
             {"content-type": "application/json", "accept": "application/json"}
         )
 
-        params = {"datasetId": self.id, "folder": folder, "offset": offset, "limit": limit}
+        params = {"datasetId": self.id, "folder": folder}
 
         if sort:
             params["sort"] = sort
@@ -582,9 +582,26 @@ class Dataset(CruxModel):
         else:
             params["includeFolders"] = "false"
 
-        return self.connection.api_call(
-            "GET", ["resources"], params=params, model=model, headers=headers
-        )
+        resources = []
+        retrieved = 0
+        pagesize = 500
+        paginate = {}
+        while retrieved < limit:
+            params["limit"] = min(pagesize, limit - retrieved)
+
+            resp = self.connection.api_call(
+                "GET", ["resources"], params=params, model=model, headers=headers, paginate=paginate
+            )
+            respcnt = len(resp)
+
+            if respcnt == 0:
+                break
+
+            resources += resp
+            retrieved += respcnt
+            params["cursor"] = paginate["cursor"]
+
+        return resources
 
     def upload_file(
         self,

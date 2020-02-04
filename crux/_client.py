@@ -59,6 +59,7 @@ class CruxClient(object):
         stream=False,  # type: bool
         connect_timeout=9.5,  # type: float
         read_timeout=60,  # type: float
+        paginate = {}
     ):
         # type:(...) -> Any
         """
@@ -163,6 +164,7 @@ class CruxClient(object):
                     and "cursor" in response.json()
                 ):
                     log.debug("Response is pagination of type %s", model)
+                    paginate["cursor"] = response.json()["cursor"]
                     serial_list = []
                     for item in response.json()["results"]:
                         obj = model.from_dict(item, connection=self)

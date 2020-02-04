@@ -360,7 +360,7 @@ class Dataset(CruxModel):
         return self._get_resource(path=path, model=Folder)
 
     def list_resources(
-        self, folder="/", offset=0, limit=1, include_folders=False, sort=None
+        self, folder="/", offset=None, limit=1, include_folders=False, sort=None
     ):
         # type: (str, int, int, bool, str) -> Resource
         """Lists the resources in Dataset.
@@ -419,7 +419,7 @@ class Dataset(CruxModel):
         resources = self._list_resources(
             sort=None,
             folder=folder,
-            offset=0,
+            offset=None,
             limit=None,
             include_folders=True,
             model=Resource,
@@ -524,7 +524,7 @@ class Dataset(CruxModel):
 
         return uploaded_file_objects
 
-    def list_files(self, sort=None, folder="/", offset=0, limit=100):
+    def list_files(self, sort=None, folder="/", offset=None, limit=100):
         # type: (str, str, int, int) -> List[File]
         """Lists the files.
 
@@ -570,6 +570,9 @@ class Dataset(CruxModel):
         )
 
         params = {"datasetId": self.id, "folder": folder}
+
+        if offset is not None:
+            log.debug("Obsolete 'offset' param ignored")
 
         if sort:
             params["sort"] = sort

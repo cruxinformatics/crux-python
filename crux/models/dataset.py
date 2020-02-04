@@ -360,7 +360,7 @@ class Dataset(CruxModel):
         return self._get_resource(path=path, model=Folder)
 
     def list_resources(
-        self, folder="/", offset=0, limit=1, include_folders=False, sort=None
+        self, folder=None, offset=None, limit=None, include_folders=False, sort=False
     ):
         # type: (str, int, int, bool, str) -> Resource
         """Lists the resources in Dataset.
@@ -379,12 +379,12 @@ class Dataset(CruxModel):
             list (:obj:`crux.models.Resource`): List of File resource objects.
         """
         return self._list_resources(
-            sort=sort,
             folder=folder,
             offset=offset,
             limit=limit,
             include_folders=include_folders,
             model=Resource,
+            sort=sort,
         )
 
     def download_files(self, folder, local_path, only_use_crux_domains=None):
@@ -417,12 +417,7 @@ class Dataset(CruxModel):
         local_file_list = []  # type: List[str]
 
         resources = self._list_resources(
-            sort=None,
-            folder=folder,
-            offset=0,
-            limit=None,
-            include_folders=True,
-            model=Resource,
+            folder=folder, include_folders=True, model=Resource
         )
 
         for resource in resources:
@@ -524,7 +519,7 @@ class Dataset(CruxModel):
 
         return uploaded_file_objects
 
-    def list_files(self, sort=None, folder="/", offset=0, limit=100):
+    def list_files(self, sort=None, folder=None, offset=0, limit=0):
         # type: (str, str, int, int) -> List[File]
         """Lists the files.
 
@@ -556,46 +551,59 @@ class Dataset(CruxModel):
 
     def _list_resources(
         self,
-        folder="/",
-        offset=0,
-        limit=1,
+        folder=None,
+        offset=None,
+        limit=None,
         include_folders=False,
-        name=None,
         model=None,
         sort=None,
     ):
-        # type: (str, int, int, bool, str, dict, str) -> List
+        # type: (str, int, int, bool, dict, str) -> List
+
+        if limit is None:
+            limit = 99999
+        if offset is None:
+            offset = 0
 
         headers = Headers(
             {"content-type": "application/json", "accept": "application/json"}
         )
 
-        params = {
-            "datasetId": self.id,
-            "folder": folder,
-            "after": offset,
-            "limit": limit,
-        }
+        params = {"datasetId": self.id, "offset": offset}
+
+        if folder:
+            params["folder"] = folder
 
         if sort:
             params["sort"] = sort
-
-        if name:
-            params["name"] = name
 
         if include_folders:
             params["includeFolders"] = "true"
         else:
             params["includeFolders"] = "false"
 
-        resp = self.connection.api_call(
-            "GET", ["resources"], params=params, model=model, headers=headers,
-        )
+        resources = []
+        retrieved = 0
+        pagesize = 500
+        while retrieved < limit:
+            params["limit"] = min(pagesize, limit - retrieved)
 
-        if type(resp) is list:
-            resources = resp
-        else:
-            resources = [resp]
+            resp = self.connection.api_call(
+                "GET", ["resources"], params=params, model=model, headers=headers
+            )
+            if type(resp) is list:
+                pg = resp
+            else:
+                pg = [resp]
+            pglen = len(pg)
+
+            resources += pg
+            retrieved += pglen
+
+            if pglen < pagesize:
+                break
+            else:
+                params["offset"] += pagesize
 
         return resources
 

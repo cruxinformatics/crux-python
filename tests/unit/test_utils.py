@@ -36,7 +36,7 @@ def test_detect_media_type():
     assert MediaType.detect("file.json") == "application/json"
     assert MediaType.detect("file.ndjson") == "application/x-ndjson"
     assert MediaType.detect("file.csv") == "text/csv"
-    assert MediaType.detect("file.parquet") == "application/parquet"
+    assert MediaType.detect("file.parquet") == "parquet/binary"
     assert MediaType.detect("file.avro") == "avro/binary"
     with pytest.raises(LookupError):
         MediaType.detect("file.txt")

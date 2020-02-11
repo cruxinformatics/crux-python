@@ -77,15 +77,6 @@ class Resource(CruxModel):
         self.raw_model["name"] = name
 
     @property
-    def config(self):
-        """str: Gets the config."""
-        return self.raw_model["config"]
-
-    @config.setter
-    def config(self, config):
-        self.raw_model["config"] = config
-
-    @property
     def provenance(self):
         """dict: Gets the Provenance."""
         return self.raw_model["provenance"]

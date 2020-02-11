@@ -15,7 +15,7 @@ from crux._compat import urllib_quote
 
 
 DEFAULT_CHUNK_SIZE = 10485760  # 10 MB
-DELIVERY_ID_REGEX = re.compile(r"^[a-zA-Z0-9]+\.[0-9]$")
+DELIVERY_ID_REGEX = re.compile(r"^[a-zA-Z0-9]+\.[0-9]+$")
 TRACE = 5
 
 

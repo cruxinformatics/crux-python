@@ -1,6 +1,7 @@
 """Module contains File model."""
 
 from typing import Any, Dict, IO, Iterable, List, Union  # noqa: F401
+import xml.etree.ElementTree as ET
 
 from google.resumable_media.common import (  # type: ignore
     DataCorruption,
@@ -120,7 +121,15 @@ class File(Resource):
                 download.consume_next_chunk(transport)
                 total_bytes_from_urls[-1] = download.bytes_downloaded
             # Catch the signed URL expiring
-            except InvalidResponse:
+            except InvalidResponse as e:
+                root = ET.fromstring(e.response._content)
+                code = root.find('Code').text
+                if code != "ExpiredToken":
+                    el = ["Resumable download failed."]
+                    for child in root:
+                        el.append(f"{child.tag}: {child.text}")
+                    raise CruxClientError("\n   ".join(el))
+
                 # Limit total new URL(s)
                 if fetched_signed_urls >= max_url_refreshes:
                     raise CruxClientError("Exceeded max new Signed URLs")

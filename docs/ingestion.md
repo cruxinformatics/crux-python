@@ -88,7 +88,7 @@ def main():
         log.info("Fetching delivery files for ingestion %s", ingestion.id)
 
         for delivery_file in ingestion.get_data(
-            file_format=MediaType.CSV.value
+            media_type=MediaType.CSV.value
         ):
             local_file_path = os.path.join(
                 "/tmp",
@@ -140,7 +140,7 @@ def main():
         raise Exception("Failed to find latest ingestion")
 
     for delivery_file in ingestion.get_data(
-        file_format=MediaType.CSV.value
+        media_type=MediaType.CSV.value
     ):
         local_file_path = os.path.join(
             "/tmp",

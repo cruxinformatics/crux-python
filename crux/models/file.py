@@ -111,7 +111,7 @@ class File(Resource):
         fetched_signed_urls = 0
         max_url_refreshes_without_progress = 7
         max_url_refreshes = 100
-        delay = 2      # Initial delay between retries in seconds.
+        delay = 2    # Initial delay between retries in seconds.
         backoff = 2  # Backoff multiplier (e.g. value of 2 will double the delay each retry).
 
         download = ChunkedDownload(signed_url, chunk_size, file_obj)
@@ -237,7 +237,6 @@ class File(Resource):
 
         signed_url = self._get_signed_url()
         session = get_session(proxies=self.connection.crux_config.proxies)
-
         try:
             data = session.get(signed_url, stream=True)
             data.raise_for_status()

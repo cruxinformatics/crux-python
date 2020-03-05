@@ -51,17 +51,15 @@ class Ingestion(CruxModel):
 
     def get_data(
         self,
+        media_type=MediaType.AVRO.value,  # type: str
         version=None,  # type: int
-        file_format=MediaType.AVRO.value,  # type: str
     ):
         # type: (...) -> Iterator[Resource]
         """Get the processed delivery data
 
         Args:
+            media_type (str): Content Type of File resource to be uploaded.
             version (int): Version of the delivery.
-            file_format (str): File format of delivery.
-            accepted status (:obj:`list` of :obj:`str`): List of acceptable statuses.
-                Defaults to None.
 
         Returns:
             list (:obj:`crux.models.Resource`): List of resources.
@@ -70,7 +68,7 @@ class Ingestion(CruxModel):
             for version_no in sorted(self.versions, reverse=True):
                 delivery_object = self._get_delivery_object(version_no)
                 if delivery_object.status == "DELIVERY_SUCCEEDED":
-                    return delivery_object.get_data(file_format=file_format)
+                    return delivery_object.get_data(media_type=media_type)
             log.info(
                 "Delivery %s has no version with DELIVERY_SUCCEEDED status",
                 delivery_object.id,
@@ -78,7 +76,7 @@ class Ingestion(CruxModel):
             return iter([])
 
         delivery_object = self._get_delivery_object(version)
-        return delivery_object.get_data(file_format=file_format)
+        return delivery_object.get_data(media_type=media_type)
 
     def get_raw(self, version=None):
         # type: (...) -> Iterator[Resource]

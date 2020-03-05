@@ -1,5 +1,6 @@
 """Module contains File model."""
 
+import time
 from typing import Any, Dict, IO, Iterable, List, Union  # noqa: F401
 import xml.etree.ElementTree as ET
 
@@ -108,8 +109,10 @@ class File(Resource):
         # Track how much has been downloaded from each signed URL
         total_bytes_from_urls = [0]
         fetched_signed_urls = 0
-        max_url_refreshes_without_progress = 5
+        max_url_refreshes_without_progress = 7
         max_url_refreshes = 100
+        delay = 2      # Initial delay between retries in seconds.
+        backoff = 2  # Backoff multiplier (e.g. value of 2 will double the delay each retry).
 
         download = ChunkedDownload(signed_url, chunk_size, file_obj)
 
@@ -121,23 +124,30 @@ class File(Resource):
                 download.consume_next_chunk(transport)
                 total_bytes_from_urls[-1] = download.bytes_downloaded
             # Catch the signed URL expiring
-            except InvalidResponse as e:
-                root = ET.fromstring(e.response._content)
-                code = root.find('Code').text
-                if code != "ExpiredToken":
+            except InvalidResponse as err:
+                root = ET.fromstring(err.response._content)
+                errcode = root.find('Code').text
+                if errcode == "ExpiredToken":
+                    errmsg = "Signed URL expired"
+                else:
                     el = ["Resumable download failed."]
                     for child in root:
-                        el.append(f"{child.tag}: {child.text}")
-                    raise CruxClientError("\n   ".join(el))
-
+                        el.append("{}: {}".format(child.tag, child.text))
+                    errmsg = "\n   ".join(el)
+                log.debug(errmsg)
                 # Limit total new URL(s)
                 if fetched_signed_urls >= max_url_refreshes:
-                    raise CruxClientError("Exceeded max new Signed URLs")
+                    log.error("Exceeded max new Signed URLs")
+                    raise CruxClientError(errmsg)
                 sum_total_bytes_from_urls = sum(total_bytes_from_urls)
                 # Check if download has made progress downloading since last time we got URL
                 if not sum_total_bytes_from_urls > bytes_at_last_refresh:
                     # Limit new URLs without making progress downloading
                     if refreshes_without_progress <= max_url_refreshes_without_progress:
+                        log.warning("Retrying in {} seconds...".format(delay))
+                        time.sleep(delay)
+                        delay *= backoff
+
                         new_signed_url = self._get_signed_url()
                         fetched_signed_urls += 1
                         log.debug(
@@ -153,9 +163,8 @@ class File(Resource):
                         bytes_at_last_refresh = sum_total_bytes_from_urls
                     else:
                         # Exceeded max new signed URLs without progress
-                        raise CruxClientError(
-                            "Exceeded max new Signed URLs without progress"
-                        )
+                        log.error("Exceeded max new Signed URLs without progress")
+                        raise CruxClientError(errmsg)
                 else:
                     refreshes_without_progress = 0
                     log.debug("Fetching new singed url")
@@ -168,7 +177,6 @@ class File(Resource):
                     )
                     total_bytes_from_urls.append(0)
                     bytes_at_last_refresh = sum_total_bytes_from_urls
-
                 # Replace the download object with a new one, using a new signed URL,
                 # but start where the last download object left off.
                 log.debug(
@@ -229,7 +237,18 @@ class File(Resource):
 
         signed_url = self._get_signed_url()
         session = get_session(proxies=self.connection.crux_config.proxies)
-        data = session.get(signed_url, stream=True)
+
+        try:
+            data = session.get(signed_url, stream=True)
+            data.raise_for_status()
+        except HTTPError as err:
+            raise CruxClientHTTPError(str(err), err.response)
+        except TooManyRedirects as err:
+            raise CruxClientTooManyRedirects(str(err))
+        except (ProxyError, SSLError) as err:
+            raise CruxClientConnectionError(str(err))
+        except (ConnectTimeout, ReadTimeout) as err:
+            raise CruxClientTimeout(str(err))
 
         return data.iter_content(chunk_size=chunk_size)
 

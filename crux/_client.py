@@ -59,7 +59,7 @@ class CruxClient(object):
         stream=False,  # type: bool
         connect_timeout=9.5,  # type: float
         read_timeout=60,  # type: float
-        paginate = {}
+        paginate=None
     ):
         # type:(...) -> Any
         """
@@ -79,6 +79,7 @@ class CruxClient(object):
                 Defaults to 60.5.
             read_timeout (float): Request read timeout configuration in seconds.
                 Defaults to 60.
+            paginate (dict): Dictionary to store pagination params
 
         Returns:
             crux.models.Model or bool: Serialized response from API backend.
@@ -106,6 +107,9 @@ class CruxClient(object):
 
         if params is None:
             params = {}
+
+        if paginate is None:
+            paginate = {}
 
         auth_scheme = "Bearer"  # type: str
         bearer_token = "{scheme} {key}".format(

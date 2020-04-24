@@ -7,6 +7,7 @@ import posixpath
 from typing import (
     DefaultDict,
     Dict,
+    Generator,
     IO,
     Iterator,
     List,
@@ -16,7 +17,6 @@ from typing import (
     Text,
     Tuple,
     Union,
-    Generator
 )  # noqa: F401
 
 from crux._compat import unicode
@@ -312,6 +312,7 @@ class Dataset(CruxModel):
         try:
             return next(resource_gen)
         except StopIteration as ex:
+            log.debug("Parse exception: %s" % str(ex))
             # As of now API can't fetch id from the resource path or name,
             # hence raising the 404 error from the Python client
             raise CruxResourceNotFoundError({"statusCode": 404, "name": resource_name})
@@ -378,7 +379,7 @@ class Dataset(CruxModel):
         Returns:
             list (:obj:`crux.models.Resource`): List of File resource objects.
         """
-        yield from self._list_resources(
+        result_gen = self._list_resources(
             sort=sort,
             folder=folder,
             cursor=cursor,
@@ -386,6 +387,9 @@ class Dataset(CruxModel):
             include_folders=include_folders,
             model=Resource,
         )
+
+        for result in result_gen:
+            yield result
 
     def download_files(self, folder, local_path, only_use_crux_domains=None):
         # type: (str, str, bool) -> List[str]
@@ -430,11 +434,13 @@ class Dataset(CruxModel):
                 if not os.path.exists(resource_local_path):
                     os.mkdir(resource_local_path)
                 log.debug("Created local directory %s", resource_local_path)
-                yield from self.download_files(
+                result_gen = self.download_files(
                     folder=resource_path,
                     local_path=resource_local_path,
                     only_use_crux_domains=only_use_crux_domains,
                 )
+                for result in result_gen:
+                    yield result
             elif resource.type == "file":
                 file_resource = File.from_dict(
                     resource.to_dict(), connection=self.connection
@@ -544,8 +550,6 @@ class Dataset(CruxModel):
             model=File,
         )
 
-        file_resource_list = []
-
         for resource in resource_list_gen:
             if resource.type == "file":
                 yield resource
@@ -588,7 +592,8 @@ class Dataset(CruxModel):
             params["limit"] = None if limit is None else min(pagesize, limit - retrieved)
 
             resp = self.connection.api_call(
-                "GET", ["resources"], params=params, model=model, headers=headers, paginate=paginate
+                "GET", ["resources"], params=params, model=model, headers=headers,
+                paginate=paginate
             )
             resp_count = len(resp)
 

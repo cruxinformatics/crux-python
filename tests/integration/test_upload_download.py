@@ -21,9 +21,11 @@ def test_upload_download_files(dataset, helpers):
     for file_object in file_objects:
         assert file_object.name in ["test_file.csv", "test_file_2.csv"]
     download_dir = mkdtemp()
-    downloaded_file_list = dataset.download_files(
+    downloaded_file_list_gen = dataset.download_files(
         local_path=download_dir, folder=folder_path
     )
+
+    downloaded_file_list = [downloaded_file for downloaded_file in downloaded_file_list_gen]
     assert len(downloaded_file_list) == 2
     download_path = os.path.join(download_dir, "test_file.csv")
     assert sorted(downloaded_file_list)[0] == download_path

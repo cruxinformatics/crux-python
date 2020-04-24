@@ -528,7 +528,7 @@ class Dataset(CruxModel):
         return uploaded_file_objects
 
     def list_files(self, sort=None, folder="/", cursor=None, limit=100):
-        # type: (str, str, int, int) -> List[File]
+        # type: (str, str, str, int) -> List[File]
         """Lists the files.
 
         Args:

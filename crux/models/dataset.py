@@ -16,6 +16,7 @@ from typing import (
     Text,
     Tuple,
     Union,
+    Generator
 )  # noqa: F401
 
 from crux._compat import unicode
@@ -301,17 +302,16 @@ class Dataset(CruxModel):
             crux.exceptions.CruxResourceNotFoundError: If resource is not found.
         """
         resource_name, folder_path = split_posixpath_filename_dirpath(path)
-        rsrc_list = self._list_resources(
+        resource_gen = self._list_resources(
             folder=folder_path,
             limit=1,
             name=resource_name,
             include_folders=True,
             model=model,
         )
-
-        if rsrc_list:
-            return rsrc_list[0]
-        else:
+        try:
+            return next(resource_gen)
+        except StopIteration as ex:
             # As of now API can't fetch id from the resource path or name,
             # hence raising the 404 error from the Python client
             raise CruxResourceNotFoundError({"statusCode": 404, "name": resource_name})
@@ -360,15 +360,15 @@ class Dataset(CruxModel):
         return self._get_resource(path=path, model=Folder)
 
     def list_resources(
-        self, folder="/", offset=None, limit=1, include_folders=False, sort=None
+        self, folder="/", cursor=None, limit=1, include_folders=False, sort=None
     ):
-        # type: (str, int, int, bool, str) -> Resource
+        # type: (str, str, int, bool, str) -> Generator[Resource]
         """Lists the resources in Dataset.
 
         Args:
             folder (str): Folder for which resource should be listed.
                 Defaults to /.
-            offset (int): Sets the offset. Defaults to 0.
+            cursor (str): Sets the offset to the page cursor. Defaults to None.
             limit (int): Sets the limit. Defaults to 1.
             include_folders (bool): Sets whether to include folders or not.
                 Defaults to False.
@@ -378,10 +378,10 @@ class Dataset(CruxModel):
         Returns:
             list (:obj:`crux.models.Resource`): List of File resource objects.
         """
-        return self._list_resources(
+        yield from self._list_resources(
             sort=sort,
             folder=folder,
-            offset=offset,
+            cursor=cursor,
             limit=limit,
             include_folders=include_folders,
             model=Resource,
@@ -414,24 +414,23 @@ class Dataset(CruxModel):
         if not os.path.exists(local_path) and not os.path.isdir(local_path):
             raise OSError("local_path is an invalid directory location")
 
-        local_file_list = []  # type: List[str]
-
-        resources = self._list_resources(
+        resources_gen = self._list_resources(
             sort=None,
             folder=folder,
-            offset=None,
+            cursor=None,
             limit=None,
             include_folders=True,
             model=Resource,
         )
 
-        for resource in resources:
+        for resource in resources_gen:
             resource_path = posixpath.join(folder, resource.name)
             resource_local_path = os.path.join(local_path, resource.name)
             if resource.type == "folder":
-                os.mkdir(resource_local_path)
+                if not os.path.exists(resource_local_path):
+                    os.mkdir(resource_local_path)
                 log.debug("Created local directory %s", resource_local_path)
-                local_file_list += self.download_files(
+                yield from self.download_files(
                     folder=resource_path,
                     local_path=resource_local_path,
                     only_use_crux_domains=only_use_crux_domains,
@@ -443,10 +442,8 @@ class Dataset(CruxModel):
                 file_resource.download(
                     resource_local_path, only_use_crux_domains=only_use_crux_domains
                 )
-                local_file_list.append(resource_local_path)
+                yield resource_local_path
                 log.debug("Downloaded file at %s", resource_local_path)
-
-        return local_file_list
 
     def upload_files(
         self,
@@ -524,7 +521,7 @@ class Dataset(CruxModel):
 
         return uploaded_file_objects
 
-    def list_files(self, sort=None, folder="/", offset=None, limit=100):
+    def list_files(self, sort=None, folder="/", cursor=None, limit=100):
         # type: (str, str, int, int) -> List[File]
         """Lists the files.
 
@@ -532,16 +529,16 @@ class Dataset(CruxModel):
             sort (str): Sets whether to sort or not. Defaults to None.
             folder (str): Folder for which resource should be listed.
                 Defaults to /.
-            offset (int): Sets the offset. Defaults to 0.
+            cursor (str): Sets the offset to the page cursor. Defaults to None.
             limit (int): Sets the limit. Defaults to 100.
 
         Returns:
             list (:obj:`crux.models.File`): List of File objects.
         """
-        resource_list = self._list_resources(
+        resource_list_gen = self._list_resources(
             sort=sort,
             folder=folder,
-            offset=offset,
+            cursor=cursor,
             limit=limit,
             include_folders=False,
             model=File,
@@ -549,15 +546,14 @@ class Dataset(CruxModel):
 
         file_resource_list = []
 
-        for resource in resource_list:
+        for resource in resource_list_gen:
             if resource.type == "file":
-                file_resource_list.append(resource)
-        return file_resource_list
+                yield resource
 
     def _list_resources(
         self,
         folder="/",
-        offset=None,
+        cursor=None,
         limit=1,
         include_folders=False,
         name=None,
@@ -571,8 +567,8 @@ class Dataset(CruxModel):
 
         params = {"datasetId": self.id, "folder": folder}
 
-        if offset is not None:
-            log.debug("Obsolete 'offset' param ignored")
+        if cursor:
+            params["cursor"] = cursor
 
         if sort:
             params["sort"] = sort
@@ -585,26 +581,25 @@ class Dataset(CruxModel):
         else:
             params["includeFolders"] = "false"
 
-        resources = []
         retrieved = 0
         pagesize = 500
         paginate = {}
-        while retrieved < limit:
-            params["limit"] = min(pagesize, limit - retrieved)
+        while limit is None or retrieved < limit:
+            params["limit"] = None if limit is None else min(pagesize, limit - retrieved)
 
             resp = self.connection.api_call(
                 "GET", ["resources"], params=params, model=model, headers=headers, paginate=paginate
             )
-            respcnt = len(resp)
+            resp_count = len(resp)
 
-            if respcnt == 0:
+            if resp_count == 0:
                 break
 
-            resources += resp
-            retrieved += respcnt
-            params["cursor"] = paginate["cursor"]
+            for resource in resp:
+                yield resource
 
-        return resources
+            retrieved += resp_count
+            params["cursor"] = paginate["cursor"]
 
     def upload_file(
         self,

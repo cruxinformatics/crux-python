@@ -63,6 +63,11 @@ class Resource(CruxModel):
         self.raw_model["folderId"] = folder_id
 
     @property
+    def frame_id(self):
+        """str: Gets the Frame ID."""
+        return self.labels["frame_id"]
+
+    @property
     def storage_id(self):
         """str: Gets the Storage ID."""
         return self.raw_model["storageId"]

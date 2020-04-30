@@ -32,6 +32,11 @@ class Delivery(CruxModel):
         return self.raw_model["dataset_id"]
 
     @property
+    def ingestion_time(self):
+        """str: Gets ingestion time of delivery."""
+        return self.summary["ingestion_time"]
+
+    @property
     def status(self):
         """str: Gets the Status of delivery."""
         return self.summary["latest_health_status"]

@@ -51,19 +51,19 @@ class Delivery(CruxModel):
             self._summary = response.json()
         return self._summary
 
-    def get_data(self, file_format=MediaType.AVRO.value):
+    def get_data(self, media_type=MediaType.AVRO.value):
         # type: (str) -> Iterator[Resource]
         """Get the processed delivery data
 
         Args:
-            file_format (str): File format of delivery.
+            media_type (str): Content Type of File resource to be uploaded.
 
         Returns:
             list (:obj:`crux.models.Resource`): List of resources.
         """
         params = {}
 
-        params["delivery_resource_format"] = file_format
+        params["delivery_resource_format"] = media_type
 
         response = self.connection.api_call(
             "GET", ["deliveries", self.dataset_id, self.id, "data"], params=params

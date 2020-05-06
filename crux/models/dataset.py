@@ -3,10 +3,9 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from dateutil import parser
-
+import json
 import os
 import posixpath
-import time
 from typing import (
     DefaultDict,
     Dict,
@@ -40,6 +39,7 @@ from crux.models.label import Label
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
 from crux.models.resource import Resource
+from crux.models.resource import MediaType
 
 
 log = create_logger(__name__)
@@ -592,11 +592,17 @@ class Dataset(CruxModel):
         pagesize = 500
         paginate = {}
         while limit is None or retrieved < limit:
-            params["limit"] = None if limit is None else min(pagesize, limit - retrieved)
+            params["limit"] = (
+                None if limit is None else min(pagesize, limit - retrieved)
+            )
 
             resp = self.connection.api_call(
-                "GET", ["resources"], params=params, model=model, headers=headers,
-                paginate=paginate
+                "GET",
+                ["resources"],
+                params=params,
+                model=model,
+                headers=headers,
+                paginate=paginate,
             )
             resp_count = len(resp)
 
@@ -1195,34 +1201,45 @@ class Dataset(CruxModel):
             obj.connection = self.connection
             yield obj
 
-    def get_latest_scheduled_delivery(self):
-        # type: () -> Delivery
-        """Gets a Delivery.
+    def get_latest_files(self, file_format=MediaType.AVRO.value):
+
+        # type: () -> Iterator[File]
+        """Gets a Delivery set of Files.
 
         Args:
-            none
+            file_format (str): File format of delivery.
 
         Returns:
-            crux.models.Delivery: Delivery Object.
+            list (:obj:`crux.models.File`): List of file resources.
         """
 
-        latest_delivery = None
-
         # look back a couple extra days in case query is performed over the weekend
-        for lookback in [1 + 2, 7 + 2, 31 + 2, 180 + 2, 366 + 2]:
+        got_files = False
+        for lookback in [1 + 2, 14 + 2, 31 + 2, 180 + 2, 366 + 2]:
             start_date = datetime.utcnow() - timedelta(days=lookback)
 
-            series = self.get_scheduled_deliveries(start_date=start_date.isoformat())
+            series = self.get_files_range(
+                file_format=file_format,
+                start_date=start_date.isoformat(),
+                latest_only=True,
+            )
             for item in series:
-                latest_delivery = item
+                got_files = True
+                yield item
 
-            if latest_delivery is not None:
+            if got_files:
                 break
 
-        return latest_delivery
-
-    def get_scheduled_deliveries(self, start_date=None, end_date=None, dayfirst=False, yearfirst=False):
-        # type: (str, str) -> Iterator[Delivery]
+    def get_files_range(
+        self,
+        file_format=MediaType.AVRO.value,
+        start_date=None,
+        end_date=None,
+        dayfirst=False,
+        yearfirst=False,
+        latest_only=False,
+    ):
+        # type: (str, str) -> Iterator[File]
         """Gets Ingestions.
 
         Args:
@@ -1230,55 +1247,110 @@ class Dataset(CruxModel):
             end_date (str): ISO format end time.
 
         Returns:
-            crux.models.Delivery: Delivery Object.
+            list (:obj:`crux.models.File`): List of file resources.
         """
 
+        if isinstance(file_format, MediaType):
+            file_format = file_format.value
+        if not isinstance(file_format, str) or file_format not in [
+            item.value for item in MediaType
+        ]:
+            raise ValueError("Value of file_format is invalid")
         try:
             stdt = parser.parse(start_date, dayfirst=dayfirst, yearfirst=yearfirst)
         except:
             raise ValueError("Value of start_date is invalid")
-        try:
-            enddt = parser.parse(end_date, dayfirst=dayfirst, yearfirst=yearfirst)
-        except:
-            raise ValueError("Value of end_date is invalid")
+        if end_date is None:
+            enddt = None
+        else:
+            try:
+                enddt = parser.parse(end_date, dayfirst=dayfirst, yearfirst=yearfirst)
+            except:
+                raise ValueError("Value of end_date is invalid")
 
         headers = Headers({"accept": "application/json"})
-        # look a bit later as crux_available_dt might be later than schedule_dt
-        params = {"start_date": stdt, "end_date": (enddt+timedelta(days=3)).isoformat()}
+        # query all dates to most recent to pick up any corrections
+        params = {"start_date": stdt, "end_date": None}
         response = self.connection.api_call(
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )
         delivery_set = {}
-        for idx, delivery_id in enumerate(response.json()):
+        resource_set = {}
+        for delivery_id in response.json():
             if not DELIVERY_ID_REGEX.match(delivery_id):
                 raise ValueError("Value of delivery_id is invalid")
-            obj = Delivery.from_dict(
-                {"dataset_id": self.id, "delivery_id": delivery_id}
-            )  # type: Delivery
-            obj.connection = self.connection
-            if obj.status != "DELIVERY_SUCCEEDED":
-                continue
-            if obj.schedule_datetime < stdt.isoformat():
-                continue
-            if obj.schedule_datetime > enddt.isoformat():
-                continue
-
-            if len(delivery_set) > 50:
-                dates = sorted(delivery_set.keys())
-                if obj.schedule_datetime <= dates[0]:
-                    raise CruxClientError("Unexpected Delivery date received")
-                yield delivery_set[dates[0]]
-                del delivery_set[dates[0]]
-
+            params = {"delivery_resource_format": file_format}
+            response = self.connection.api_call(
+                "GET", ["deliveries", self.id, delivery_id, "data"], params=params
+            )
+            data = response.json()
             if (
-                obj.schedule_datetime not in delivery_set
-                or obj.ingestion_time
-                > delivery_set[obj.schedule_datetime].ingestion_time
+                data["latest_health_status"] != "DELIVERY_SUCCEEDED"
+                or not data["resources"]
             ):
-                delivery_set[obj.schedule_datetime] = obj
+                continue
+            for item in data["resources"]:
+                resource_set[item["resource_id"]] = delivery_id
+            delivery_set[delivery_id] = {
+                "resource_ids": [item["resource_id"] for item in data["resources"]],
+                "files": [],
+                "supplier_implied_dt": None,
+                "ingestion_time": None,
+            }
 
-            if idx % 50 == 0:
-                time.sleep(5)  # throttle delivery summary queries
+        for file in self.get_resources_batch(list(resource_set.keys())):
+            delivery_id = resource_set[file.id]
+            delivery_set[delivery_id]["files"].append(file)
+            if delivery_set[delivery_id]["supplier_implied_dt"] is None:
+                delivery_set[delivery_id][
+                    "supplier_implied_dt"
+                ] = file.supplier_implied_dt
+                delivery_set[delivery_id]["ingestion_time"] = file.ingestion_time
 
-        for dt in sorted(delivery_set.keys()):
-            yield delivery_set[dt]
+        best_deliveries = {}
+        for pak in delivery_set.values():
+            dt = pak["supplier_implied_dt"]
+            if dt < stdt.isoformat():
+                continue
+            if enddt is not None and dt > enddt.isoformat():
+                continue
+            if (
+                dt not in best_deliveries
+                or pak["ingestion_time"] > best_deliveries[dt]["ingestion_time"]
+            ):
+                best_deliveries[dt] = pak
+
+        if latest_only:
+            dt = sorted(best_deliveries.keys())[-1]
+            for file in best_deliveries[dt]["files"]:
+                yield file
+        else:
+            for dt in sorted(best_deliveries.keys()):
+                for file in best_deliveries[dt]["files"]:
+                    yield file
+
+    def get_resources_batch(self, resource_ids):
+        # type: (list) -> Iterator[File]
+        """Gets resource metadata.
+
+        Args:
+            resource_ids (list): List of resource IDs
+
+        Returns:
+            list (:obj:`crux.models.File`): List of file resources.
+        """
+        headers = Headers({"accept": "application/json"})
+        limit = 250
+        for i in range(0, len(resource_ids), limit):
+            chunk = resource_ids[i : i + limit]
+            response = self.connection.api_call(
+                "POST",
+                ["resources", "get-batch"],
+                params={"limit": limit + 1},
+                headers=headers,
+                data=json.dumps(chunk),
+            )
+            for resource in response.json():
+                obj = File(raw_model=resource)
+                obj.connection = self.connection
+                yield obj

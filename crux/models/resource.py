@@ -91,6 +91,11 @@ class Resource(CruxModel):
         self.raw_model["provenance"] = provenance
 
     @property
+    def supplier_implied_dt(self):
+        """str: Gets the supplier date."""
+        return self.labels["supplier_implied_dt"]
+
+    @property
     def type(self):
         """str: Gets the Resource Type."""
         return self.raw_model["type"]
@@ -121,6 +126,11 @@ class Resource(CruxModel):
     def created_at(self):
         """str: Gets created_at."""
         return self.raw_model["createdAt"]
+
+    @property
+    def ingestion_time(self):
+        """str: Gets created_at."""
+        return self.labels["ingestion_dt"]
 
     @property
     def modified_at(self):

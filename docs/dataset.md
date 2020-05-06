@@ -39,7 +39,7 @@ def main():
             tempfile.gettempdir(), file.supplier_implied_dt, file.frame_id, file.name
         )
         log.info("   Download %s size=%s", local_file_path, file.size)
-        # file.download(local_file_path)
+        file.download(local_file_path)
 
 
 main()
@@ -86,7 +86,7 @@ def main():
             tempfile.gettempdir(), file.supplier_implied_dt, file.frame_id, file.name
         )
         log.info("   Download %s size=%s", local_file_path, file.size)
-        # file.download(local_file_path)
+        file.download(local_file_path)
 
 
 main()

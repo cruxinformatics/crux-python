@@ -1126,9 +1126,11 @@ class Dataset(CruxModel):
     def get_latest_files(self, frames=None, file_format=MediaType.AVRO.value):
 
         # type: (Optional[Union[str, List]], str) -> Iterator[File]
-        """Gets a Delivery set of Files.
+        """Get the latest dataset file resources. The latest supplier_implied_dt with the
+        best single delivery version is selected.
 
         Args:
+            frames (str, list): filter for selected frames
             file_format (str): File format of delivery.
 
         Returns:
@@ -1141,7 +1143,10 @@ class Dataset(CruxModel):
             start_date = datetime.utcnow() - timedelta(days=lookback)
 
             series = self.get_files_range(
-                file_format=file_format, start_date=start_date.isoformat(), latest_only=True,
+                start_date=start_date.isoformat(),
+                frames=frames,
+                file_format=file_format,
+                latest_only=True
             )
             for item in series:
                 got_files = True
@@ -1161,11 +1166,14 @@ class Dataset(CruxModel):
         latest_only=False,  # type: bool
     ):
         # type: (...) -> Iterator[File]
-        """Gets Ingestions.
+        """Get a set of dataset file resources. The best single delivery version for each
+        supplier_implied_dt is computed for the selected time range.
 
         Args:
-            start_date (str): ISO format start time.
-            end_date (str): ISO format end time.
+            start_date (str): ISO format start datetime or any paresable date string.
+            end_date (str): ISO format end datetime or any parseable date string.
+            frames (str, list): filter for selected frames
+            file_format (str): File format of delivery.
 
         Returns:
             list (:obj:`crux.models.File`): List of file resources.
@@ -1204,7 +1212,7 @@ class Dataset(CruxModel):
             except:
                 raise ValueError("Value of end_date is invalid")
         else:
-            raise ValueError("endtyuiop7890date must be str or datetime")
+            raise ValueError("date must be str or datetime")
 
         headers = Headers({"accept": "application/json"})
         # query all dates to most recent to pick up any corrections

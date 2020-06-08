@@ -163,12 +163,8 @@ class Resource(CruxModel):
         Returns:
             bool: True if it is deleted.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
-        return self.connection.api_call(
-            "DELETE", ["resources", self.id], headers=headers
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
+        return self.connection.api_call("DELETE", ["resources", self.id], headers=headers)
 
     def update(self, name=None, description=None, tags=None, provenance=None):
         # type: (str, str, List[str], str) -> bool
@@ -187,9 +183,7 @@ class Resource(CruxModel):
             ValueError: It is raised if name, description or tags are unset.
             TypeError: It is raised if tags are not of type List.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         body = {}  # type: Dict[str, Union[str, List, Dict]]
 
         if name is not None:
@@ -225,9 +219,7 @@ class Resource(CruxModel):
         Returns:
             crux.models.Permission: Permission Object.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         return self.connection.api_call(
             "PUT",
             ["permissions", self.id, identity_id, permission],
@@ -246,9 +238,7 @@ class Resource(CruxModel):
         Returns:
             bool: True if it is able to delete it.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         return self.connection.api_call(
             "DELETE", ["permissions", self.id, identity_id, permission], headers=headers
         )
@@ -262,10 +252,7 @@ class Resource(CruxModel):
         """
         headers = Headers({"accept": "application/json"})
         return self.connection.api_call(
-            "GET",
-            ["resources", self.id, "permissions"],
-            model=Permission,
-            headers=headers,
+            "GET", ["resources", self.id, "permissions"], model=Permission, headers=headers,
         )
 
     def add_label(self, label_key, label_value):
@@ -279,9 +266,7 @@ class Resource(CruxModel):
         Returns:
             bool: True if label is added, False otherwise.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         response_result = self.connection.api_call(
             "PUT",
             [
@@ -312,9 +297,7 @@ class Resource(CruxModel):
         Returns:
             bool: True if label is deleted, False otherwise.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         response_result = self.connection.api_call(
             "DELETE",
             ["datasets", self.dataset_id, "resources", self.id, "labels", label_key],
@@ -337,16 +320,12 @@ class Resource(CruxModel):
         Returns:
             bool: True if the labels were added, False otherwise.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
 
         labels_list = []
         for label_key, label_value in labels_dict.items():
             if label_key is not None and label_value is not None:
-                label_key = (
-                    label_key.value if isinstance(label_key, Enum) else label_key
-                )
+                label_key = label_key.value if isinstance(label_key, Enum) else label_key
                 labels_list.append(
                     {"labelKey": str(label_key), "labelValue": str(label_value)}
                 )
@@ -373,9 +352,7 @@ class Resource(CruxModel):
         Returns:
             str: Folder name of the resource.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         response = self.connection.api_call(
             "GET", ["resources", self.id, "folderpath"], headers=headers
         )
@@ -406,9 +383,7 @@ class Resource(CruxModel):
                 False otherwise.
         """
         # type () -> bool
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         resource_object = self.connection.api_call(
             "GET", ["resources", self.id], headers=headers, model=Resource
         )

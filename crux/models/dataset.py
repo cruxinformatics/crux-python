@@ -127,9 +127,7 @@ class Dataset(CruxModel):
         Returns:
             bool: True if dataset is created.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         dataset_object = self.connection.api_call(
             "POST", ["datasets"], json=self.raw_model, model=Dataset, headers=headers
         )
@@ -145,12 +143,8 @@ class Dataset(CruxModel):
         Returns:
             bool: True if dataset is deleted.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
-        return self.connection.api_call(
-            "DELETE", ["datasets", self.id], headers=headers
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
+        return self.connection.api_call("DELETE", ["datasets", self.id], headers=headers)
 
     def update(self, name=None, description=None, tags=None):
         # type: (str, str, List[str]) -> bool
@@ -164,9 +158,7 @@ class Dataset(CruxModel):
         Returns:
             bool: True, if dataset is updated.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
 
         if name is not None:
             self.raw_model["name"] = name
@@ -183,9 +175,7 @@ class Dataset(CruxModel):
 
         self.raw_model = dataset_object.raw_model
 
-        log.debug(
-            "Updated dataset %s with content %s", self.id, dataset_object.__dict__
-        )
+        log.debug("Updated dataset %s with content %s", self.id, dataset_object.__dict__)
         return True
 
     def refresh(self):
@@ -196,9 +186,7 @@ class Dataset(CruxModel):
                 False otherwise.
         """
         # type () -> bool
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         dataset_object = self.connection.api_call(
             "GET", ["datasets", self.id], headers=headers, model=Resource
         )
@@ -222,9 +210,7 @@ class Dataset(CruxModel):
             crux.models.File: File Object.
         """
 
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
 
         tags = tags if tags else []
 
@@ -265,9 +251,7 @@ class Dataset(CruxModel):
             crux.models.Folder: Folder Object.
         """
 
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
 
         tags = tags if tags else []
 
@@ -306,11 +290,7 @@ class Dataset(CruxModel):
         """
         resource_name, folder_path = split_posixpath_filename_dirpath(path)
         resource_gen = self._list_resources(
-            folder=folder_path,
-            limit=1,
-            name=resource_name,
-            include_folders=True,
-            model=model,
+            folder=folder_path, limit=1, name=resource_name, include_folders=True, model=model,
         )
         try:
             return next(resource_gen)
@@ -445,9 +425,7 @@ class Dataset(CruxModel):
                 for result in result_gen:
                     yield result
             elif resource.type == "file":
-                file_resource = File.from_dict(
-                    resource.to_dict(), connection=self.connection
-                )
+                file_resource = File.from_dict(resource.to_dict(), connection=self.connection)
                 file_resource.download(
                     resource_local_path, only_use_crux_domains=only_use_crux_domains
                 )
@@ -503,9 +481,7 @@ class Dataset(CruxModel):
             content_local_path = os.path.join(local_path, content)
             content_path = posixpath.join(folder, content)
             if os.path.isdir(content_local_path):
-                self.create_folder(
-                    path=content_path, tags=tags, description=description
-                )
+                self.create_folder(path=content_path, tags=tags, description=description)
                 log.debug("Created folder %s in dataset %s", content_path, self.id)
                 uploaded_file_objects += self.upload_files(
                     media_type=media_type,
@@ -568,9 +544,7 @@ class Dataset(CruxModel):
         sort=None,
     ):
 
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
 
         params = {"datasetId": self.id, "folder": folder}
 
@@ -592,9 +566,7 @@ class Dataset(CruxModel):
         pagesize = 500
         paginate = {}
         while limit is None or retrieved < limit:
-            params["limit"] = (
-                None if limit is None else min(pagesize, limit - retrieved)
-            )
+            params["limit"] = None if limit is None else min(pagesize, limit - retrieved)
 
             resp = self.connection.api_call(
                 "GET",
@@ -685,9 +657,7 @@ class Dataset(CruxModel):
         Returns:
             bool: True if permission is applied.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         body = {
             "identityId": identity_id,
             "permission": permission,
@@ -697,23 +667,17 @@ class Dataset(CruxModel):
         if resource_ids or resource_objects or resource_paths:
             if resource_paths:
                 log.debug(
-                    "Add permission %s to %s for resource paths",
-                    permission,
-                    identity_id,
+                    "Add permission %s to %s for resource paths", permission, identity_id,
                 )
                 resource_ids = list()
                 for resource_path in resource_paths:
-                    resource_object = self._get_resource(
-                        path=resource_path, model=Resource
-                    )
+                    resource_object = self._get_resource(path=resource_path, model=Resource)
                     resource_ids.append(resource_object.id)
                 body["resourceIds"] = resource_ids
 
             if resource_objects:
                 log.debug(
-                    "Add permissions %s to %s for resource objects",
-                    permission,
-                    identity_id,
+                    "Add permissions %s to %s for resource objects", permission, identity_id,
                 )
                 resource_ids = list()
                 for resource_object in resource_objects:
@@ -721,16 +685,11 @@ class Dataset(CruxModel):
                 body["resourceIds"] = resource_ids
 
             if resource_ids:
-                log.debug(
-                    "Add permissions %s to %s for resource ids", permission, identity_id
-                )
+                log.debug("Add permissions %s to %s for resource ids", permission, identity_id)
                 body["resourceIds"] = resource_ids
         else:
             log.debug(
-                "Add permission %s to %s for dataset %s",
-                permission,
-                identity_id,
-                self.id,
+                "Add permission %s to %s for dataset %s", permission, identity_id, self.id,
             )
             body["datasetId"] = self.id
 
@@ -772,9 +731,7 @@ class Dataset(CruxModel):
         Returns:
             bool: True if it is able to delete the permission.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         body = {
             "identityId": identity_id,
             "permission": permission,
@@ -784,15 +741,11 @@ class Dataset(CruxModel):
         if resource_ids or resource_objects or resource_paths:
             if resource_paths:
                 log.debug(
-                    "Delete permission %s for %s from resource paths",
-                    permission,
-                    identity_id,
+                    "Delete permission %s for %s from resource paths", permission, identity_id,
                 )
                 resource_ids = list()
                 for resource_path in resource_paths:
-                    resource_object = self._get_resource(
-                        path=resource_path, model=Resource
-                    )
+                    resource_object = self._get_resource(path=resource_path, model=Resource)
                     resource_ids.append(resource_object.id)
                 body["resourceIds"] = resource_ids
 
@@ -809,9 +762,7 @@ class Dataset(CruxModel):
 
             if resource_ids:
                 log.debug(
-                    "Delete permission %s for %s from resource ids",
-                    permission,
-                    identity_id,
+                    "Delete permission %s for %s from resource ids", permission, identity_id,
                 )
                 body["resourceIds"] = resource_ids
         else:
@@ -877,10 +828,7 @@ class Dataset(CruxModel):
         """
         headers = {"Accept": "application/json"}  # type: MutableMapping[Text, Text]
         return self.connection.api_call(
-            "GET",
-            ["datasets", self.id, "permissions"],
-            model=Permission,
-            headers=headers,
+            "GET", ["datasets", self.id, "permissions"], model=Permission, headers=headers,
         )
 
     def add_label(self, label_key, label_value):
@@ -894,13 +842,9 @@ class Dataset(CruxModel):
         Returns:
             bool: True if labels are added.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         return self.connection.api_call(
-            "PUT",
-            ["datasets", self.id, "labels", label_key, label_value],
-            headers=headers,
+            "PUT", ["datasets", self.id, "labels", label_key, label_value], headers=headers,
         )
 
     def delete_label(self, label_key):
@@ -913,9 +857,7 @@ class Dataset(CruxModel):
         Returns:
             bool: True if labels are deleted.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         return self.connection.api_call(
             "DELETE", ["datasets", self.id, "labels", label_key], headers=headers
         )
@@ -930,14 +872,9 @@ class Dataset(CruxModel):
         Returns:
             crux.models.Label: Label Object.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         return self.connection.api_call(
-            "GET",
-            ["datasets", self.id, "labels", label_key],
-            headers=headers,
-            model=Label,
+            "GET", ["datasets", self.id, "labels", label_key], headers=headers, model=Label,
         )
 
     def find_resources_by_label(self, predicates, max_per_page=1000):
@@ -1004,14 +941,10 @@ class Dataset(CruxModel):
 
         query_params = {"limit": max_per_page}
 
-        predicates_query = {
-            "basic_query": predicates
-        }  # type: Dict[str, List[Dict[str,str]]]
+        predicates_query = {"basic_query": predicates}  # type: Dict[str, List[Dict[str,str]]]
 
         after = None
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
 
         while True:
 
@@ -1040,12 +973,7 @@ class Dataset(CruxModel):
                 return
 
     def stitch(
-        self,
-        source_resources,
-        destination_resource,
-        labels=None,
-        tags=None,
-        description=None,
+        self, source_resources, destination_resource, labels=None, tags=None, description=None,
     ):
         # type: (List[Union[str, File]], str, str, List[str], str) -> Tuple[File, str]
         """Method which stitches multiple Avro resources into single Avro resource
@@ -1067,9 +995,7 @@ class Dataset(CruxModel):
         Raises:
             TypeError: Source and Destination resource should be of type File or String
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         source_resource_ids = list()
         for resource in source_resources:
             if isinstance(resource, File):
@@ -1101,9 +1027,7 @@ class Dataset(CruxModel):
                     tags=tags if tags else [],
                 )
         else:
-            raise TypeError(
-                "Invalid Type. It should be File resource object or path string"
-            )
+            raise TypeError("Invalid Type. It should be File resource object or path string")
 
         data = {
             "sourceResourceIds": source_resource_ids,
@@ -1132,9 +1056,7 @@ class Dataset(CruxModel):
         Returns:
             crux.models.StitchJob: StitchJob object.
         """
-        headers = Headers(
-            {"content-type": "application/json", "accept": "application/json"}
-        )
+        headers = Headers({"content-type": "application/json", "accept": "application/json"})
         return self.connection.api_call(
             "GET", ["datasets", "stitch", job_id], headers=headers, model=StitchJob
         )
@@ -1201,9 +1123,9 @@ class Dataset(CruxModel):
             obj.connection = self.connection
             yield obj
 
-    def get_latest_files(self, file_format=MediaType.AVRO.value):
+    def get_latest_files(self, frames=None, file_format=MediaType.AVRO.value):
 
-        # type: () -> Iterator[File]
+        # type: (Optional[Union[str, List]], str) -> Iterator[File]
         """Gets a Delivery set of Files.
 
         Args:
@@ -1219,9 +1141,7 @@ class Dataset(CruxModel):
             start_date = datetime.utcnow() - timedelta(days=lookback)
 
             series = self.get_files_range(
-                file_format=file_format,
-                start_date=start_date.isoformat(),
-                latest_only=True,
+                file_format=file_format, start_date=start_date.isoformat(), latest_only=True,
             )
             for item in series:
                 got_files = True
@@ -1232,14 +1152,15 @@ class Dataset(CruxModel):
 
     def get_files_range(
         self,
-        file_format=MediaType.AVRO.value,
-        start_date=None,
-        end_date=None,
-        dayfirst=False,
-        yearfirst=False,
-        latest_only=False,
+        start_date,  # type: Union[datetime, str]
+        end_date=None,  # type: Optional[Union[datetime, str]]
+        frames=None,  # type: Optional[Union[str, list]]
+        file_format=MediaType.AVRO.value,  # type: str
+        dayfirst=False,  # type: bool
+        yearfirst=False,  # type: bool
+        latest_only=False,  # type: bool
     ):
-        # type: (str, str) -> Iterator[File]
+        # type: (...) -> Iterator[File]
         """Gets Ingestions.
 
         Args:
@@ -1250,23 +1171,40 @@ class Dataset(CruxModel):
             list (:obj:`crux.models.File`): List of file resources.
         """
 
+        if isinstance(frames, list):
+            frames = [x.upper() for x in frames]
+        elif isinstance(frames, str):
+            frames = [frames.upper()]
+        elif frames is not None:
+            raise ValueError("Value of frames is invalid")
+
         if isinstance(file_format, MediaType):
             file_format = file_format.value
-        if not isinstance(file_format, str) or file_format not in [
-            item.value for item in MediaType
-        ]:
-            raise ValueError("Value of file_format is invalid")
-        try:
-            stdt = parser.parse(start_date, dayfirst=dayfirst, yearfirst=yearfirst)
-        except:
-            raise ValueError("Value of start_date is invalid")
+        else:
+            if file_format not in [item.value for item in MediaType]:
+                raise ValueError("Value of file_format is invalid")
+
+        if isinstance(start_date, datetime):
+            stdt = start_date
+        elif isinstance(start_date, str):
+            try:
+                stdt = parser.parse(start_date, dayfirst=dayfirst, yearfirst=yearfirst)
+            except:
+                raise ValueError("Value of start_date is invalid")
+        else:
+            raise ValueError("start_date must be str or datetime")
+
         if end_date is None:
             enddt = None
-        else:
+        elif isinstance(end_date, datetime):
+            enddt = end_date
+        elif isinstance(end_date, str):
             try:
                 enddt = parser.parse(end_date, dayfirst=dayfirst, yearfirst=yearfirst)
             except:
                 raise ValueError("Value of end_date is invalid")
+        else:
+            raise ValueError("endtyuiop7890date must be str or datetime")
 
         headers = Headers({"accept": "application/json"})
         # query all dates to most recent to pick up any corrections
@@ -1275,7 +1213,8 @@ class Dataset(CruxModel):
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )
         delivery_set = {}
-        resource_set = {}
+        deliveryid_mapping = {}
+        resources = []
         for delivery_id in response.json():
             if not DELIVERY_ID_REGEX.match(delivery_id):
                 raise ValueError("Value of delivery_id is invalid")
@@ -1284,41 +1223,59 @@ class Dataset(CruxModel):
                 "GET", ["deliveries", self.id, delivery_id, "data"], params=params
             )
             data = response.json()
-            if (
-                data["latest_health_status"] != "DELIVERY_SUCCEEDED"
-                or not data["resources"]
-            ):
+            if data["latest_health_status"] != "DELIVERY_SUCCEEDED" or not data["resources"]:
                 continue
             for item in data["resources"]:
-                resource_set[item["resource_id"]] = delivery_id
-            delivery_set[delivery_id] = {
-                "resource_ids": [item["resource_id"] for item in data["resources"]],
-                "files": [],
-                "supplier_implied_dt": None,
-                "ingestion_time": None,
-            }
+                if frames is not None and item["frame_id"].upper() not in frames:
+                    continue
+                resources.append(item)
+                deliveryid_mapping[item["resource_id"]] = delivery_id
+            if resources:
+                delivery_set[delivery_id] = {
+                    "deliver_id": delivery_id,
+                    "resource_ids": resources,
+                    "files": [],
+                    "supplier_implied_dt": None,
+                    "ingestion_time": None,
+                }
+            else:
+                log.warn(f"Specified frames not found in delivery {delivery_id}")
 
-        for file in self.get_resources_batch(list(resource_set.keys())):
-            delivery_id = resource_set[file.id]
-            delivery_set[delivery_id]["files"].append(file)
+        for item in self.get_resources_batch(list(deliveryid_mapping.keys())):
+            delivery_id = deliveryid_mapping[item.id]
+            if delivery_id != ".".join(
+                [item.labels["ingestion_id"], item.labels["version_id"]]
+            ):
+                log.debug(
+                    "File resource has incorrect labels for delivery_id=%s %s %s",
+                    delivery_id,
+                    item.labels["ingestion_id"],
+                    item.labels["version_id"],
+                )
+                item.labels["ingestion_id"] = delivery_id.split(".")[0]
+                item.labels["version_id"] = delivery_id.split(".")[1]
+
+            delivery_set[delivery_id]["files"].append(item)
             if delivery_set[delivery_id]["supplier_implied_dt"] is None:
-                delivery_set[delivery_id][
-                    "supplier_implied_dt"
-                ] = file.supplier_implied_dt
-                delivery_set[delivery_id]["ingestion_time"] = file.ingestion_time
+                delivery_set[delivery_id]["supplier_implied_dt"] = item.supplier_implied_dt
+                delivery_set[delivery_id]["ingestion_time"] = item.ingestion_time
 
         best_deliveries = {}
-        for pak in delivery_set.values():
-            dt = pak["supplier_implied_dt"]
+        for item in delivery_set.values():
+            dt = item["supplier_implied_dt"]
             if dt < stdt.isoformat():
                 continue
             if enddt is not None and dt > enddt.isoformat():
                 continue
             if (
                 dt not in best_deliveries
-                or pak["ingestion_time"] > best_deliveries[dt]["ingestion_time"]
+                or item["ingestion_time"] > best_deliveries[dt]["ingestion_time"]
+                or (
+                    item["ingestion_time"] == best_deliveries[dt]["ingestion_time"]
+                    and item["delivery_id"] > best_deliveries[dt]["delivery_id"]
+                )
             ):
-                best_deliveries[dt] = pak
+                best_deliveries[dt] = item
 
         if latest_only:
             dt = sorted(best_deliveries.keys())[-1]

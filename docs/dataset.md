@@ -32,7 +32,10 @@ def main():
     dataset = CRUX_CLIENT.get_dataset(dataset_id)
     log.info("Dataset: %s", dataset.name)
 
-    file_set = dataset.get_latest_files(file_format=MediaType.CSV.value)
+    file_set = dataset.get_latest_files(
+        frames=None,  # optional str or list[str]
+        file_format=MediaType.CSV.value
+    )
 
     for file in file_set:
         local_file_path = os.path.join(
@@ -78,7 +81,10 @@ def main():
     log.info("Dataset: %s", dataset.name)
 
     file_set = dataset.get_files_range(
-        file_format=MediaType.AVRO.value, start_date="2/1/2020", end_date="2/28/2020"
+        start_date="2/1/2020",
+        end_date="2/28/2020",
+        frames=None,  # optional str or list[str]
+        file_format=MediaType.AVRO.value
     )
 
     for file in file_set:

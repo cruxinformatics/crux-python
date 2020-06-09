@@ -38,9 +38,7 @@ def main():
     )
 
     for file in file_set:
-        local_file_path = os.path.join(
-            tempfile.gettempdir(), file.supplier_implied_dt, file.frame_id, file.name
-        )
+        local_file_path = os.path.join(tempfile.gettempdir(), file.name)
         log.info("   Download %s size=%s", local_file_path, file.size)
         file.download(local_file_path)
 
@@ -88,9 +86,7 @@ def main():
     )
 
     for file in file_set:
-        local_file_path = os.path.join(
-            tempfile.gettempdir(), file.supplier_implied_dt, file.frame_id, file.name
-        )
+        local_file_path = os.path.join(tempfile.gettempdir(), file.name)
         log.info("   Download %s size=%s", local_file_path, file.size)
         file.download(local_file_path)
 

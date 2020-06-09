@@ -1215,15 +1215,14 @@ class Dataset(CruxModel):
             raise ValueError("date must be str or datetime")
 
         headers = Headers({"accept": "application/json"})
-        # query all dates to most recent to pick up any corrections
-        params = {"start_date": stdt, "end_date": None}
+        params = {"start_date": stdt, "end_date": enddt}
         response = self.connection.api_call(
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )
         delivery_set = {}
         deliveryid_mapping = {}
-        resources = []
         for delivery_id in response.json():
+            delivery_resources = []
             if not DELIVERY_ID_REGEX.match(delivery_id):
                 raise ValueError("Value of delivery_id is invalid")
             params = {"delivery_resource_format": file_format}
@@ -1236,18 +1235,18 @@ class Dataset(CruxModel):
             for item in data["resources"]:
                 if frames is not None and item["frame_id"].upper() not in frames:
                     continue
-                resources.append(item)
+                delivery_resources.append(item)
                 deliveryid_mapping[item["resource_id"]] = delivery_id
-            if resources:
-                delivery_set[delivery_id] = {
-                    "deliver_id": delivery_id,
-                    "resource_ids": resources,
-                    "files": [],
-                    "supplier_implied_dt": None,
-                    "ingestion_time": None,
-                }
-            else:
-                log.debug(f"Specified frames not found in delivery {delivery_id}")
+            delivery_set[delivery_id] = {
+                "deliver_id": delivery_id,
+                "resource_ids": delivery_resources,
+                "files": [],
+                "supplier_implied_dt": None,
+                "ingestion_time": None,
+            }
+
+        if delivery_set and not sum([x["resource_ids"] for x in delivery_set.values()], []):
+            raise ValueError("No file resources found for selected frames")
 
         for item in self.get_resources_batch(list(deliveryid_mapping.keys())):
             delivery_id = deliveryid_mapping[item.id]
@@ -1270,11 +1269,9 @@ class Dataset(CruxModel):
 
         best_deliveries = {}
         for item in delivery_set.values():
+            if item["supplier_implied_dt"] is None:
+                continue
             dt = item["supplier_implied_dt"]
-            if dt < stdt.isoformat():
-                continue
-            if enddt is not None and dt > enddt.isoformat():
-                continue
             if (
                 dt not in best_deliveries
                 or item["ingestion_time"] > best_deliveries[dt]["ingestion_time"]
@@ -1291,12 +1288,9 @@ class Dataset(CruxModel):
                 for file in best_deliveries[dt]["files"]:
                     yield file
         else:
-            if not best_deliveries.keys():
-                log.warn("No deliveries found for the given time range")
-            else:
-                for dt in sorted(best_deliveries.keys()):
-                    for file in best_deliveries[dt]["files"]:
-                        yield file
+            for dt in sorted(best_deliveries.keys()):
+                for file in best_deliveries[dt]["files"]:
+                    yield file
 
     def get_resources_batch(self, resource_ids):
         # type: (list) -> Iterator[File]

@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 enum34 = {version = "*", markers="python_version < '3.4'"}
 google-resumable-media = { version = "*", extras = ["requests"] }
+python-dateutil = "*"
 typing = {version = "*", markers="python_version < '3.5'"}
 
 [dev-packages]

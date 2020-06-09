@@ -1146,7 +1146,7 @@ class Dataset(CruxModel):
                 start_date=start_date.isoformat(),
                 frames=frames,
                 file_format=file_format,
-                latest_only=True
+                latest_only=True,
             )
             for item in series:
                 got_files = True
@@ -1247,7 +1247,7 @@ class Dataset(CruxModel):
                     "ingestion_time": None,
                 }
             else:
-                log.warn(f"Specified frames not found in delivery {delivery_id}")
+                log.debug(f"Specified frames not found in delivery {delivery_id}")
 
         for item in self.get_resources_batch(list(deliveryid_mapping.keys())):
             delivery_id = deliveryid_mapping[item.id]
@@ -1286,13 +1286,17 @@ class Dataset(CruxModel):
                 best_deliveries[dt] = item
 
         if latest_only:
-            dt = sorted(best_deliveries.keys())[-1]
-            for file in best_deliveries[dt]["files"]:
-                yield file
-        else:
-            for dt in sorted(best_deliveries.keys()):
+            if best_deliveries.keys():
+                dt = sorted(best_deliveries.keys())[-1]
                 for file in best_deliveries[dt]["files"]:
                     yield file
+        else:
+            if not best_deliveries.keys():
+                log.warn("No deliveries found for the given time range")
+            else:
+                for dt in sorted(best_deliveries.keys()):
+                    for file in best_deliveries[dt]["files"]:
+                        yield file
 
     def get_resources_batch(self, resource_ids):
         # type: (list) -> Iterator[File]

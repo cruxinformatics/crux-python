@@ -12,6 +12,7 @@ requirements = [
     "enum34;python_version<'3.4'",
     "google-resumable-media[requests]",
     "typing;python_version<'3.5'",
+    "python-dateutil",
 ]
 packages = [pkg for pkg in find_packages() if pkg.startswith("crux")]
 

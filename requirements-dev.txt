@@ -28,7 +28,7 @@ keyring==21.2.1; python_version >= '3.6'
 lazy-object-proxy==1.4.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 markupsafe==1.1.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 mccabe==0.6.1
-more-itertools==8.3.0; python_version >= '3.5'
+more-itertools==8.4.0; python_version >= '3.5'
 mypy-extensions==0.4.3
 mypy==0.780
 nox==2020.5.24
@@ -37,7 +37,7 @@ pathspec==0.8.0
 pbr==5.4.5
 pkginfo==1.5.0.1
 pluggy==0.13.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-py==1.8.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+py==1.8.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pycodestyle==2.6.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pyflakes==2.2.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pygments==2.6.1; python_version >= '3.5'
@@ -50,10 +50,10 @@ readme-renderer==26.0
 recommonmark==0.6.0
 regex==2020.6.8
 requests-toolbelt==0.9.1
-requests==2.23.0
+requests==2.24.0
 six==1.15.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 snowballstemmer==2.0.0
-sphinx==3.1.0
+sphinx==2.4.4
 sphinxcontrib-apidoc==0.3.0
 sphinxcontrib-applehelp==1.0.2; python_version >= '3.5'
 sphinxcontrib-devhelp==1.0.2; python_version >= '3.5'
@@ -68,7 +68,7 @@ typed-ast==1.4.1; python_version < '3.8' and implementation_name == 'cpython'
 typing-extensions==3.7.4.2
 typing==3.7.4.1; python_version < '3.5'
 urllib3==1.25.9; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'
-virtualenv==20.0.21; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+virtualenv==20.0.23; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 wcwidth==0.2.4
 webencodings==0.5.1
 wheel==0.34.2

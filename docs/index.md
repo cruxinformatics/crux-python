@@ -56,6 +56,7 @@ Details on specific topics:
 - [Installation](installation.md)
 - [Authentication](authentication.md)
 - [Client](client.md)
+- [Dataset](dataset.md)
 - [Searching](searching.md)
 - [Ingestion](ingestion.md)
 - [Downloading](downloading.md)

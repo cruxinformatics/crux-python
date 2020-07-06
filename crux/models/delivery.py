@@ -103,3 +103,17 @@ class Delivery(CruxModel):
                 )
                 obj.refresh()
                 yield obj
+
+    def get_healthlog(self):
+        # type: () -> Iterator[Resource]
+        """Get the raw delivery data
+
+        Returns:
+            list (:obj:`crux.models.Resource`): List of resources.
+        """
+        response = self.connection.api_call(
+            "GET", ["deliveries", self.id, "log"]
+        )
+
+        healthlog_list = response.json()
+        return healthlog_list

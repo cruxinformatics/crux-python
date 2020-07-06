@@ -1082,13 +1082,15 @@ class Dataset(CruxModel):
             "GET", ["deliveries", self.id, delivery_id], headers=headers, model=Delivery
         )
 
-    def get_ingestions(self, start_date=None, end_date=None):
-        # type: (str, str) -> Iterator[Ingestion]
+    def get_ingestions(self, start_date=None, end_date=None, delivery_status=None):
+        # type: (str, str, str) -> Iterator[Ingestion]
         """Gets Ingestions.
 
         Args:
             start_date (str): ISO format start time.
             end_date (str): ISO format end time.
+            delivery_status (str): Delivery status enum
+
 
         Returns:
             crux.models.Delivery: Delivery Object.
@@ -1099,24 +1101,32 @@ class Dataset(CruxModel):
         params["start_date"] = start_date
         params["end_date"] = end_date
 
+        if delivery_status:
+            params["delivery_status"] = delivery_status.upper()
+
         response = self.connection.api_call(
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )
 
-        all_deliveries = response.json()
-        ingestion_map = defaultdict(set)  # type: DefaultDict[str, Set]
+        response_json = response.json()
+        if isinstance(response_json, dict):
+            all_deliveries = response_json.get("delivery_ids")
+        else:
+            all_deliveries = response_json
+
+        ingestion_set = defaultdict(set)  # type: DefaultDict[str, Set]
 
         for delivery in all_deliveries:
             if not DELIVERY_ID_REGEX.match(delivery):
                 raise ValueError("Value of delivery_id is invalid")
             ingestion_id, version_id = delivery.split(".")
-            ingestion_map[ingestion_id].add(int(version_id))
+            ingestion_set[ingestion_id].add(int(version_id))
 
-        for ingestion_id in ingestion_map:
+        for ingestion_id in ingestion_set:
             obj = Ingestion.from_dict(
                 {
                     "ingestionId": ingestion_id,
-                    "versions": ingestion_map[ingestion_id],
+                    "versions": ingestion_set[ingestion_id],
                     "datasetId": self.id,
                 }
             )
@@ -1221,7 +1231,14 @@ class Dataset(CruxModel):
         )
         delivery_set = {}
         deliveryid_mapping = {}
-        for delivery_id in response.json():
+
+        response_json = response.json()
+        if isinstance(response_json, dict):
+            all_deliveries = response_json.get("delivery_ids")
+        else:
+            all_deliveries = response_json
+
+        for delivery_id in all_deliveries:
             delivery_resources = []
             if not DELIVERY_ID_REGEX.match(delivery_id):
                 raise ValueError("Value of delivery_id is invalid")

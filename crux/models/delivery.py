@@ -106,10 +106,10 @@ class Delivery(CruxModel):
 
     def get_healthlog(self):
         # type: () -> Iterator[Resource]
-        """Get the raw delivery data
+        """Get delivery healthlog information
 
         Returns:
-            list (:obj:`crux.models.Resource`): List of resources.
+            dict: Healthlog Json Object.
         """
         response = self.connection.api_call(
             "GET", ["deliveries", self.id, "log"]

@@ -1169,6 +1169,7 @@ class Dataset(CruxModel):
         self,
         start_date,  # type: Union[datetime, str]
         end_date=None,  # type: Optional[Union[datetime, str]]
+        delivery_status=None,  #type: str
         frames=None,  # type: Optional[Union[str, list]]
         file_format=MediaType.AVRO.value,  # type: str
         dayfirst=False,  # type: bool
@@ -1182,6 +1183,7 @@ class Dataset(CruxModel):
         Args:
             start_date (str): ISO format start datetime or any paresable date string.
             end_date (str): ISO format end datetime or any parseable date string.
+            delivery_status (str): Delivery status enum
             frames (str, list): filter for selected frames
             file_format (str): File format of delivery.
 
@@ -1226,6 +1228,9 @@ class Dataset(CruxModel):
 
         headers = Headers({"accept": "application/json"})
         params = {"start_date": stdt, "end_date": enddt}
+        if delivery_status:
+            params["delivery_status"] = delivery_status.upper()
+
         response = self.connection.api_call(
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )

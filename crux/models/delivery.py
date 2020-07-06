@@ -56,19 +56,21 @@ class Delivery(CruxModel):
             self._summary = response.json()
         return self._summary
 
-    def get_data(self, file_format=MediaType.AVRO.value):
-        # type: (str) -> Iterator[Resource]
+    def get_data(self, file_format=MediaType.AVRO.value, use_cache=None):
+        # type: (str, bool) -> Iterator[Resource]
         """Get the processed delivery data
 
         Args:
             file_format (str): File format of delivery.
+            use_cache (bool): Preference to set cached response
 
         Returns:
             list (:obj:`crux.models.Resource`): List of resources.
         """
         params = {}
-
         params["delivery_resource_format"] = file_format
+        if use_cache is not None:
+            params["useCache"] = use_cache
 
         response = self.connection.api_call(
             "GET", ["deliveries", self.dataset_id, self.id, "data"], params=params
@@ -83,15 +85,22 @@ class Delivery(CruxModel):
                 obj.refresh()
                 yield obj
 
-    def get_raw(self):
-        # type: () -> Iterator[Resource]
+    def get_raw(self, use_cache=None):
+        # type: (bool) -> Iterator[Resource]
         """Get the raw delivery data
+
+        Args:
+            use_cache (bool): Preference to set cached response
 
         Returns:
             list (:obj:`crux.models.Resource`): List of resources.
         """
+        params = {}
+        if use_cache is not None:
+            params["useCache"] = use_cache
+
         response = self.connection.api_call(
-            "GET", ["deliveries", self.dataset_id, self.id, "raw"]
+            "GET", ["deliveries", self.dataset_id, self.id, "raw"], params=params
         )
 
         resource_list = response.json()["resource_ids"]
@@ -104,15 +113,22 @@ class Delivery(CruxModel):
                 obj.refresh()
                 yield obj
 
-    def get_healthlog(self):
-        # type: () -> Iterator[Resource]
+    def get_healthlog(self, use_cache=None):
+        # type: (bool) -> Iterator[Resource]
         """Get delivery healthlog information
+
+        Args:
+            use_cache (bool): Preference to set cached response
 
         Returns:
             dict: Healthlog Json Object.
         """
+        params = {}
+        if use_cache is not None:
+            params["useCache"] = use_cache
+
         response = self.connection.api_call(
-            "GET", ["deliveries", self.id, "log"]
+            "GET", ["deliveries", self.id, "log"], params=params
         )
 
         healthlog_list = response.json()

@@ -1,5 +1,38 @@
 # Dataset
 
+A dataset is a unique set of data as defined by a Supplier and Crux. 
+It comprises of a series of data with unique content that is updated (as metadata and file resources) on a given schedule from a Supplier, processed, and stored by Crux.
+
+
+## List subscribed datasets
+
+```python
+import os
+from crux import Crux
+
+if not os.getenv("CRUX_API_KEY"):
+    raise ValueError("CRUX_API_KEY is unset")
+
+conn = Crux(api_key=os.getenv(“CRUX_API_KEY”), api_host='https://api.cruxinformatics.com')
+datasets = conn.list_datasets()
+for dataset in datasets:
+    print('Dataset {} identified by {}'.format(dataset.name, dataset.id))
+```
+
+
+## Get a dataset
+
+```python
+import os
+from crux import Crux
+
+if not os.getenv("CRUX_API_KEY"):
+    raise ValueError("CRUX_API_KEY is unset")
+
+conn = Crux(api_key=os.getenv(“CRUX_API_KEY”), api_host='https://api.cruxinformatics.com')
+dataset = conn.get_dataset("DATASET_ID")
+```
+
 ## Get the latest Dataset file frames for all subsubscriptions.
 
 ```python

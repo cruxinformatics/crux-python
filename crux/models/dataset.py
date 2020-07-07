@@ -56,12 +56,12 @@ class Dataset(CruxModel):
     @property
     def owner_identity_id(self):
         """str: Gets the Owner Identity ID."""
-        return self.raw_model["ownerIdentityId"]
+        return self.raw_model.get("ownerIdentityId", "")
 
     @property
     def contact_identity_id(self):
         """str: Gets the Contact Identity ID."""
-        return self.raw_model["contactIdentityId"]
+        return self.raw_model.get("contactIdentityId", "")
 
     @property
     def name(self):
@@ -79,7 +79,7 @@ class Dataset(CruxModel):
         Raises:
             TypeError: If tags is not a list
         """
-        return self.raw_model["tags"]
+        return self.raw_model.get("tags", [])
 
     @tags.setter
     def tags(self, tags):
@@ -90,7 +90,7 @@ class Dataset(CruxModel):
     @property
     def description(self):
         """str: Gets the Dataset Description."""
-        return self.raw_model["description"]
+        return self.raw_model.get("description", "")
 
     @description.setter
     def description(self, description):
@@ -99,7 +99,7 @@ class Dataset(CruxModel):
     @property
     def website(self):
         """str: Gets the Dataset Website."""
-        return self.raw_model["website"]
+        return self.raw_model.get("website", "")
 
     @website.setter
     def website(self, website):
@@ -108,17 +108,17 @@ class Dataset(CruxModel):
     @property
     def created_at(self):
         """str: Gets the Dataset created_at."""
-        return self.raw_model["createdAt"]
+        return self.raw_model.get("createdAt", "")
 
     @property
     def modified_at(self):
         """str: Gets the Dataset modified_at."""
-        return self.raw_model["modifiedAt"]
+        return self.raw_model.get("modifiedAt", "")
 
     @property
     def provenance(self):
         """str: Compute or Get the provenance."""
-        return self.raw_model["provenance"]
+        return self.raw_model.get("provenance", "")
 
     def create(self):
         # type: () -> bool

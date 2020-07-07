@@ -1,6 +1,6 @@
 # Dataset
 
-## Get the latest Dataset file frames.
+## Get the latest Dataset file frames for all subsubscriptions.
 
 ```python
 import os
@@ -28,20 +28,18 @@ def main():
 
     logging.basicConfig(level=logging.INFO)
 
-    dataset_id = os.getenv("CRUX_DSID")
-    dataset = CRUX_CLIENT.get_dataset(dataset_id)
-    log.info("Dataset: %s", dataset.name)
+    for dataset in CRUX_CLIENT.list_datasets():
+        log.info("Dataset: %s", dataset.name)
 
-    file_set = dataset.get_latest_files(
-        frames=None,  # optional str or list[str]
-        file_format=MediaType.CSV.value
-    )
+        file_set = dataset.get_latest_files(
+            frames=None,  # optional str or list[str]
+            file_format=MediaType.CSV.value
+        )
 
-    for file in file_set:
-        local_file_path = os.path.join(tempfile.gettempdir(), file.name)
-        log.info("   Download %s size=%s", local_file_path, file.size)
-        file.download(local_file_path)
-
+        for file in file_set:
+            local_file_path = os.path.join(tempfile.gettempdir(), file.name)
+            log.info("   Download %s size=%s", local_file_path, file.size)
+            file.download(local_file_path)
 
 main()
 ```

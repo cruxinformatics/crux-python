@@ -137,8 +137,24 @@ class Crux(object):
         Returns:
             list(:obj:`crux.models.Dataset`): List of Dataset objects.
         """
-        datasets = self._call_drives_my()
         dataset_list = []
+
+        # Prefer domainV2 for data source
+        headers = Headers(
+            {"accept": "application/json"}
+        )  # type: MutableMapping[Text, Text]
+
+        response = self.api_client.api_call(
+            "GET", ["v2", "client", "subscriptions", "view", "summary"], model=None, headers=headers
+        )
+        for dataset in response.json():
+            dataset["name"] = dataset["datasetName"]
+            obj = Dataset.from_dict(dataset, connection=self.api_client)
+            dataset_list.append(obj)
+        if dataset_list:
+            return dataset_list
+
+        datasets = self._call_drives_my()
 
         if owned:
             for dataset in datasets["owned"]:

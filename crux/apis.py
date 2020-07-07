@@ -135,7 +135,6 @@ class Crux(object):
 
         # Prefer domainV2 for data source
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
-
         response = self.api_client.api_call(
             "GET",
             ["v2", "client", "subscriptions", "view", "summary"],

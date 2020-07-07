@@ -1082,13 +1082,15 @@ class Dataset(CruxModel):
             "GET", ["deliveries", self.id, delivery_id], headers=headers, model=Delivery
         )
 
-    def get_ingestions(self, start_date=None, end_date=None):
-        # type: (str, str) -> Iterator[Ingestion]
+    def get_ingestions(self, start_date=None, end_date=None, delivery_status=None, use_cache=None):
+        # type: (str, str, str, bool) -> Iterator[Ingestion]
         """Gets Ingestions.
 
         Args:
             start_date (str): ISO format start time.
             end_date (str): ISO format end time.
+            delivery_status (str): Delivery status enum
+            use_cache (bool): Preference to set cached response
 
         Returns:
             crux.models.Delivery: Delivery Object.
@@ -1099,39 +1101,52 @@ class Dataset(CruxModel):
         params["start_date"] = start_date
         params["end_date"] = end_date
 
+        if delivery_status:
+            params["delivery_status"] = delivery_status.upper()
+
+        if use_cache is not None:
+            params["useCache"] = use_cache
+
         response = self.connection.api_call(
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )
 
-        all_deliveries = response.json()
-        ingestion_map = defaultdict(set)  # type: DefaultDict[str, Set]
+        response_json = response.json()
+        if isinstance(response_json, dict):
+            all_deliveries = response_json.get("delivery_ids")
+        else:
+            all_deliveries = response_json
+
+        ingestion_set = defaultdict(set)  # type: DefaultDict[str, Set]
 
         for delivery in all_deliveries:
             if not DELIVERY_ID_REGEX.match(delivery):
                 raise ValueError("Value of delivery_id is invalid")
             ingestion_id, version_id = delivery.split(".")
-            ingestion_map[ingestion_id].add(int(version_id))
+            ingestion_set[ingestion_id].add(int(version_id))
 
-        for ingestion_id in ingestion_map:
+        for ingestion_id in ingestion_set:
             obj = Ingestion.from_dict(
                 {
                     "ingestionId": ingestion_id,
-                    "versions": ingestion_map[ingestion_id],
+                    "versions": ingestion_set[ingestion_id],
                     "datasetId": self.id,
                 }
             )
             obj.connection = self.connection
             yield obj
 
-    def get_latest_files(self, frames=None, file_format=MediaType.AVRO.value):
+    def get_latest_files(self, frames=None, file_format=MediaType.AVRO.value, delivery_status=None, use_cache=None):
 
-        # type: (Optional[Union[str, List]], str) -> Iterator[File]
+        # type: (Optional[Union[str, List]], str, str, bool) -> Iterator[File]
         """Get the latest dataset file resources. The latest supplier_implied_dt with the
         best single delivery version is selected.
 
         Args:
             frames (str, list): filter for selected frames
             file_format (str): File format of delivery.
+            delivery_status (str): Delivery status enum
+            use_cache (bool): Preference to set cached response
 
         Returns:
             list (:obj:`crux.models.File`): List of file resources.
@@ -1147,6 +1162,8 @@ class Dataset(CruxModel):
                 frames=frames,
                 file_format=file_format,
                 latest_only=True,
+                delivery_status=delivery_status,
+                use_cache=use_cache
             )
             for item in series:
                 got_files = True
@@ -1164,6 +1181,8 @@ class Dataset(CruxModel):
         dayfirst=False,  # type: bool
         yearfirst=False,  # type: bool
         latest_only=False,  # type: bool
+        delivery_status=None,  # type: str
+        use_cache=None  # type: bool
     ):
         # type: (...) -> Iterator[File]
         """Get a set of dataset file resources. The best single delivery version for each
@@ -1172,6 +1191,7 @@ class Dataset(CruxModel):
         Args:
             start_date (str): ISO format start datetime or any paresable date string.
             end_date (str): ISO format end datetime or any parseable date string.
+            delivery_status (str): Delivery status enum
             frames (str, list): filter for selected frames
             file_format (str): File format of delivery.
 
@@ -1215,13 +1235,26 @@ class Dataset(CruxModel):
             raise ValueError("date must be str or datetime")
 
         headers = Headers({"accept": "application/json"})
-        params = {"start_date": stdt, "end_date": enddt}
+
+        delivery_status = "DELIVERY_SUCCEEDED" if not delivery_status else delivery_status
+        params = {"start_date": stdt, "end_date": enddt, "delivery_status": delivery_status}
+
+        if use_cache is not None:
+            params["useCache"] = use_cache
+
         response = self.connection.api_call(
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )
         delivery_set = {}
         deliveryid_mapping = {}
-        for delivery_id in response.json():
+
+        response_json = response.json()
+        if isinstance(response_json, dict):
+            all_deliveries = response_json.get("delivery_ids")
+        else:
+            all_deliveries = response_json
+
+        for delivery_id in all_deliveries:
             delivery_resources = []
             if not DELIVERY_ID_REGEX.match(delivery_id):
                 raise ValueError("Value of delivery_id is invalid")

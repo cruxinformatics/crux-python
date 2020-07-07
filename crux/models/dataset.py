@@ -1082,7 +1082,9 @@ class Dataset(CruxModel):
             "GET", ["deliveries", self.id, delivery_id], headers=headers, model=Delivery
         )
 
-    def get_ingestions(self, start_date=None, end_date=None, delivery_status=None, use_cache=None):
+    def get_ingestions(
+        self, start_date=None, end_date=None, delivery_status=None, use_cache=None
+    ):
         # type: (str, str, str, bool) -> Iterator[Ingestion]
         """Gets Ingestions.
 
@@ -1136,7 +1138,13 @@ class Dataset(CruxModel):
             obj.connection = self.connection
             yield obj
 
-    def get_latest_files(self, frames=None, file_format=MediaType.AVRO.value, delivery_status=None, use_cache=None):
+    def get_latest_files(
+        self,
+        frames=None,
+        file_format=MediaType.AVRO.value,
+        delivery_status=None,
+        use_cache=None,
+    ):
 
         # type: (Optional[Union[str, List]], str, str, bool) -> Iterator[File]
         """Get the latest dataset file resources. The latest supplier_implied_dt with the
@@ -1163,7 +1171,7 @@ class Dataset(CruxModel):
                 file_format=file_format,
                 latest_only=True,
                 delivery_status=delivery_status,
-                use_cache=use_cache
+                use_cache=use_cache,
             )
             for item in series:
                 got_files = True
@@ -1182,7 +1190,7 @@ class Dataset(CruxModel):
         yearfirst=False,  # type: bool
         latest_only=False,  # type: bool
         delivery_status=None,  # type: str
-        use_cache=None  # type: bool
+        use_cache=None,  # type: bool
     ):
         # type: (...) -> Iterator[File]
         """Get a set of dataset file resources. The best single delivery version for each

@@ -7,6 +7,14 @@ from crux._config import CruxConfig
 from crux._utils import Headers
 from crux.models import Dataset, File, Folder, Identity, Job
 from crux.models._factory import get_resource_object
+from crux.exceptions import (
+    CruxAPIError,
+    CruxClientConnectionError,
+    CruxClientHTTPError,
+    CruxClientTimeout,
+    CruxClientTooManyRedirects,
+    CruxResourceNotFoundError,
+)
 
 
 class Crux(object):
@@ -135,13 +143,17 @@ class Crux(object):
 
         # Prefer domainV2 for data source
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
-        response = self.api_client.api_call(
-            "GET",
-            ["v2", "client", "subscriptions", "view", "summary"],
-            model=None,
-            headers=headers,
-        )
-        for dataset in response.json():
+        try:
+            response = self.api_client.api_call(
+                "GET",
+                ["v2", "client", "subscriptions", "view", "summary"],
+                model=None,
+                headers=headers,
+            )
+            subscriptions = response.json()
+        except CruxAPIError:
+            subscriptions = []
+        for dataset in subscriptions:
             dataset["name"] = dataset["datasetName"]
             obj = Dataset.from_dict(dataset, connection=self.api_client)
             dataset_list.append(obj)

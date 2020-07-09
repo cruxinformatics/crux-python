@@ -7,6 +7,14 @@ from crux._config import CruxConfig
 from crux._utils import Headers
 from crux.models import Dataset, File, Folder, Identity, Job
 from crux.models._factory import get_resource_object
+from crux.exceptions import (
+    CruxAPIError,
+    CruxClientConnectionError,
+    CruxClientHTTPError,
+    CruxClientTimeout,
+    CruxClientTooManyRedirects,
+    CruxResourceNotFoundError,
+)
 
 
 class Crux(object):
@@ -80,9 +88,7 @@ class Crux(object):
         Returns:
             crux.models.Dataset: Dataset object
         """
-        headers = Headers(
-            {"accept": "application/json"}
-        )  # type: MutableMapping[Text, Text]
+        headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
         return self.api_client.api_call(
             "GET", ["datasets", id], model=Dataset, headers=headers
         )
@@ -101,9 +107,7 @@ class Crux(object):
         Returns:
             crux.models.Resource: Resource or its Child Object.
         """
-        headers = Headers(
-            {"accept": "application/json"}
-        )  # type: MutableMapping[Text, Text]
+        headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
 
         response = self.api_client.api_call("GET", ["resources", id], headers=headers)
         raw_resource = response.json()
@@ -116,9 +120,7 @@ class Crux(object):
         return resource
 
     def _call_drives_my(self):
-        headers = Headers(
-            {"accept": "application/json"}
-        )  # type: MutableMapping[Text, Text]
+        headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
 
         response = self.api_client.api_call(
             "GET", ["drives", "my"], model=None, headers=headers
@@ -137,8 +139,28 @@ class Crux(object):
         Returns:
             list(:obj:`crux.models.Dataset`): List of Dataset objects.
         """
-        datasets = self._call_drives_my()
         dataset_list = []
+
+        # Prefer domainV2 for data source
+        headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
+        try:
+            response = self.api_client.api_call(
+                "GET",
+                ["v2", "client", "subscriptions", "view", "summary"],
+                model=None,
+                headers=headers,
+            )
+            subscriptions = response.json()
+        except CruxAPIError:
+            subscriptions = []
+        for dataset in subscriptions:
+            dataset["name"] = dataset["datasetName"]
+            obj = Dataset.from_dict(dataset, connection=self.api_client)
+            dataset_list.append(obj)
+        if dataset_list:
+            return dataset_list
+
+        datasets = self._call_drives_my()
 
         if owned:
             for dataset in datasets["owned"]:
@@ -159,9 +181,7 @@ class Crux(object):
         Returns:
             list (:obj:`crux.models.Dataset`): List of Dataset objects.
         """
-        headers = Headers(
-            {"accept": "application/json"}
-        )  # type: MutableMapping[Text, Text]
+        headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
         return self.api_client.api_call(
             "GET", ["datasets", "public"], model=Dataset, headers=headers
         )
@@ -176,12 +196,8 @@ class Crux(object):
         Returns:
             crux.models.Job: Job object.
         """
-        headers = Headers(
-            {"accept": "application/json"}
-        )  # type: MutableMapping[Text, Text]
-        return self.api_client.api_call(
-            "GET", ["jobs", job_id], model=Job, headers=headers
-        )
+        headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
+        return self.api_client.api_call("GET", ["jobs", job_id], model=Job, headers=headers)
 
     def set_datasets_provenance(self, provenance):
         # type(Dict[Any, Any]) -> Dict[Any, Any]

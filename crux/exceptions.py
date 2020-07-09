@@ -19,7 +19,8 @@ class CruxAPIError(Exception):
             status_code (int): Exception error code.
         """
         super(CruxAPIError, self).__init__(message)
-        self.status_code = message["statusCode"]
+        # domainV2 has "status"
+        self.status_code = message.get("statusCode", message.get("status"))
         self.message = message
 
     def __str__(self):

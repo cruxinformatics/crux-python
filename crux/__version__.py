@@ -1,3 +1,3 @@
 """Module contains version and other package information."""
 
-__version__ = "0.0.16"
+__version__ = "0.0.17"

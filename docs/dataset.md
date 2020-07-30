@@ -66,6 +66,7 @@ def main():
 
         file_set = dataset.get_latest_files(
             frames=None,  # optional str or list[str]
+            cutoff_date=None,  # search up to this date
             file_format=MediaType.CSV.value
         )
 

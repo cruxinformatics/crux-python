@@ -1156,6 +1156,7 @@ class Dataset(CruxModel):
         Args:
             frames (str, list): filter for selected frames
             file_format (str): File format of delivery.
+            cutoff_date (datetime, str): Search up to this date.
             delivery_status (str): Delivery status enum
             use_cache (bool): Preference to set cached response
 

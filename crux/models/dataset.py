@@ -1142,6 +1142,9 @@ class Dataset(CruxModel):
         self,
         frames=None,
         file_format=MediaType.AVRO.value,
+        cutoff_date=None,
+        dayfirst=False,  # type: bool
+        yearfirst=False,  # type: bool
         delivery_status=None,
         use_cache=None,
     ):
@@ -1160,13 +1163,29 @@ class Dataset(CruxModel):
             list (:obj:`crux.models.File`): List of file resources.
         """
 
+        if cutoff_date is None:
+            codt = None
+        elif isinstance(cutoff_date, datetime):
+            codt = cutoff_date
+        elif isinstance(cutoff_date, str):
+            try:
+                codt = parser.parse(cutoff_date, dayfirst=dayfirst, yearfirst=yearfirst)
+            except:
+                raise ValueError("Value of start_date is invalid")
+        else:
+            raise ValueError("start_date must be str or datetime")
+
         # look back a couple extra days in case query is performed over the weekend
         got_files = False
         for lookback in [1 + 2, 14 + 2, 31 + 2, 180 + 2, 366 + 2]:
-            start_date = datetime.utcnow() - timedelta(days=lookback)
+            if codt is None:
+                start_date = datetime.utcnow() - timedelta(days=lookback)
+            else:
+                start_date = codt - timedelta(days=lookback)
 
             series = self.get_files_range(
-                start_date=start_date.isoformat(),
+                start_date=start_date,
+                end_date=codt,
                 frames=frames,
                 file_format=file_format,
                 latest_only=True,

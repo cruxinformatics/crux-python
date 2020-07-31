@@ -21,20 +21,20 @@ There are various places in the source repository where we explicitly list the v
 Search the code to find all references to the current version, for example:
 
 ```
-$ rg -F '0.0.17'
+$ rg -F '0.0.18'
 README.md
-27:pipenv install "crux==0.0.17"
+27:pipenv install "crux==0.0.18"
 
 docs/index.md
-27:pipenv install "crux==0.0.17"
+27:pipenv install "crux==0.0.18"
 
 docs/installation.md
-20:pipenv install "crux==0.0.17"
-26:crux = "==0.0.17"
-36:python3 -m pip install "crux==0.0.17"
+20:pipenv install "crux==0.0.18"
+26:crux = "==0.0.18"
+36:python3 -m pip install "crux==0.0.18"
 
 crux/__version__.py
-3:__version__ = "0.0.17"
+3:__version__ = "0.0.18"
 ```
 
 Update all the versions. This could also be a good opportunity to double check that all tests pass.
@@ -71,8 +71,8 @@ Once the "bump" PR is merged, we create a GitHub release and tag the bump commit
 
 1. Go to [github.com/cruxinformatics/crux-python](https://github.com/cruxinformatics/crux-python) and click **releases**.
 2. Click **Draft new release**.
-3. In the **Tag version** field enter the version number prefixed with a *v*, e.g., `v0.0.17`. The **Target** will remain *master*, assuming the version bump commit is the latest commit on master, otherwise change the target to the bump commit.
-4. In **Release title** enter the tag version, e.g., `v0.0.17`.
+3. In the **Tag version** field enter the version number prefixed with a *v*, e.g., `v0.0.18`. The **Target** will remain *master*, assuming the version bump commit is the latest commit on master, otherwise change the target to the bump commit.
+4. In **Release title** enter the tag version, e.g., `v0.0.18`.
 5. In **Describe this release** use the same change lists as in the commit body, plus Markdown syntax to make the headings bold.
 6. Check the **This is a pre-release** box (until crux-python is no longer alpha or beta).
 7. Click **Publish release**.

@@ -1,7 +1,7 @@
 """Module contains Dataset model."""
 
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from dateutil import parser
 import json
 import os
@@ -1143,20 +1143,21 @@ class Dataset(CruxModel):
         frames=None,
         file_format=MediaType.AVRO.value,
         cutoff_date=None,
-        dayfirst=False,  # type: bool
-        yearfirst=False,  # type: bool
+        dayfirst=False,
+        yearfirst=False,
         delivery_status=None,
         use_cache=None,
     ):
-
-        # type: (Optional[Union[str, List]], str, str, bool) -> Iterator[File]
+        # type: (Optional[Union[str, List]], str, str, bool, bool, str, bool) -> Iterator[File]
         """Get the latest dataset file resources. The latest supplier_implied_dt with the
-        best single delivery version is selected.
+        best single delivery version for each frame is selected.
 
         Args:
             frames (str, list): filter for selected frames
-            file_format (str): File format of delivery.
-            cutoff_date (datetime, str): Search up to this date.
+            file_format (str): File format of delivery
+            cutoff_date (datetime, str): Search up to this date
+            dayfirst (str): Parse format for str date
+            yearfirst (str): Parse format for str date
             delivery_status (str): Delivery status enum
             use_cache (bool): Preference to set cached response
 
@@ -1164,41 +1165,80 @@ class Dataset(CruxModel):
             list (:obj:`crux.models.File`): List of file resources.
         """
 
+        if isinstance(frames, list):
+            frames = set([x.upper() for x in frames])
+        elif isinstance(frames, str):
+            frames = {frames.upper()}
+        elif frames is not None:
+            raise ValueError("Value of frames is invalid")
         if cutoff_date is None:
-            codt = None
+            now = datetime.utcnow()
+            codt = datetime(year=now.year, month=now.month, day=now.day)
         elif isinstance(cutoff_date, datetime):
-            codt = cutoff_date
+            codt = datetime(
+                year=cutoff_date.year, month=cutoff_date.month, day=cutoff_date.day
+            )
         elif isinstance(cutoff_date, str):
             try:
                 codt = parser.parse(cutoff_date, dayfirst=dayfirst, yearfirst=yearfirst)
+                codt = datetime(year=codt.year, month=codt.month, day=codt.day)
             except:
                 raise ValueError("Value of start_date is invalid")
         else:
             raise ValueError("start_date must be str or datetime")
 
         # look back a couple extra days in case query is performed over the weekend
-        got_files = False
-        for lookback in [1 + 2, 14 + 2, 31 + 2, 180 + 2, 366 + 2]:
-            if codt is None:
-                start_date = datetime.utcnow() - timedelta(days=lookback)
-            else:
-                start_date = codt - timedelta(days=lookback)
+        lookbacks = [
+            {
+                "start": codt - timedelta(days=3),
+                "end": None if cutoff_date is None else codt,
+            },
+            {
+                "start": codt - timedelta(days=16),
+                "end": codt - timedelta(days=4),
+            },
+            {
+                "start": codt - timedelta(days=32),
+                "end": codt - timedelta(days=17),
+            },
+            {
+                "start": codt - timedelta(days=92),
+                "end": codt - timedelta(days=33),
+            },
+            {
+                "start": codt - timedelta(days=212),
+                "end": codt - timedelta(days=93),
+            },
+            {
+                "start": codt - timedelta(days=366),
+                "end": codt - timedelta(days=213),
+            },
+        ]
 
+        found_frames = set()
+        found_files = []
+        for dt in lookbacks:
             series = self.get_files_range(
-                start_date=start_date,
-                end_date=codt,
-                frames=frames,
+                start_date=dt["start"],
+                end_date=dt["end"],
                 file_format=file_format,
                 latest_only=True,
                 delivery_status=delivery_status,
                 use_cache=use_cache,
             )
             for item in series:
-                got_files = True
-                yield item
+                frame_id = item.frame_id.upper()
+                found_frames.add(frame_id)
+                if frames and frame_id not in frames:
+                    continue
+                found_files.append(item)
 
-            if got_files:
+            if found_frames:
                 break
+        if frames is not None and found_frames and not found_frames.issuperset(frames):
+            unused_frames = found_frames - frames
+            log.info(f"One or more specified frames not found. Unused frames: %s", unused_frames)
+        return found_files
 
     def get_files_range(
         self,
@@ -1214,23 +1254,28 @@ class Dataset(CruxModel):
     ):
         # type: (...) -> Iterator[File]
         """Get a set of dataset file resources. The best single delivery version for each
-        supplier_implied_dt is computed for the selected time range.
+        supplier_implied_dt is selected for the given time range.
 
         Args:
-            start_date (str): ISO format start datetime or any paresable date string.
-            end_date (str): ISO format end datetime or any parseable date string.
+            start_date (str): ISO format start datetime or any paresable date string
+            end_date (str): ISO format end datetime or any parseable date string
             delivery_status (str): Delivery status enum
             frames (str, list): filter for selected frames
-            file_format (str): File format of delivery.
+            file_format (str): File format of delivery
+            dayfirst (str): Parse format for str date
+            yearfirst (str): Parse format for str date
+            latest_only (bool): Return latest files only
+            delivery_status (str): Delivery status enum
+            use_cache (bool): Preference to set cached response
 
         Returns:
             list (:obj:`crux.models.File`): List of file resources.
         """
 
         if isinstance(frames, list):
-            frames = [x.upper() for x in frames]
+            frames = set([x.upper() for x in frames])
         elif isinstance(frames, str):
-            frames = [frames.upper()]
+            frames = {frames.upper()}
         elif frames is not None:
             raise ValueError("Value of frames is invalid")
 
@@ -1240,8 +1285,9 @@ class Dataset(CruxModel):
             if file_format not in [item.value for item in MediaType]:
                 raise ValueError("Value of file_format is invalid")
 
+        fullday = timedelta(minutes=23 * 60 + 59)
         if isinstance(start_date, datetime):
-            stdt = start_date
+            stdt = start_date.date()
         elif isinstance(start_date, str):
             try:
                 stdt = parser.parse(start_date, dayfirst=dayfirst, yearfirst=yearfirst)
@@ -1249,11 +1295,12 @@ class Dataset(CruxModel):
                 raise ValueError("Value of start_date is invalid")
         else:
             raise ValueError("start_date must be str or datetime")
+        stdt = datetime(year=stdt.year, month=stdt.month, day=stdt.day)
 
         if end_date is None:
             enddt = None
         elif isinstance(end_date, datetime):
-            enddt = end_date
+            enddt = end_date.date()
         elif isinstance(end_date, str):
             try:
                 enddt = parser.parse(end_date, dayfirst=dayfirst, yearfirst=yearfirst)
@@ -1261,29 +1308,30 @@ class Dataset(CruxModel):
                 raise ValueError("Value of end_date is invalid")
         else:
             raise ValueError("date must be str or datetime")
+        enddt = None if enddt is None else datetime(year=enddt.year, month=enddt.month, day=enddt.day) + fullday
 
         headers = Headers({"accept": "application/json"})
-
-        delivery_status = "DELIVERY_SUCCEEDED" if not delivery_status else delivery_status
-        params = {"start_date": stdt, "end_date": enddt, "delivery_status": delivery_status}
-
-        if use_cache is not None:
-            params["useCache"] = use_cache
-
+        delivery_status = "DELIVERY_SUCCEEDED" if delivery_status is None else delivery_status
+        use_cache = True if use_cache is None else use_cache
+        params = {
+            "start_date": stdt,
+            "end_date": None if enddt is None else enddt + timedelta(days=3),
+            "delivery_status": delivery_status,
+            "use_cache": use_cache,
+        }
         response = self.connection.api_call(
             "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
         )
-        delivery_set = {}
-        deliveryid_mapping = {}
-
         response_json = response.json()
         if isinstance(response_json, dict):
             all_deliveries = response_json.get("delivery_ids")
         else:
             all_deliveries = response_json
 
-        for delivery_id in all_deliveries:
-            delivery_resources = []
+        frame_resources = {}
+        resource_delivery_ids = {}
+        select_deliveries = all_deliveries[-20:] if latest_only else all_deliveries
+        for delivery_id in select_deliveries:
             if not DELIVERY_ID_REGEX.match(delivery_id):
                 raise ValueError("Value of delivery_id is invalid")
             params = {"delivery_resource_format": file_format}
@@ -1291,67 +1339,53 @@ class Dataset(CruxModel):
                 "GET", ["deliveries", self.id, delivery_id, "data"], params=params
             )
             data = response.json()
-            if data["latest_health_status"] != "DELIVERY_SUCCEEDED" or not data["resources"]:
-                continue
             for item in data["resources"]:
-                if frames is not None and item["frame_id"].upper() not in frames:
-                    continue
-                delivery_resources.append(item)
-                deliveryid_mapping[item["resource_id"]] = delivery_id
-            delivery_set[delivery_id] = {
-                "deliver_id": delivery_id,
-                "resource_ids": delivery_resources,
-                "files": [],
-                "supplier_implied_dt": None,
-                "ingestion_time": None,
-            }
+                frame_id = item["frame_id"].upper()
+                resource_id = item["resource_id"]
+                if frame_id not in frame_resources:
+                    frame_resources[frame_id] = {
+                        "resource_ids": [],
+                        "best_deliveries": {},
+                    }
+                frame_resources[frame_id]["resource_ids"].append(resource_id)
+                resource_delivery_ids[resource_id] = delivery_id
 
-        if delivery_set and not sum([x["resource_ids"] for x in delivery_set.values()], []):
-            raise ValueError("No file resources found for selected frames")
-
-        for item in self.get_resources_batch(list(deliveryid_mapping.keys())):
-            delivery_id = deliveryid_mapping[item.id]
-            if delivery_id != ".".join(
-                [item.labels["ingestion_id"], item.labels["version_id"]]
-            ):
-                log.debug(
-                    "File resource has incorrect labels for delivery_id=%s %s %s",
-                    delivery_id,
-                    item.labels["ingestion_id"],
-                    item.labels["version_id"],
-                )
-                item.labels["ingestion_id"] = delivery_id.split(".")[0]
-                item.labels["version_id"] = delivery_id.split(".")[1]
-
-            delivery_set[delivery_id]["files"].append(item)
-            if delivery_set[delivery_id]["supplier_implied_dt"] is None:
-                delivery_set[delivery_id]["supplier_implied_dt"] = item.supplier_implied_dt
-                delivery_set[delivery_id]["ingestion_time"] = item.ingestion_time
-
-        best_deliveries = {}
-        for item in delivery_set.values():
-            if item["supplier_implied_dt"] is None:
+        found_frames = set(frame_resources)
+        if frames is None:
+            process_frames = found_frames
+        else:
+            process_frames = frames.intersection(found_frames)
+            if found_frames and not found_frames.issuperset(frames):
+                unused_frames = found_frames - frames
+                log.info("One or more specified frames not found. Unused frames: %s", unused_frames)
+        resource_ids = [i for s in process_frames for i in frame_resources[s]["resource_ids"]]
+        for file in self.get_resources_batch(resource_ids):
+            frame_id = file.frame_id.upper()
+            dt = (
+                file.supplier_implied_dt
+                if file.supplier_implied_dt is not None
+                else file.ingestion_time
+            )
+            if dt < stdt.isoformat() or (enddt is not None and dt > enddt.isoformat()):
                 continue
-            dt = item["supplier_implied_dt"]
+            best_deliveries = frame_resources[frame_id]["best_deliveries"]
             if (
                 dt not in best_deliveries
-                or item["ingestion_time"] > best_deliveries[dt]["ingestion_time"]
+                or file.ingestion_time > best_deliveries[dt].ingestion_time
                 or (
-                    item["ingestion_time"] == best_deliveries[dt]["ingestion_time"]
-                    and item["delivery_id"] > best_deliveries[dt]["delivery_id"]
+                    file.ingestion_time == best_deliveries[dt].ingestion_time
+                    and resource_delivery_ids[file.id]
+                    > resource_delivery_ids[best_deliveries[dt].id]
                 )
             ):
-                best_deliveries[dt] = item
+                best_deliveries[dt] = file
 
-        if latest_only:
-            if best_deliveries.keys():
-                dt = sorted(best_deliveries.keys())[-1]
-                for file in best_deliveries[dt]["files"]:
-                    yield file
-        else:
-            for dt in sorted(best_deliveries.keys()):
-                for file in best_deliveries[dt]["files"]:
-                    yield file
+        for frame_id in process_frames:
+            best_deliveries = frame_resources[frame_id]["best_deliveries"]
+            for cnt, dt in enumerate(sorted(best_deliveries), 1):
+                if latest_only and cnt != len(best_deliveries):
+                    continue
+                yield best_deliveries[dt]
 
     def get_resources_batch(self, resource_ids):
         # type: (list) -> Iterator[File]

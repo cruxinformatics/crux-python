@@ -149,6 +149,7 @@ class Crux(object):
                 ["v2", "client", "subscriptions", "view", "summary"],
                 model=None,
                 headers=headers,
+                params={"limit": 100000},
             )
             subscriptions = response.json()
         except CruxAPIError:

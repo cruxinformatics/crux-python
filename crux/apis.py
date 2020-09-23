@@ -153,14 +153,14 @@ class Crux(object):
             params["offset"] = retrieved
             try:
                 resp = self.api_client.api_call(
-                "GET",
-                ["v2", "client", "subscriptions", "view", "summary"],
-                params=params,
-                model=None,
-                headers=headers,
+                    "GET",
+                    ["v2", "client", "subscriptions", "view", "summary"],
+                    params=params,
+                    model=None,
+                    headers=headers,
                 ).json()
             except CruxAPIError as err:
-                log.debug( "Get subscriptions failed: %s", err)
+                log.debug("Get subscriptions failed: %s", err)
                 break
 
             for dataset in resp:

@@ -204,7 +204,6 @@ class Dataset(CruxModel):
             tags (:obj:`list` of :obj:`str`): Tags of the file resource.
                 Defaults to None.
             description (str): Description of the file resource.
-                Defaults to None.
 
         Returns:
             crux.models.File: File Object.

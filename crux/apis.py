@@ -4,6 +4,7 @@ from typing import List, MutableMapping, Optional, Text, Union  # noqa: F401
 
 from crux._client import CruxClient
 from crux._config import CruxConfig
+from crux._utils import create_logger
 from crux._utils import Headers
 from crux.models import Dataset, File, Folder, Identity, Job
 from crux.models._factory import get_resource_object
@@ -15,6 +16,8 @@ from crux.exceptions import (
     CruxClientTooManyRedirects,
     CruxResourceNotFoundError,
 )
+
+log = create_logger(__name__)
 
 
 class Crux(object):
@@ -156,7 +159,8 @@ class Crux(object):
                 model=None,
                 headers=headers,
                 ).json()
-            except CruxAPIError:
+            except CruxAPIError as err:
+                log.debug( "Get subscriptions failed: %s", err)
                 break
 
             for dataset in resp:
@@ -171,6 +175,7 @@ class Crux(object):
         if dataset_list:
             return dataset_list
 
+        # Try legacy tables
         datasets = self._call_drives_my()
 
         if owned:

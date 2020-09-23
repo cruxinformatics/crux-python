@@ -143,21 +143,31 @@ class Crux(object):
 
         # Prefer domainV2 for data source
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
-        try:
-            response = self.api_client.api_call(
+        pagesize = 100
+        params = {"limit": pagesize}
+        retrieved = 0
+        while True:
+            params["offset"] = retrieved
+            try:
+                resp = self.api_client.api_call(
                 "GET",
                 ["v2", "client", "subscriptions", "view", "summary"],
+                params=params,
                 model=None,
                 headers=headers,
-                params={"limit": 100000},
-            )
-            subscriptions = response.json()
-        except CruxAPIError:
-            subscriptions = []
-        for dataset in subscriptions:
-            dataset["name"] = dataset["datasetName"]
-            obj = Dataset.from_dict(dataset, connection=self.api_client)
-            dataset_list.append(obj)
+                ).json()
+            except CruxAPIError:
+                break
+
+            for dataset in resp:
+                dataset["name"] = dataset["datasetName"]
+                obj = Dataset.from_dict(dataset, connection=self.api_client)
+                dataset_list.append(obj)
+
+            respcnt = len(resp)
+            retrieved += respcnt
+            if respcnt < pagesize:
+                break
         if dataset_list:
             return dataset_list
 

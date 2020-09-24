@@ -4,6 +4,7 @@ from typing import List, MutableMapping, Optional, Text, Union  # noqa: F401
 
 from crux._client import CruxClient
 from crux._config import CruxConfig
+from crux._utils import create_logger
 from crux._utils import Headers
 from crux.models import Dataset, File, Folder, Identity, Job
 from crux.models._factory import get_resource_object
@@ -15,6 +16,8 @@ from crux.exceptions import (
     CruxClientTooManyRedirects,
     CruxResourceNotFoundError,
 )
+
+log = create_logger(__name__)
 
 
 class Crux(object):
@@ -143,23 +146,36 @@ class Crux(object):
 
         # Prefer domainV2 for data source
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
-        try:
-            response = self.api_client.api_call(
-                "GET",
-                ["v2", "client", "subscriptions", "view", "summary"],
-                model=None,
-                headers=headers,
-            )
-            subscriptions = response.json()
-        except CruxAPIError:
-            subscriptions = []
-        for dataset in subscriptions:
-            dataset["name"] = dataset["datasetName"]
-            obj = Dataset.from_dict(dataset, connection=self.api_client)
-            dataset_list.append(obj)
+        pagesize = 100
+        params = {"limit": pagesize}
+        retrieved = 0
+        while True:
+            params["offset"] = retrieved
+            try:
+                resp = self.api_client.api_call(
+                    "GET",
+                    ["v2", "client", "subscriptions", "view", "summary"],
+                    params=params,
+                    model=None,
+                    headers=headers,
+                ).json()
+            except CruxAPIError as err:
+                log.debug("Get subscriptions failed: %s", err)
+                break
+
+            for dataset in resp:
+                dataset["name"] = dataset["datasetName"]
+                obj = Dataset.from_dict(dataset, connection=self.api_client)
+                dataset_list.append(obj)
+
+            respcnt = len(resp)
+            retrieved += respcnt
+            if respcnt < pagesize:
+                break
         if dataset_list:
             return dataset_list
 
+        # Try legacy tables
         datasets = self._call_drives_my()
 
         if owned:

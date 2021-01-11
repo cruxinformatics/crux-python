@@ -70,17 +70,15 @@ class CruxConfig(object):
 
         if api_prefix is None:
             self.api_prefix = os.environ.get("CRUX_API_PREFIX", "plat-api")
-            log.trace("Setting API prefix to %s", self.api_prefix)
         else:
             self.api_prefix = api_prefix
-            log.trace("Setting API prefix to %s", self.api_prefix)
+        log.trace("Setting API prefix to %s", self.api_prefix)
 
         if api_prefix_v2 is None:
             self.api_prefix_v2 = os.environ.get("CRUX_API_PREFIX_V2", "v2")
-            log.trace("Setting API prefix-v2 to %s", self.api_prefix_v2)
         else:
             self.api_prefix_v2 = api_prefix_v2
-            log.trace("Setting API prefix-v2 to %s", self.api_prefix_v2)
+        log.trace("Setting API prefix-v2 to %s", self.api_prefix_v2)
 
         if user_agent is None:
             self.user_agent = self._default_user_agent()

@@ -1,0 +1,12 @@
+conn.whoami(), identities/whoami
+conn.list_datasets(), v2/client/subscriptions/view/summary drives/my
+conn.find_resources_by_label(), datasets/{id}/labels/search
+conn.get_dataset(), datasets/{id}
+conn.get_dataset().get_files_range(), deliveries/{id}/ids deliveries/{id}/{delivery_id}/data resources/get-batch
+conn.get_dataset().download_files(), resources
+conn.get_dataset().list_permissions(), datasets/{id}/permissions
+conn.get_resource(), resources/{id}
+conn.get_resource().download(), resources/{id}/content
+conn.get_resource().iter_content(), resources/{id}/content-url
+conn.get_resource().list_permissions(), resources/{id}/permissions
+

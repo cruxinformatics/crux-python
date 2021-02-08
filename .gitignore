@@ -34,3 +34,5 @@ __pycache__/
 .mypy_cache/
 /pip-wheel-metadata/
 /.env
+
+/tests/regression/client.env

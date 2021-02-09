@@ -134,3 +134,12 @@ make format
 # Generate Sphinx HTML documentation
 make docs
 ```
+
+#### Running test scripts
+
+Manual testing scripts could be found at `tests/regression`.
+In order to run one, i.e. `client.py`, follow the steps:
+
+1. copy corresponding `.env.dist` file as `.env` file (if you plan to run `client.py`, copy `client.env.dist` as `client.env`)
+2. fill variables within `.env` file
+3. launch the script (while being in the `tests/regression` folder, execute `python client.py`)

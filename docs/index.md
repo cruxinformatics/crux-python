@@ -59,7 +59,6 @@ Details on specific topics:
 - [Dataset](dataset.md)
 - [Ingestion](ingestion.md)
 - [Downloading](downloading.md)
-- [Tables](tables.md)
 - [Exception Handling](exception_handling.md)
 - [Logging](logging.md)
 - [API Reference](modules.rst)

@@ -1188,30 +1188,13 @@ class Dataset(CruxModel):
 
         # look back a couple extra days in case query is performed over the weekend
         lookbacks = [
-            {
-                "start": codt - timedelta(days=3),
-                "end": None if cutoff_date is None else codt,
-            },
-            {
-                "start": codt - timedelta(days=16),
-                "end": codt - timedelta(days=4),
-            },
-            {
-                "start": codt - timedelta(days=32),
-                "end": codt - timedelta(days=17),
-            },
-            {
-                "start": codt - timedelta(days=92),
-                "end": codt - timedelta(days=33),
-            },
-            {
-                "start": codt - timedelta(days=212),
-                "end": codt - timedelta(days=93),
-            },
-            {
-                "start": codt - timedelta(days=366),
-                "end": codt - timedelta(days=213),
-            },
+            {"start": codt - timedelta(days=3), "end": None if cutoff_date is None else codt},
+            {"start": codt - timedelta(days=16), "end": codt - timedelta(days=4)},
+            {"start": codt - timedelta(days=32), "end": codt - timedelta(days=17)},
+            {"start": codt - timedelta(days=92), "end": codt - timedelta(days=33)},
+            {"start": codt - timedelta(days=212), "end": codt - timedelta(days=93)},
+            {"start": codt - timedelta(days=366), "end": codt - timedelta(days=213)},
+            {"start": None, "end": None},
         ]
 
         found_frames = set()
@@ -1241,7 +1224,7 @@ class Dataset(CruxModel):
 
     def get_files_range(
         self,
-        start_date,  # type: Union[datetime, str]
+        start_date,  # type: Optional[Union[datetime, str]]
         end_date=None,  # type: Optional[Union[datetime, str]]
         frames=None,  # type: Optional[Union[str, list]]
         file_format=MediaType.AVRO.value,  # type: str
@@ -1285,7 +1268,9 @@ class Dataset(CruxModel):
                 raise ValueError("Value of file_format is invalid")
 
         fullday = timedelta(minutes=23 * 60 + 59)
-        if isinstance(start_date, datetime):
+        if start_date is None:
+            stdt = None
+        elif isinstance(start_date, datetime):
             stdt = start_date.date()
         elif isinstance(start_date, str):
             try:
@@ -1294,7 +1279,7 @@ class Dataset(CruxModel):
                 raise ValueError("Value of start_date is invalid")
         else:
             raise ValueError("start_date must be str or datetime")
-        stdt = datetime(year=stdt.year, month=stdt.month, day=stdt.day)
+        stdt = None if stdt is None else datetime(year=stdt.year, month=stdt.month, day=stdt.day)
 
         if end_date is None:
             enddt = None
@@ -1365,7 +1350,7 @@ class Dataset(CruxModel):
                 if file.supplier_implied_dt is not None
                 else file.ingestion_time
             )
-            if dt < stdt.isoformat() or (enddt is not None and dt > enddt.isoformat()):
+            if (stdt is not None and dt < stdt.isoformat()) or (enddt is not None and dt > enddt.isoformat()):
                 continue
             best_deliveries = frame_resources[frame_id]["best_deliveries"]
             if (

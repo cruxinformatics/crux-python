@@ -28,7 +28,8 @@ def main():
     dataset_id = os.getenv("CRUX_DSID")
     dataset = CRUX_CLIENT.get_dataset(dataset_id)
 
-    ingestions = dataset.get_ingestions()
+    #  Optional delivery_status filter: "DELIVERY_SUCCEEDED", "DELIVERY_OBSOLETE", "DELIVERY_FAILED"
+    ingestions = dataset.get_ingestions(delivery_status=None)
 
     for ingestion in ingestions:
         log.info("Fetching delivery files for ingestion %s", ingestion.id)
@@ -82,7 +83,7 @@ def main():
     # Current Time
     end_date = datetime.now(timezone.utc).isoformat()
 
-    ingestions = dataset.get_ingestions(start_date=start_date, end_date=end_date)
+    ingestions = dataset.get_ingestions(start_date=start_date, end_date=end_date, delivery_status="DELIVERY_SUCCEEDED")
 
     for ingestion in ingestions:
         log.info("Fetching delivery files for ingestion %s", ingestion.id)
@@ -139,7 +140,7 @@ def main():
     # Current Time
     end_date = datetime.now(timezone.utc).isoformat()
 
-    ingestions = dataset.get_ingestions(start_date=start_date, end_date=end_date)
+    ingestions = dataset.get_ingestions(start_date=start_date, end_date=end_date, delivery_status="DELIVERY_SUCCEEDED")
 
     for ingestion in ingestions:
         log.info("Fetching delivery files for ingestion %s", ingestion.id)

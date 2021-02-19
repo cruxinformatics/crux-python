@@ -20,7 +20,7 @@ if os.path.exists(envfile_name):
 
 
 now = datetime.now().strftime('%Y.%m.%d-%H.%M.%S')
-logfile_name = f'client_regression_{now}.log'
+logfile_name = 'client_regression_{}.log'.format(now)
 logging.basicConfig(
     level=TRACE,
     filename=logfile_name,
@@ -53,7 +53,7 @@ def print_custom(message, style=print_styles['INFO'], move_caret=True):
     else:
         color = yellow
 
-    message = f"{color}{message}{end_symbol}"
+    message = "{}{}{}".format(color, message, end_symbol)
 
     if move_caret:
         message = message.ljust(100)
@@ -63,23 +63,23 @@ def print_custom(message, style=print_styles['INFO'], move_caret=True):
 
 
 def format_func_name(name):
-    return f'\"{name}\"'.ljust(40)
+    return '\"{}\"'.format(name).ljust(40)
 
 
 def print_pending(func_name):
-    print_custom(f"{format_func_name(func_name)}: checking...", move_caret=False)
+    print_custom("{}: checking...".format(format_func_name(func_name)), move_caret=False)
 
 
 def print_success(func_name):
-    print_custom(f"{format_func_name(func_name)}: success", print_styles['SUCCESS'])
+    print_custom("{}: success".format(format_func_name(func_name)), print_styles['SUCCESS'])
 
 
 def print_failure(func_name):
-    print_custom(f"{format_func_name(func_name)}: failure", print_styles['ERROR'])
+    print_custom("{}: failure".format(format_func_name(func_name)), print_styles['ERROR'])
 
 
 def print_info(func_name, message):
-    print_custom(f"{format_func_name(func_name)}: {message}")
+    print_custom("{}: {}".format(format_func_name(func_name), message))
 
 
 def run_tests():
@@ -113,9 +113,8 @@ def run_tests():
             raise ValueError('missing dataset for testing')
 
     def fetch_resource():
+        r_id = resource_id
         try:
-            r_id = resource_id
-
             if not r_id:
                 dataset = fetch_dataset()
                 resources = dataset.list_resources()
@@ -135,7 +134,7 @@ def run_tests():
         except TypeError:
             raise ValueError('missing resource for testing')
         except CruxAPIError as e:
-            if str(e) == f'{{\'statusCode\': 400, \'error\': \'Bad Request\', \'message\': \'Incorrect type - expected a resource. id={r_id}\', \'data\': \'Incorrect type - expected a resource. id={r_id}\'}}':
+            if str(e) == '{{\'statusCode\': 400, \'error\': \'Bad Request\', \'message\': \'Incorrect type - expected a resource. id={}\', \'data\': \'Incorrect type - expected a resource. id={}\'}}'.format(r_id, r_id):
                 log(e)
                 raise ValueError('missing resource for testing')
             else:
@@ -362,4 +361,4 @@ except Exception as err:
     log(err)
     print_custom('Error occurred during tests\' run: ' + str(err), print_styles['ERROR'])
 
-print_custom(f'\nLogs of the tests\' run could be found at "{logfile_name}".')
+print_custom('\nLogs of the tests\' run could be found at "{}".'.format(logfile_name))

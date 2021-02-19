@@ -1254,7 +1254,7 @@ class Dataset(CruxModel):
 
     def get_files_range(
         self,
-        start_date,  # type: Optional[Union[datetime, str]]
+        start_date=None,  # type: Optional[Union[datetime, str]]
         end_date=None,  # type: Optional[Union[datetime, str]]
         frames=None,  # type: Optional[Union[str, list]]
         file_format=MediaType.AVRO.value,  # type: str
@@ -1388,9 +1388,8 @@ class Dataset(CruxModel):
                 if file.supplier_implied_dt is not None
                 else file.ingestion_time
             )
-            if not latest_only and (
-                (stdt is not None and dt < stdt.isoformat())
-                or (enddt is not None and dt > enddt.isoformat())
+            if (not latest_only and stdt is not None and dt < stdt.isoformat()) or (
+                enddt is not None and dt > enddt.isoformat()
             ):
                 continue
             best_deliveries = frame_resources[frame_id]["best_deliveries"]

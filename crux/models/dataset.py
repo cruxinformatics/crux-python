@@ -289,7 +289,11 @@ class Dataset(CruxModel):
         """
         resource_name, folder_path = split_posixpath_filename_dirpath(path)
         resource_gen = self._list_resources(
-            folder=folder_path, limit=1, name=resource_name, include_folders=True, model=model,
+            folder=folder_path,
+            limit=1,
+            name=resource_name,
+            include_folders=True,
+            model=model,
         )
         try:
             return next(resource_gen)
@@ -666,7 +670,9 @@ class Dataset(CruxModel):
         if resource_ids or resource_objects or resource_paths:
             if resource_paths:
                 log.debug(
-                    "Add permission %s to %s for resource paths", permission, identity_id,
+                    "Add permission %s to %s for resource paths",
+                    permission,
+                    identity_id,
                 )
                 resource_ids = list()
                 for resource_path in resource_paths:
@@ -676,7 +682,9 @@ class Dataset(CruxModel):
 
             if resource_objects:
                 log.debug(
-                    "Add permissions %s to %s for resource objects", permission, identity_id,
+                    "Add permissions %s to %s for resource objects",
+                    permission,
+                    identity_id,
                 )
                 resource_ids = list()
                 for resource_object in resource_objects:
@@ -688,7 +696,10 @@ class Dataset(CruxModel):
                 body["resourceIds"] = resource_ids
         else:
             log.debug(
-                "Add permission %s to %s for dataset %s", permission, identity_id, self.id,
+                "Add permission %s to %s for dataset %s",
+                permission,
+                identity_id,
+                self.id,
             )
             body["datasetId"] = self.id
 
@@ -740,7 +751,9 @@ class Dataset(CruxModel):
         if resource_ids or resource_objects or resource_paths:
             if resource_paths:
                 log.debug(
-                    "Delete permission %s for %s from resource paths", permission, identity_id,
+                    "Delete permission %s for %s from resource paths",
+                    permission,
+                    identity_id,
                 )
                 resource_ids = list()
                 for resource_path in resource_paths:
@@ -761,7 +774,9 @@ class Dataset(CruxModel):
 
             if resource_ids:
                 log.debug(
-                    "Delete permission %s for %s from resource ids", permission, identity_id,
+                    "Delete permission %s for %s from resource ids",
+                    permission,
+                    identity_id,
                 )
                 body["resourceIds"] = resource_ids
         else:
@@ -827,7 +842,10 @@ class Dataset(CruxModel):
         """
         headers = {"Accept": "application/json"}  # type: MutableMapping[Text, Text]
         return self.connection.api_call(
-            "GET", ["datasets", self.id, "permissions"], model=Permission, headers=headers,
+            "GET",
+            ["datasets", self.id, "permissions"],
+            model=Permission,
+            headers=headers,
         )
 
     def add_label(self, label_key, label_value):
@@ -843,7 +861,9 @@ class Dataset(CruxModel):
         """
         headers = Headers({"content-type": "application/json", "accept": "application/json"})
         return self.connection.api_call(
-            "PUT", ["datasets", self.id, "labels", label_key, label_value], headers=headers,
+            "PUT",
+            ["datasets", self.id, "labels", label_key, label_value],
+            headers=headers,
         )
 
     def delete_label(self, label_key):
@@ -873,7 +893,10 @@ class Dataset(CruxModel):
         """
         headers = Headers({"content-type": "application/json", "accept": "application/json"})
         return self.connection.api_call(
-            "GET", ["datasets", self.id, "labels", label_key], headers=headers, model=Label,
+            "GET",
+            ["datasets", self.id, "labels", label_key],
+            headers=headers,
+            model=Label,
         )
 
     def find_resources_by_label(self, predicates, max_per_page=1000):
@@ -972,7 +995,12 @@ class Dataset(CruxModel):
                 return
 
     def stitch(
-        self, source_resources, destination_resource, labels=None, tags=None, description=None,
+        self,
+        source_resources,
+        destination_resource,
+        labels=None,
+        tags=None,
+        description=None,
     ):
         # type: (List[Union[str, File]], str, str, List[str], str) -> Tuple[File, str]
         """Method which stitches multiple Avro resources into single Avro resource
@@ -1189,11 +1217,11 @@ class Dataset(CruxModel):
         # look back a couple extra days in case query is performed over the weekend
         lookbacks = [
             {"start": codt - timedelta(days=3), "end": None if cutoff_date is None else codt},
-            {"start": codt - timedelta(days=16), "end": codt - timedelta(days=4)},
-            {"start": codt - timedelta(days=32), "end": codt - timedelta(days=17)},
-            {"start": codt - timedelta(days=92), "end": codt - timedelta(days=33)},
-            {"start": codt - timedelta(days=212), "end": codt - timedelta(days=93)},
-            {"start": codt - timedelta(days=366), "end": codt - timedelta(days=213)},
+            {"start": codt - timedelta(days=16), "end": codt - timedelta(days=3)},
+            {"start": codt - timedelta(days=32), "end": codt - timedelta(days=16)},
+            {"start": codt - timedelta(days=92), "end": codt - timedelta(days=32)},
+            {"start": codt - timedelta(days=212), "end": codt - timedelta(days=92)},
+            {"start": codt - timedelta(days=366), "end": codt - timedelta(days=212)},
             {"start": None, "end": None},
         ]
 
@@ -1219,7 +1247,9 @@ class Dataset(CruxModel):
                 break
         if frames is not None and found_frames and not found_frames.issuperset(frames):
             unused_frames = found_frames - frames
-            log.info(f"One or more specified frames not found. Unused frames: %s", unused_frames)
+            log.info(
+                f"One or more specified frames not found. Unused frames: %s", unused_frames
+            )
         return found_files
 
     def get_files_range(
@@ -1279,7 +1309,9 @@ class Dataset(CruxModel):
                 raise ValueError("Value of start_date is invalid")
         else:
             raise ValueError("start_date must be str or datetime")
-        stdt = None if stdt is None else datetime(year=stdt.year, month=stdt.month, day=stdt.day)
+        stdt = (
+            None if stdt is None else datetime(year=stdt.year, month=stdt.month, day=stdt.day)
+        )
 
         if end_date is None:
             enddt = None
@@ -1292,7 +1324,11 @@ class Dataset(CruxModel):
                 raise ValueError("Value of end_date is invalid")
         else:
             raise ValueError("date must be str or datetime")
-        enddt = None if enddt is None else datetime(year=enddt.year, month=enddt.month, day=enddt.day) + fullday
+        enddt = (
+            None
+            if enddt is None
+            else datetime(year=enddt.year, month=enddt.month, day=enddt.day) + fullday
+        )
 
         headers = Headers({"accept": "application/json"})
         delivery_status = "DELIVERY_SUCCEEDED" if delivery_status is None else delivery_status
@@ -1341,7 +1377,9 @@ class Dataset(CruxModel):
             process_frames = frames.intersection(found_frames)
             if found_frames and not found_frames.issuperset(frames):
                 unused_frames = found_frames - frames
-                log.info("One or more specified frames not found. Unused frames: %s", unused_frames)
+                log.info(
+                    "One or more specified frames not found. Unused frames: %s", unused_frames
+                )
         resource_ids = [i for s in process_frames for i in frame_resources[s]["resource_ids"]]
         for file in self.get_resources_batch(resource_ids):
             frame_id = file.frame_id.upper()
@@ -1350,7 +1388,10 @@ class Dataset(CruxModel):
                 if file.supplier_implied_dt is not None
                 else file.ingestion_time
             )
-            if (stdt is not None and dt < stdt.isoformat()) or (enddt is not None and dt > enddt.isoformat()):
+            if not latest_only and (
+                (stdt is not None and dt < stdt.isoformat())
+                or (enddt is not None and dt > enddt.isoformat())
+            ):
                 continue
             best_deliveries = frame_resources[frame_id]["best_deliveries"]
             if (

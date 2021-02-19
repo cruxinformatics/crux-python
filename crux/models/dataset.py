@@ -1248,7 +1248,7 @@ class Dataset(CruxModel):
         if frames is not None and found_frames and not found_frames.issuperset(frames):
             unused_frames = found_frames - frames
             log.info(
-                f"One or more specified frames not found. Unused frames: %s", unused_frames
+                "One or more specified frames not found. Unused frames: %s", unused_frames
             )
         return found_files
 

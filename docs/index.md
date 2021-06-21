@@ -2,11 +2,9 @@
 
 A Python library for interacting with the Crux platform.
 
-The aim of this client is to be a Pythonic way to use the Crux API reliably. It covers core functionality, such as uploading and downloading files, but does not cover all API functionality. It isn't an SDK.
+The aim of this module is to be a Pythonic way to use the Crux API reliably. It covers client functionality including scanning subscriptions, getting delivery status, and downloading files.
 
-Python 3.6+ is recommended. Python 2.7 and 3.5 are supported but deprecated, with support planned for removal in early-2020 and mid-2020 respectively.
-
-**This library is ALPHA.** Breaking changes are expected. Pin to a specific version when using this library, and test upgrades thoroughly.
+Python 3.6+ is supported.
 
 Source code is available on GitHub at [github.com/cruxinformatics/crux-python](https://github.com/cruxinformatics/crux-python).
 

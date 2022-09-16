@@ -1,7 +1,5 @@
-"""Module contains Dataset model."""
-
 from collections import defaultdict
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from dateutil import parser
 import json
 import os
@@ -22,6 +20,7 @@ from typing import (
 )  # noqa: F401
 
 from crux._compat import unicode
+from crux._config import CruxConfig
 from crux._utils import (
     create_logger,
     DELIVERY_ID_REGEX,
@@ -188,7 +187,7 @@ class Dataset(CruxModel):
         # type () -> bool
         headers = Headers({"content-type": "application/json", "accept": "application/json"})
         dataset_object = self.connection.api_call(
-            "GET", ["datasets", self.id], headers=headers, model=Resource
+            "GET", [CruxConfig.v1_client, "datasets", self.id], headers=headers, model=Resource
         )
 
         self.raw_model = dataset_object.raw_model
@@ -1106,7 +1105,10 @@ class Dataset(CruxModel):
             raise ValueError("Value of delivery_id is invalid")
 
         return self.connection.api_call(
-            "GET", ["deliveries", self.id, delivery_id], headers=headers, model=Delivery
+            "GET",
+            [CruxConfig.v1_client, "deliveries", self.id, delivery_id],
+            headers=headers,
+            model=Delivery,
         )
 
     def get_ingestions(
@@ -1137,7 +1139,10 @@ class Dataset(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
+            "GET",
+            [CruxConfig.v1_client, "deliveries", self.id, "ids"],
+            headers=headers,
+            params=params,
         )
 
         response_json = response.json()

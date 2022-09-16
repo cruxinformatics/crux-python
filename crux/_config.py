@@ -21,6 +21,11 @@ class CruxConfig(object):
     Crux Configuration Class.
     """
 
+    v1_client = "v1/client"
+    v1_ops = "v1/ops"
+    v2_client = "v1/client"
+    v2_ops = "v2/ops"
+
     def __init__(  # pylint: disable=too-many-branches
         self,
         api_key=None,  # type: Optional[str]
@@ -30,7 +35,6 @@ class CruxConfig(object):
         user_agent=None,  # type: str
         only_use_crux_domains=None,  # type: bool
         session=None,  # type: requests.Session
-        api_prefix_v2=None,  # type: str
     ):
         # type: (...) -> None
         """
@@ -60,9 +64,7 @@ class CruxConfig(object):
             log.trace("API KEY: %s", self.api_key)
 
         if api_host is None:
-            self.api_host = os.environ.get(
-                "CRUX_API_HOST", "https://api.cruxinformatics.com"
-            )
+            self.api_host = os.environ.get("CRUX_API_HOST", "https://api.cruxinformatics.com")
             log.debug("Setting API host to %s", self.api_host)
         else:
             self.api_host = api_host
@@ -74,12 +76,6 @@ class CruxConfig(object):
             self.api_prefix = api_prefix
         log.trace("Setting API prefix to %s", self.api_prefix)
 
-        if api_prefix_v2 is None:
-            self.api_prefix_v2 = os.environ.get("CRUX_API_PREFIX_V2", "v2")
-        else:
-            self.api_prefix_v2 = api_prefix_v2
-        log.trace("Setting API prefix-v2 to %s", self.api_prefix_v2)
-
         if user_agent is None:
             self.user_agent = self._default_user_agent()
             log.debug("Setting User Agent to %s", self.user_agent)
@@ -87,9 +83,7 @@ class CruxConfig(object):
             self.user_agent = user_agent
             log.debug("Setting User Agent to %s", self.user_agent)
 
-        self.proxies = (
-            proxies if proxies else {}
-        )  # type: Optional[MutableMapping[Text, Text]]
+        self.proxies = proxies if proxies else {}  # type: Optional[MutableMapping[Text, Text]]
 
         if only_use_crux_domains is None:
             self.only_use_crux_domains = str_to_bool(

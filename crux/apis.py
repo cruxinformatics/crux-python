@@ -59,7 +59,10 @@ class Crux(object):
             {"accept": "application/json"}
         )  # type: Optional[MutableMapping[Text, Text]]
         return self.api_client.api_call(
-            "GET", ["identities", "whoami"], model=Identity, headers=headers
+            "GET",
+            [CruxConfig.v1_client, "identities", "profile"],
+            model=Identity,
+            headers=headers,
         )
 
     def create_dataset(self, name, description=None, tags=None):
@@ -93,7 +96,7 @@ class Crux(object):
         """
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
         return self.api_client.api_call(
-            "GET", ["datasets", id], model=Dataset, headers=headers
+            "GET", [CruxConfig.v1_ops, "datasets", id], model=Dataset, headers=headers
         )
 
     def get_resource(self, id):  # id is by design pylint: disable=redefined-builtin
@@ -112,7 +115,9 @@ class Crux(object):
         """
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
 
-        response = self.api_client.api_call("GET", ["resources", id], headers=headers)
+        response = self.api_client.api_call(
+            "GET", [CruxConfig.v1_client, "resources", id], headers=headers
+        )
         raw_resource = response.json()
 
         resource = get_resource_object(
@@ -126,7 +131,7 @@ class Crux(object):
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
 
         response = self.api_client.api_call(
-            "GET", ["drives", "my"], model=None, headers=headers
+            "GET", [CruxConfig.v1_ops, "drives", "my"], model=None, headers=headers
         )
 
         return response.json()
@@ -154,7 +159,7 @@ class Crux(object):
             try:
                 resp = self.api_client.api_call(
                     "GET",
-                    ["v2", "client", "subscriptions", "view", "summary"],
+                    [CruxConfig.v2_client, "subscriptions", "view", "summary"],
                     params=params,
                     model=None,
                     headers=headers,
@@ -217,7 +222,7 @@ class Crux(object):
 
     def set_datasets_provenance(self, provenance):
         # type(Dict[Any, Any]) -> Dict[Any, Any]
-        """ Sets the Dataset Provenance
+        """Sets the Dataset Provenance
 
         Args:
             provenance (dict): Provenance dictionary

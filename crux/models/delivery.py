@@ -3,6 +3,7 @@
 from typing import Dict, Iterator
 
 from crux._client import CruxClient
+from crux._config import CruxConfig
 from crux.models.file import File
 from crux.models.model import CruxModel
 from crux.models.resource import MediaType, Resource
@@ -51,7 +52,7 @@ class Delivery(CruxModel):
         """dict: Gets the Delivery Summary"""
         if self._summary is None:
             response = self.connection.api_call(
-                "GET", ["deliveries", self.dataset_id, self.id]
+                "GET", [CruxConfig.v1_client, "deliveries", self.dataset_id, self.id]
             )
             self._summary = response.json()
         return self._summary
@@ -73,7 +74,7 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", ["deliveries", self.dataset_id, self.id, "data"], params=params
+            "GET", [CruxConfig.v1_client, "deliveries", self.dataset_id, self.id, "data"], params=params
         )
 
         resource_list = response.json()["resources"]
@@ -100,7 +101,7 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", ["deliveries", self.dataset_id, self.id, "raw"], params=params
+            "GET", [CruxConfig.v1_client, "deliveries", self.dataset_id, self.id, "raw"], params=params
         )
 
         resource_list = response.json()["resource_ids"]
@@ -128,7 +129,7 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", ["deliveries", self.id, "log"], params=params
+            "GET", [CruxConfig.v1_client, "deliveries", self.id, "log"], params=params
         )
 
         healthlog_list = response.json()

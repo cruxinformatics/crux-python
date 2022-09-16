@@ -96,18 +96,11 @@ class CruxClient(object):
         if path is None or not isinstance(path, list) or len(path) <= 0:
             raise TypeError("Path cannot be of NoneType. It should be a List")
 
-        if path[0] == "v2":
-            url = url_builder(
-                url_base=self.crux_config.api_host,
-                url_prefix=self.crux_config.api_prefix_v2,
-                url_path_list=path[1:],
-            )
-        else:
-            url = url_builder(
-                url_base=self.crux_config.api_host,
-                url_prefix=self.crux_config.api_prefix,
-                url_path_list=path,
-            )
+        url = url_builder(
+            url_base=self.crux_config.api_host,
+            url_prefix=None if path[0] not in ["v1", "v2"] else self.crux_config.api_prefix,
+            url_path_list=path,
+        )
 
         if headers is None:
             headers = Headers({})

@@ -52,7 +52,7 @@ class Delivery(CruxModel):
         """dict: Gets the Delivery Summary"""
         if self._summary is None:
             response = self.connection.api_call(
-                "GET", [CruxConfig.v1_client, "deliveries", self.dataset_id, self.id]
+                "GET", CruxConfig.v1_client + ["deliveries", self.dataset_id, self.id]
             )
             self._summary = response.json()
         return self._summary
@@ -74,7 +74,9 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", [CruxConfig.v1_client, "deliveries", self.dataset_id, self.id, "data"], params=params
+            "GET",
+            CruxConfig.v1_client + ["deliveries", self.dataset_id, self.id, "data"],
+            params=params,
         )
 
         resource_list = response.json()["resources"]
@@ -101,16 +103,16 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", [CruxConfig.v1_client, "deliveries", self.dataset_id, self.id, "raw"], params=params
+            "GET",
+            CruxConfig.v1_client + ["deliveries", self.dataset_id, self.id, "raw"],
+            params=params,
         )
 
         resource_list = response.json()["resource_ids"]
 
         if resource_list:
             for resource in resource_list:
-                obj = File(
-                    raw_model={"resourceId": resource}, connection=self.connection
-                )
+                obj = File(raw_model={"resourceId": resource}, connection=self.connection)
                 obj.refresh()
                 yield obj
 
@@ -129,7 +131,7 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", [CruxConfig.v1_client, "deliveries", self.id, "log"], params=params
+            "GET", CruxConfig.v1_client + ["deliveries", self.id, "log"], params=params
         )
 
         healthlog_list = response.json()

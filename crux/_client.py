@@ -98,7 +98,7 @@ class CruxClient(object):
 
         url = url_builder(
             url_base=self.crux_config.api_host,
-            url_prefix=None if path[0] not in ["v1", "v2"] else self.crux_config.api_prefix,
+            url_prefix=None if path[0] in ["v1", "v2"] else self.crux_config.api_prefix,
             url_path_list=path,
         )
 
@@ -181,9 +181,9 @@ class CruxClient(object):
         elif response.status_code == 204:
             log.debug("Response code is 204, returning True boolean value")
             return True
+        elif response.status_code == 404:
+            raise CruxResourceNotFoundError(response.json())
         else:
-            if response.status_code == 404:
-                raise CruxResourceNotFoundError(response.json())
             raise CruxAPIError(response.json())
 
     def close(self):

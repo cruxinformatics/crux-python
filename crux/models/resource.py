@@ -8,6 +8,7 @@ from typing import Dict, List, Union  # noqa: F401
 from requests.models import Response  # noqa: F401 pylint: disable=unused-import
 
 from crux._client import CruxClient
+from crux._config import CruxConfig
 from crux._utils import create_logger, DEFAULT_CHUNK_SIZE, Headers
 from crux.models.model import CruxModel
 from crux.models.permission import Permission
@@ -367,7 +368,7 @@ class Resource(CruxModel):
             headers = None
 
         data = self.connection.api_call(
-            "GET", ["resources", self.id, "content"], headers=headers, stream=True
+            "GET", CruxConfig.v1_client + ["resources", self.id, "content"], headers=headers, stream=True
         )
 
         for chunk in data.iter_content(chunk_size=chunk_size):

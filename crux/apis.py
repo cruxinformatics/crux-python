@@ -60,7 +60,7 @@ class Crux(object):
         )  # type: Optional[MutableMapping[Text, Text]]
         return self.api_client.api_call(
             "GET",
-            [CruxConfig.v1_client, "identities", "profile"],
+            CruxConfig.v1_client + ["identities", "profile"],
             model=Identity,
             headers=headers,
         )
@@ -96,7 +96,7 @@ class Crux(object):
         """
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
         return self.api_client.api_call(
-            "GET", [CruxConfig.v1_ops, "datasets", id], model=Dataset, headers=headers
+            "GET", CruxConfig.v1_ops + ["datasets", id], model=Dataset, headers=headers
         )
 
     def get_resource(self, id):  # id is by design pylint: disable=redefined-builtin
@@ -116,7 +116,7 @@ class Crux(object):
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
 
         response = self.api_client.api_call(
-            "GET", [CruxConfig.v1_client, "resources", id], headers=headers
+            "GET", CruxConfig.v1_client + ["resources", id], headers=headers
         )
         raw_resource = response.json()
 
@@ -131,7 +131,7 @@ class Crux(object):
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
 
         response = self.api_client.api_call(
-            "GET", [CruxConfig.v1_ops, "drives", "my"], model=None, headers=headers
+            "GET", CruxConfig.v1_ops + ["drives", "my"], model=None, headers=headers
         )
 
         return response.json()
@@ -159,7 +159,7 @@ class Crux(object):
             try:
                 resp = self.api_client.api_call(
                     "GET",
-                    [CruxConfig.v2_client, "subscriptions", "view", "summary"],
+                    CruxConfig.v2_client + ["subscriptions", "view", "summary"],
                     params=params,
                     model=None,
                     headers=headers,

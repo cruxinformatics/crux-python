@@ -21,10 +21,10 @@ class CruxConfig(object):
     Crux Configuration Class.
     """
 
-    v1_client = "v1/client"
-    v1_ops = "v1/ops"
-    v2_client = "v1/client"
-    v2_ops = "v2/ops"
+    v1_client = ["v1", "client"]
+    v1_ops = ["v1", "ops"]
+    v2_client = ["v2", "client"]
+    v2_ops = ["v2", "ops"]
 
     def __init__(  # pylint: disable=too-many-branches
         self,

@@ -187,7 +187,7 @@ class Dataset(CruxModel):
         # type () -> bool
         headers = Headers({"content-type": "application/json", "accept": "application/json"})
         dataset_object = self.connection.api_call(
-            "GET", [CruxConfig.v1_client, "datasets", self.id], headers=headers, model=Resource
+            "GET", CruxConfig.v1_client + ["datasets", self.id], headers=headers, model=Resource
         )
 
         self.raw_model = dataset_object.raw_model
@@ -1106,7 +1106,7 @@ class Dataset(CruxModel):
 
         return self.connection.api_call(
             "GET",
-            [CruxConfig.v1_client, "deliveries", self.id, delivery_id],
+            CruxConfig.v1_client + ["deliveries", self.id, delivery_id],
             headers=headers,
             model=Delivery,
         )
@@ -1140,7 +1140,7 @@ class Dataset(CruxModel):
 
         response = self.connection.api_call(
             "GET",
-            [CruxConfig.v1_client, "deliveries", self.id, "ids"],
+            CruxConfig.v1_client + ["deliveries", self.id, "ids"],
             headers=headers,
             params=params,
         )

@@ -1335,7 +1335,7 @@ class Dataset(CruxModel):
         use_cache = True if use_cache is None else use_cache
         params = {
             "start_date": datetime.isoformat(stdt),
-            "end_date": None if enddt is None else enddt + timedelta(days=3),
+            "end_date": None if enddt is None else datetime.isoformat(enddt) + timedelta(days=3),
             "delivery_status": delivery_status,
             "use_cache": use_cache,
         }

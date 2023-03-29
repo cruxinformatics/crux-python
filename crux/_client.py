@@ -102,6 +102,12 @@ class CruxClient(object):
                 url_prefix=self.crux_config.api_prefix_v2,
                 url_path_list=path[1:],
             )
+        elif path[0] == "v1":
+            url = url_builder(
+                url_base=self.crux_config.api_host,
+                url_prefix=self.crux_config.api_prefix_v1,
+                url_path_list=path[1:],
+            )
         else:
             url = url_builder(
                 url_base=self.crux_config.api_host,
@@ -129,6 +135,7 @@ class CruxClient(object):
         headers["user-agent"] = user_agent
 
         session = self.crux_config.session
+
 
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:

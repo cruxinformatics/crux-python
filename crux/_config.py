@@ -31,6 +31,7 @@ class CruxConfig(object):
         only_use_crux_domains=None,  # type: bool
         session=None,  # type: requests.Session
         api_prefix_v2=None,  # type: str
+        api_prefix_v1=None, #type: str
     ):
         # type: (...) -> None
         """
@@ -80,6 +81,12 @@ class CruxConfig(object):
             self.api_prefix_v2 = api_prefix_v2
         log.trace("Setting API prefix-v2 to %s", self.api_prefix_v2)
 
+        if api_prefix_v1 is None:
+            self.api_prefix_v1 = os.environ.get("CRUX_API_PREFIX_V2", "v1/client")
+        else:
+            self.api_prefix_v1 = api_prefix_v1
+
+        log.trace("Setting API prefix-v2 to %s", self.api_prefix_v2)
         if user_agent is None:
             self.user_agent = self._default_user_agent()
             log.debug("Setting User Agent to %s", self.user_agent)

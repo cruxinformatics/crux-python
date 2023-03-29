@@ -1334,13 +1334,13 @@ class Dataset(CruxModel):
         delivery_status = "DELIVERY_SUCCEEDED" if delivery_status is None else delivery_status
         use_cache = True if use_cache is None else use_cache
         params = {
-            "start_date": stdt,
+            "start_date": datetime.isoformat(stdt),
             "end_date": None if enddt is None else enddt + timedelta(days=3),
             "delivery_status": delivery_status,
             "use_cache": use_cache,
         }
         response = self.connection.api_call(
-            "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
+            "GET", ["v1", "deliveries", self.id, "ids"], headers=headers, params=params
         )
         response_json = response.json()
         if isinstance(response_json, dict):
@@ -1356,7 +1356,7 @@ class Dataset(CruxModel):
                 raise ValueError("Value of delivery_id is invalid")
             params = {"delivery_resource_format": file_format}
             response = self.connection.api_call(
-                "GET", ["deliveries", self.id, delivery_id, "data"], params=params
+                "GET", ["v1", "deliveries", self.id, delivery_id, "data"], params=params
             )
             data = response.json()
             for item in data["resources"]:

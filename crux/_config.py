@@ -82,7 +82,7 @@ class CruxConfig(object):
         log.trace("Setting API prefix-v2 to %s", self.api_prefix_v2)
 
         if api_prefix_v1 is None:
-            self.api_prefix_v1 = os.environ.get("CRUX_API_PREFIX_V2", "v1/client")
+            self.api_prefix_v1 = os.environ.get("CRUX_API_PREFIX_V1", "v1/client")
         else:
             self.api_prefix_v1 = api_prefix_v1
 

@@ -51,13 +51,10 @@ def url_builder(url_base, url_prefix, url_path_list):
         str: Valid Percent Encoded URL.
     """
 
-    if 'v1' in url_prefix:
+    if  url_prefix:
         valid_url = [url_base, url_prefix]
-    elif url_prefix:
-        valid_url = [url_base, quote(url_prefix)]
     else:
         valid_url = [url_base]
-
     valid_url_path_list = []
 
     for component in url_path_list:

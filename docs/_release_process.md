@@ -23,15 +23,15 @@ Search the code to find all references to the current version, for example:
 ```
 $ rg -F '1.1'
 README.md
-27:pipenv install "crux==1.1"
+27:pipenv install "crux==1.2"
 
 docs/index.md
-27:pipenv install "crux==1.1"
+27:pipenv install "crux==1.2"
 
 docs/installation.md
-20:pipenv install "crux==1.1"
+20:pipenv install "crux==1.2"
 26:crux = "==1.1"
-36:python3 -m pip install "crux==1.1"
+36:python3 -m pip install "crux==1.2"
 
 crux/__version__.py
 3:__version__ = "1.1"

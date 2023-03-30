@@ -154,7 +154,7 @@ class Crux(object):
             try:
                 resp = self.api_client.api_call(
                     "GET",
-                    ["v2", "client", "subscriptions", "view", "summary"],
+                    ["v2", "subscriptions", "view", "summary"],
                     params=params,
                     model=None,
                     headers=headers,

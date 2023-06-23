@@ -164,7 +164,7 @@ class Resource(CruxModel):
             bool: True if it is deleted.
         """
         headers = Headers({"content-type": "application/json", "accept": "application/json"})
-        return self.connection.api_call("DELETE", ["resources", self.id], headers=headers)
+        return self.connection.api_call("DELETE", ["v1", "resources", self.id], headers=headers)
 
     def update(self, name=None, description=None, tags=None, provenance=None):
         # type: (str, str, List[str], str) -> bool
@@ -200,7 +200,7 @@ class Resource(CruxModel):
         log.debug("Body %s", body)
 
         resource_object = self.connection.api_call(
-            "PUT", ["resources", self.id], headers=headers, json=body, model=Resource
+            "PUT", ["v1", "resources", self.id], headers=headers, json=body, model=Resource
         )
 
         self.raw_model = resource_object.raw_model
@@ -270,6 +270,7 @@ class Resource(CruxModel):
         response_result = self.connection.api_call(
             "PUT",
             [
+                "v1",
                 "datasets",
                 self.dataset_id,
                 "resources",
@@ -300,7 +301,7 @@ class Resource(CruxModel):
         headers = Headers({"content-type": "application/json", "accept": "application/json"})
         response_result = self.connection.api_call(
             "DELETE",
-            ["datasets", self.dataset_id, "resources", self.id, "labels", label_key],
+            ["v1", "datasets", self.dataset_id, "resources", self.id, "labels", label_key],
             headers=headers,
         )
 
@@ -334,7 +335,7 @@ class Resource(CruxModel):
 
         response_result = self.connection.api_call(
             "PUT",
-            ["datasets", self.dataset_id, "resources", self.id, "labels"],
+            ["v1", "datasets", self.dataset_id, "resources", self.id, "labels"],
             headers=headers,
             json=data,
         )
@@ -354,7 +355,7 @@ class Resource(CruxModel):
         """
         headers = Headers({"content-type": "application/json", "accept": "application/json"})
         response = self.connection.api_call(
-            "GET", ["resources", self.id, "folderpath"], headers=headers
+            "GET", ["v1", "resources", self.id, "folderpath"], headers=headers
         )
 
         return response.json().get("path")
@@ -367,7 +368,7 @@ class Resource(CruxModel):
             headers = None
 
         data = self.connection.api_call(
-            "GET", ["resources", self.id, "content"], headers=headers, stream=True
+            "GET", ["v1", "resources", self.id, "content"], headers=headers, stream=True
         )
 
         for chunk in data.iter_content(chunk_size=chunk_size):
@@ -385,7 +386,7 @@ class Resource(CruxModel):
         # type () -> bool
         headers = Headers({"content-type": "application/json", "accept": "application/json"})
         resource_object = self.connection.api_call(
-            "GET", ["resources", self.id], headers=headers, model=Resource
+            "GET", ["v1", "resources", self.id], headers=headers, model=Resource
         )
 
         self.raw_model = resource_object.raw_model

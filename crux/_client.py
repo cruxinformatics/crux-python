@@ -136,8 +136,6 @@ class CruxClient(object):
         headers["user-agent"] = user_agent
 
         session = self.crux_config.session
-
-
         if method in ("GET", "DELETE", "PUT", "POST"):
             try:
                 log.trace("Setting request stream: %s", stream)

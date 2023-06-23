@@ -59,4 +59,4 @@ Details on specific topics:
 - [Downloading](downloading.md)
 - [Exception Handling](exception_handling.md)
 - [Logging](logging.md)
-- [API Reference](modules.rst)
+## - [API Reference](modules.rst)

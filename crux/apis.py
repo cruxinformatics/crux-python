@@ -112,7 +112,7 @@ class Crux(object):
         """
         headers = Headers({"accept": "application/json"})  # type: MutableMapping[Text, Text]
 
-        response = self.api_client.api_call("GET", ["resources", id], headers=headers)
+        response = self.api_client.api_call("GET", ["v1", "resources", id], headers=headers)
         raw_resource = response.json()
 
         resource = get_resource_object(

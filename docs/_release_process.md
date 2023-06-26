@@ -23,18 +23,18 @@ Search the code to find all references to the current version, for example:
 ```
 $ rg -F '1.1'
 README.md
-27:pipenv install "crux==1.2"
+27:pipenv install "crux==1.3"
 
 docs/index.md
-27:pipenv install "crux==1.2"
+27:pipenv install "crux==1.3"
 
 docs/installation.md
-20:pipenv install "crux==1.2"
-26:crux = "==1.1"
-36:python3 -m pip install "crux==1.2"
+20:pipenv install "crux==1.3"
+26:crux = "==1.3"
+36:python3 -m pip install "crux==1.3"
 
 crux/__version__.py
-3:__version__ = "1.1"
+3:__version__ = "1.3"
 ```
 
 Update all the versions. This could also be a good opportunity to double check that all tests pass.

@@ -1106,7 +1106,7 @@ class Dataset(CruxModel):
             raise ValueError("Value of delivery_id is invalid")
 
         return self.connection.api_call(
-            "GET", ["deliveries", self.id, delivery_id], headers=headers, model=Delivery
+            "GET", ["v1", "deliveries", self.id,  delivery_id], headers=headers, model=Delivery
         )
 
     def get_ingestions(
@@ -1137,7 +1137,7 @@ class Dataset(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", ["deliveries", self.id, "ids"], headers=headers, params=params
+            "GET", ["v1", "deliveries", self.id, "ids"], headers=headers, params=params
         )
 
         response_json = response.json()
@@ -1164,6 +1164,7 @@ class Dataset(CruxModel):
             )
             obj.connection = self.connection
             yield obj
+
 
     def get_latest_files(
         self,
@@ -1423,16 +1424,18 @@ class Dataset(CruxModel):
         """
         headers = Headers({"accept": "application/json"})
         limit = 250
-        for i in range(0, len(resource_ids), limit):
-            chunk = resource_ids[i : i + limit]
+
+        for item_cnt, item in enumerate(resource_ids):
+            if item_cnt > 250:
+                break
             response = self.connection.api_call(
-                "POST",
-                ["resources", "get-batch"],
-                params={"limit": limit + 1},
-                headers=headers,
-                data=json.dumps(chunk),
-            )
-            for resource in response.json():
-                obj = File(raw_model=resource)
-                obj.connection = self.connection
-                yield obj
+                "GET",
+                ["v1", "resources", item],
+                headers=headers
+             )
+            response_json = response.json()
+            obj =File(raw_model=response_json)
+            obj.connection = self.connection
+            yield obj
+
+

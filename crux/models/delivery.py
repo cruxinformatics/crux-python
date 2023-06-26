@@ -51,7 +51,7 @@ class Delivery(CruxModel):
         """dict: Gets the Delivery Summary"""
         if self._summary is None:
             response = self.connection.api_call(
-                "GET", ["deliveries", self.dataset_id, self.id]
+                "GET", ["v1", "deliveries", self.dataset_id, self.id]
             )
             self._summary = response.json()
         return self._summary
@@ -73,7 +73,7 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", ["deliveries", self.dataset_id, self.id, "data"], params=params
+            "GET", ["v1", "deliveries", self.dataset_id, self.id, "data"], params=params
         )
 
         resource_list = response.json()["resources"]
@@ -100,7 +100,7 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", ["deliveries", self.dataset_id, self.id, "raw"], params=params
+            "GET", ["v1", "deliveries", self.dataset_id, self.id, "raw"], params=params
         )
 
         resource_list = response.json()["resource_ids"]
@@ -128,7 +128,7 @@ class Delivery(CruxModel):
             params["useCache"] = use_cache
 
         response = self.connection.api_call(
-            "GET", ["deliveries", self.id, "log"], params=params
+            "GET", ["v1", "deliveries", self.id, "log"], params=params
         )
 
         healthlog_list = response.json()

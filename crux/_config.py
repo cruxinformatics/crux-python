@@ -125,7 +125,7 @@ class CruxConfig(object):
                     527,
                     530,
                 ),
-                method_whitelist=("GET", "PUT", "DELETE", "POST"),
+                allowed_methods=("GET", "PUT", "DELETE", "POST"),
                 redirect=10,
                 connect=10,
                 read=10,

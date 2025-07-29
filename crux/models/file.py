@@ -49,7 +49,7 @@ class File(Resource):
             {"content-type": "application/json", "accept": "application/json"}
         )
         response = self.connection.api_call(
-            "POST", ["resources", self.id, "content-url"], headers=headers, json={}
+            "POST", ["v2", "resources", self.id, "content-url"], headers=headers, json={}
         )
 
         url = response.json().get("url")
@@ -211,7 +211,7 @@ class File(Resource):
 
             log.debug("Using Crux Domain for streaming file resource %s", self.id)
             data = self.connection.api_call(
-                "GET", ["resources", self.id, "content"], headers=headers, stream=True
+                "GET", ["v2", "resources", self.id, "content"], headers=headers, stream=True
             )
             # Performing early return to avoid below computation
             return data.iter_content(chunk_size=chunk_size)

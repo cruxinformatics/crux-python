@@ -49,7 +49,7 @@ class File(Resource):
             {"content-type": "application/json", "accept": "application/json"}
         )
         response = self.connection.api_call(
-            "POST", ["v2", "resources", self.id, "content-url"], headers=headers, json={}
+            "GET", ["v2", "resources", self.id, "content-url"], headers=headers, json={}
         )
 
         url = response.json().get("url")
